@@ -1,144 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-SmartERP Pro | Terminal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
-        .sidebar-modern { background: #020617; width: 260px; transition: all 0.3s ease; }
-        .glass-card { background: white; border-radius: 2rem; border: 1px solid #f1f5f9; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
-        [x-cloak] { display: none !important; }
-        @media (max-width: 1024px) { .sidebar-modern { width: 80px; } .sidebar-text { display: none; } }
-    </style>
-</head>
-<body class="flex h-screen overflow-hidden" x-data="{ onboardModal: false }">
+<div x-data="{ tab: 'workforce' }" class="p-8">
+    <div class="flex gap-4 mb-8 bg-slate-100 p-2 rounded-2xl w-fit">
+        <button @click="tab = 'workforce'" :class="tab == 'workforce' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">Workforce</button>
+        <button @click="tab = 'onboarding'" :class="tab == 'onboarding' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">Onboarding Kit</button>
+        <button @click="tab = 'tasks'" :class="tab == 'tasks' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">BTL Tasks</button>
+    </div>
 
-    <aside class="sidebar-modern text-slate-400 flex flex-col h-full shadow-2xl shrink-0">
-        <div class="p-8 border-b border-slate-800/50">
-            <h1 class="text-xl font-black italic text-white tracking-tighter sidebar-text">A-Smart<span class="text-blue-500">ERP</span></h1>
-            <div class="w-8 h-8 bg-blue-600 rounded-lg lg:hidden flex items-center justify-center text-white"><i class="fas fa-rocket text-xs"></i></div>
+    <div x-show="tab == 'workforce'" class="animate__animated animate__fadeIn">
         </div>
 
-        <nav class="flex-grow px-4 space-y-2 mt-6">
-            <a href="/hrm" class="flex items-center gap-4 p-4 bg-blue-600/10 border-l-4 border-blue-500 text-white rounded-xl font-bold text-sm transition-all">
-                <i class="fas fa-user-astronaut text-lg text-blue-500"></i> <span class="sidebar-text">Workforce</span>
-            </a>
-            <a href="#" class="flex items-center gap-4 p-4 hover:bg-slate-800/50 hover:text-white transition rounded-xl font-bold text-sm">
-                <i class="fas fa-boxes text-lg"></i> <span class="sidebar-text">Inventory</span>
-            </a>
-            <a href="#" class="flex items-center gap-4 p-4 hover:bg-slate-800/50 hover:text-white transition rounded-xl font-bold text-sm">
-                <i class="fas fa-file-invoice-dollar text-lg"></i> <span class="sidebar-text">Financing</span>
-            </a>
-        </nav>
-
-        <div class="p-6 border-t border-slate-800/50 bg-black/20 mt-auto">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold italic">V</div>
-                    <div class="sidebar-text">
-                        <p class="text-[10px] font-bold text-white italic tracking-tight">{{ name }}</p>
-                        <p class="text-[8px] text-slate-500 font-bold uppercase">Master Admin</p>
-                    </div>
+    <div x-show="tab == 'onboarding'" class="animate__animated animate__fadeIn">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-card p-8">
+                <h3 class="font-black italic mb-4">Joining Kit Checklist</h3>
+                <div class="space-y-4">
+                    <label class="flex items-center gap-3 font-bold text-sm text-slate-600">
+                        <input type="checkbox" class="w-5 h-5 rounded-lg"> Laptop Issued
+                    </label>
+                    <label class="flex items-center gap-3 font-bold text-sm text-slate-600">
+                        <input type="checkbox" class="w-5 h-5 rounded-lg"> SIM Card Provided
+                    </label>
+                    <label class="flex items-center gap-3 font-bold text-sm text-slate-600">
+                        <input type="checkbox" class="w-5 h-5 rounded-lg"> [Aadhaar Redacted] Document Verified
+                    </label>
                 </div>
-                <a href="/logout" class="text-slate-500 hover:text-red-500 transition-all transform hover:scale-110" title="Logout">
-                    <i class="fas fa-power-off text-base"></i>
-                </a>
+            </div>
+            <div class="glass-card p-8 bg-slate-900 text-white">
+                <h3 class="font-black italic text-blue-400 mb-2">Offer Letter Engine</h3>
+                <p class="text-[10px] uppercase font-bold tracking-widest mb-6">Generate official PDFs in 1-click</p>
+                <a href="/generate-offer/1" class="inline-block bg-blue-600 p-4 rounded-xl font-bold text-xs uppercase italic">Download PDF Sample</a>
             </div>
         </div>
-    </aside>
+    </div>
 
-    <main class="flex-1 overflow-y-auto p-6 lg:p-10">
-        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-4">
-            <div>
-                <h2 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight italic">Team <span class="text-blue-600 font-light underline decoration-blue-100 italic">Dynamics</span></h2>
-                <p class="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2 italic">Live Payroll & Talent HQ</p>
+    <div x-show="tab == 'tasks'" class="animate__animated animate__fadeIn">
+        <div class="glass-card p-0 overflow-hidden">
+            <div class="p-8 border-b border-slate-50 flex justify-between">
+                <h3 class="font-black italic">BTL Terminal</h3>
+                <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">3 High Priority</span>
             </div>
-            <button @click="onboardModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-[1.5rem] font-bold shadow-xl shadow-blue-100 hover:scale-105 active:scale-95 transition-all italic flex items-center gap-3 text-sm">
-                <i class="fas fa-plus-circle"></i> Onboard Staff
-            </button>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="glass-card p-6 border-b-4 border-blue-500">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 italic">Active Workforce</p>
-                <h3 class="text-3xl font-black text-slate-900 tracking-tighter">{{ staff_list|length }}</h3>
             </div>
-            <div class="glass-card p-6 border-b-4 border-green-500">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 italic">Live Payroll Cycle</p>
-                <h3 class="text-3xl font-black text-green-600 tracking-tighter">₹{{ "{:,.2f}".format(total_payroll) }}</h3>
-            </div>
-            <div class="glass-card p-6 bg-slate-950 text-white">
-                <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-2 italic">Database Sync</p>
-                <h3 class="text-xl font-black italic tracking-tighter"><i class="fas fa-bolt text-blue-500 mr-2"></i> Neon SQL Live</h3>
-            </div>
-        </div>
-
-        <div class="glass-card overflow-hidden animate__animated animate__fadeInUp">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-50 text-slate-400 text-[9px] font-bold uppercase tracking-widest italic">
-                        <tr>
-                            <th class="p-6">Employee</th>
-                            <th class="p-6">Earnings (MTD)</th>
-                            <th class="p-6 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        {% for s in staff_list %}
-                        <tr class="hover:bg-slate-50/50 transition group">
-                            <td class="p-6">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center font-black group-hover:bg-blue-600 group-hover:text-white transition-all">{{ s.info.name[:1]|upper }}</div>
-                                    <div>
-                                        <p class="font-bold text-slate-800 italic text-sm">{{ s.info.name }}</p>
-                                        <p class="text-[9px] font-bold text-blue-400 tracking-widest uppercase">{{ s.info.emp_code }} | {{ s.info.designation }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="p-6">
-                                <p class="font-black text-green-600 text-sm">₹{{ s.earned }}</p>
-                                <p class="text-[9px] font-bold text-slate-300 italic uppercase">{{ s.days }} Days Present</p>
-                            </td>
-                            <td class="p-6 text-right">
-                                <a href="/delete-staff/{{ s.info.id }}" onclick="return confirm('Terminate Access?')" class="w-10 h-10 bg-slate-100 text-slate-400 rounded-xl hover:bg-red-600 hover:text-white transition-all inline-flex items-center justify-center">
-                                    <i class="fas fa-trash-alt text-sm"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div x-show="onboardModal" x-transition x-cloak class="fixed inset-0 z-[100] flex justify-end">
-            <div @click="onboardModal = false" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
-            <div class="relative w-full max-w-sm bg-white h-full shadow-2xl p-10 animate__animated animate__slideInRight">
-                <h3 class="text-3xl font-black italic mb-2 tracking-tighter">Digital <span class="text-blue-600">Entry</span></h3>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-10 italic">Onboard New Team Member</p>
-                <form method="POST" class="space-y-6">
-                    <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Full Name</label>
-                        <input type="text" name="name" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Designation</label>
-                        <input type="text" name="designation" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Salary (Monthly)</label>
-                        <input type="number" name="salary" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100">
-                    </div>
-                    <button type="submit" class="w-full bg-slate-950 text-white p-5 rounded-2xl font-bold uppercase italic tracking-widest shadow-xl shadow-slate-200 hover:scale-[1.02] transition-all">Connect to Cloud</button>
-                </form>
-            </div>
-        </div>
-    </main>
-</body>
-</html>
+    </div>
+</div>
