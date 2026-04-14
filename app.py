@@ -6,7 +6,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Neon SQL String
 DB_URL = "postgresql://neondb_owner:npg_h85KlFgYbsmE@ep-holy-breeze-amzy28jw-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
@@ -14,14 +13,13 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATC_PRO_SECRET_2026'
+    SECRET_KEY='ATC_PRO_2026'
 )
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- SQL MODELS ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
@@ -40,13 +38,12 @@ class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'))
     date = db.Column(db.Date, default=datetime.utcnow().date())
-    status = db.Column(db.String(20)) # Full Day, Half Day, Short Leave
+    status = db.Column(db.String(20))
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- ROUTES ---
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -86,15 +83,14 @@ def hrm():
     staff_data = []
     total_payroll = 0
     for s in all_staff:
-        # Attendance Logic: Full Day = 1, Half = 0.5
         full = Attendance.query.filter_by(staff_id=s.id, status='Full Day').count()
         half = Attendance.query.filter_by(staff_id=s.id, status='Half Day').count()
         payable = full + (half * 0.5)
         earned = round((s.salary / days_in_month) * payable, 2)
         total_payroll += earned
-        staff_data.append({'info': s, 'payable': payable, 'earned': earned})
+        # 'info' key zaroor rakhein kyunki hrm.html ise dhund raha hai
+        staff_data.append({'info': s, 'earned': earned, 'payable': payable})
 
-    # 'staff' aur 'total_payroll' dono bhej rahe hain taaki HTML error na de
     return render_template('hrm.html', staff=staff_data, total_payroll=total_payroll, name=current_user.username)
 
 @app.route('/delete-staff/<int:id>')
