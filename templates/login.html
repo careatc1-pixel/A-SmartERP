@@ -1,11 +1,169 @@
 <!DOCTYPE html>
-<html>
-<body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; background: #f0f2f5;">
-    <form method="POST" style="background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
-        <h2 style="text-align: center; font-style: italic;">A-SmartERP Login</h2>
-        <input type="text" name="username" placeholder="Admin Username" required style="width: 100%; padding: 10px; margin: 10px 0;"><br>
-        <input type="password" name="password" placeholder="Password" required style="width: 100%; padding: 10px; margin: 10px 0;"><br>
-        <button type="submit" style="width: 100%; padding: 10px; background: #2563eb; color: white; border: none; cursor: pointer;">Login</button>
-    </form>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | A-SmartERP Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: #0f172a; /* Deep Slate Background */
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .login-container {
+            width: 1000px;
+            height: 600px;
+            display: flex;
+            background: #ffffff;
+            border-radius: 2.5rem;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Left Side: Branding */
+        .branding-side {
+            width: 50%;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 60px;
+            display: flex;
+            flex-col: column;
+            justify-content: center;
+            position: relative;
+            color: white;
+        }
+
+        .branding-side::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 50%;
+            filter: blur(40px);
+        }
+
+        /* Right Side: Form */
+        .form-side {
+            width: 50%;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #ffffff;
+        }
+
+        .input-modern {
+            background: #f8fafc;
+            border: 2px solid #f1f5f9;
+            transition: all 0.3s ease;
+        }
+
+        .input-modern:focus {
+            background: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="animate__animated animate__fadeIn">
+
+    <div class="login-container animate__animated animate__zoomIn">
+        
+        <div class="branding-side">
+            <div class="z-10">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                        <i class="fas fa-rocket text-xl"></i>
+                    </div>
+                    <h1 class="text-3xl font-extrabold italic tracking-tighter">A-Smart<span class="text-blue-500">ERP</span></h1>
+                </div>
+                
+                <h2 class="text-4xl font-black leading-tight mb-6 italic animate__animated animate__fadeInLeft animate__delay-1s">
+                    Run your business with <br> 
+                    <span class="text-blue-500 underline decoration-blue-800">one powerful</span> platform
+                </h2>
+                
+                <p class="text-slate-400 text-sm font-medium leading-relaxed mb-8 italic">
+                    Manage Workforce, Live Payroll, CRM, Finance, and Analytics from a single professional dashboard built for growing businesses.
+                </p>
+
+                <div class="flex items-center gap-4 text-slate-500 font-bold text-[10px] uppercase tracking-widest border-t border-slate-800 pt-8">
+                    <span>© 2026 A-SmartERP</span>
+                    <span class="w-1 h-1 bg-slate-700 rounded-full"></span>
+                    <span>Atharv Tech Co.</span>
+                </div>
+            </div>
+            
+            <div class="absolute bottom-10 right-10 opacity-10">
+                <i class="fas fa-microchip text-9xl"></i>
+            </div>
+        </div>
+
+        <div class="form-side">
+            <div class="mb-10">
+                <h3 class="text-3xl font-black text-slate-900 italic tracking-tight">Welcome Back</h3>
+                <p class="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-1">Sign in to your control terminal</p>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2 block">Username / ID</label>
+                    <div class="relative">
+                        <i class="fas fa-user absolute left-4 top-4 text-slate-300 text-sm"></i>
+                        <input type="text" name="username" placeholder="admin" required 
+                               class="input-modern w-full p-4 pl-12 rounded-2xl font-bold italic text-slate-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-2 block">Security Password</label>
+                    <div class="relative">
+                        <i class="fas fa-lock absolute left-4 top-4 text-slate-300 text-sm"></i>
+                        <input type="password" name="password" placeholder="••••••••" required 
+                               class="input-modern w-full p-4 pl-12 rounded-2xl font-bold italic text-slate-700">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between py-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Remember Terminal</span>
+                    </label>
+                    <a href="#" class="text-[10px] font-bold text-blue-600 uppercase hover:underline italic">Forgot Access?</a>
+                </div>
+
+                <button type="submit" class="btn-glow w-full bg-blue-600 text-white p-5 rounded-2xl font-black uppercase italic tracking-widest transition-all duration-300 flex items-center justify-center gap-3 shadow-lg shadow-blue-100">
+                    <i class="fas fa-sign-in-alt"></i> Initialize Login
+                </button>
+            </form>
+
+            <div class="mt-12 text-center">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Powered by <span class="text-slate-900 italic font-black">Atharv Tech Co.</span>
+                </p>
+            </div>
+        </div>
+
+    </div>
+
 </body>
 </html>
