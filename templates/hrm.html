@@ -3,146 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-SmartERP Pro | Hub</title>
+    <title>A-SmartERP | Workforce</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; margin: 0; }
-        .sidebar { background: #020617; width: 260px; height: 100vh; position: fixed; border-right: 1px solid rgba(255,255,255,0.05); }
+        .sidebar { background: #020617; width: 260px; height: 100vh; position: fixed; }
         .content { margin-left: 260px; padding: 40px; }
         .glass { background: white; border-radius: 1.5rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        [x-cloak] { display: none !important; }
-        @media (max-width: 1024px) { .sidebar { width: 70px; } .content { margin-left: 70px; } .st { display: none; } }
     </style>
 </head>
-<body x-data="{ tab: 'workforce', modal: false }">
+<body x-data="{ modal: false }">
 
-    <aside class="sidebar text-slate-400 flex flex-col shadow-2xl z-50">
+    <aside class="sidebar text-slate-400 flex flex-col shadow-2xl">
         <div class="p-8 border-b border-slate-800/50">
-            <h1 class="text-xl font-black italic text-white st">A-Smart<span class="text-blue-500">ERP</span></h1>
+            <h1 class="text-xl font-black italic text-white tracking-tighter">A-Smart<span class="text-blue-500">ERP</span></h1>
         </div>
-        <nav class="flex-grow p-4 space-y-2 mt-4">
-            <button @click="tab = 'workforce'" :class="tab == 'workforce' ? 'bg-blue-600 text-white shadow-lg' : ''" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold text-sm transition-all">
-                <i class="fas fa-id-card-alt"></i> <span class="st">Workforce HQ</span>
-            </button>
-            <button @click="tab = 'onboarding'" :class="tab == 'onboarding' ? 'bg-blue-600 text-white shadow-lg' : ''" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold text-sm transition-all">
-                <i class="fas fa-rocket"></i> <span class="st">Onboarding Kit</span>
-            </button>
-            <button @click="tab = 'tasks'" :class="tab == 'tasks' ? 'bg-blue-600 text-white shadow-lg' : ''" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold text-sm transition-all">
-                <i class="fas fa-tasks"></i> <span class="st">BTL Tasks</span>
-            </button>
+        <nav class="flex-grow p-4 space-y-2">
+            <div class="p-4 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg">
+                <i class="fas fa-users mr-3"></i> Workforce HQ
+            </div>
             <a href="/logout" class="flex items-center gap-4 p-4 text-red-500 mt-10 font-bold text-sm hover:bg-red-500/10 rounded-xl transition-all">
-                <i class="fas fa-power-off"></i> <span class="st">Exit System</span>
+                <i class="fas fa-power-off"></i> Logout
             </a>
         </nav>
-        <div class="p-6 bg-black/20 text-[10px] border-t border-slate-800/50">
-            <p class="st italic">Logged as: <span class="text-blue-400 font-bold uppercase">{{ name }}</span></p>
-        </div>
     </aside>
 
     <main class="content">
-        <div x-show="tab == 'workforce'" class="animate__animated animate__fadeIn">
-            <header class="flex justify-between items-center mb-10">
-                <h2 class="text-3xl font-black italic tracking-tight">Workforce <span class="text-blue-600 italic font-light">Management</span></h2>
-                <button @click="modal = true" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold text-sm italic shadow-lg shadow-blue-100 hover:scale-105 transition-all">Add Personnel</button>
-            </header>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                <div class="glass p-8 border-l-4 border-blue-600">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">Total Payroll Value</p>
-                    <h3 class="text-3xl font-black text-green-600">₹{{ "{:,.2f}".format(total_payroll) }}</h3>
-                </div>
-                <div class="glass p-8 border-l-4 border-slate-900">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">Personnel Log</p>
-                    <h3 class="text-3xl font-black text-slate-900">{{ staff|length }} Staff Members</h3>
-                </div>
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-3xl font-black text-slate-900 italic">Workforce <span class="text-blue-600 font-light">Management</span></h2>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2">Atharv Tech Co. - Operational Terminal</p>
             </div>
+            <button @click="modal = true" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold text-sm italic shadow-xl shadow-blue-100 transition-all hover:scale-105">Onboard Staff</button>
+        </header>
 
-            <div class="glass overflow-hidden">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-slate-400 text-[9px] font-bold uppercase italic border-b">
-                        <tr><th class="p-6">Employee</th><th class="p-6">Earnings Status</th><th class="p-6 text-right">Actions</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for s in staff %}
-                        <tr class="hover:bg-slate-50 transition border-b group">
-                            <td class="p-6">
-                                <p class="font-bold text-slate-800 text-sm italic">{{ s.info.name }}</p>
-                                <p class="text-[9px] font-bold text-blue-500 uppercase">{{ s.info.emp_code }} | {{ s.info.designation }}</p>
-                            </td>
-                            <td class="p-6">
-                                <p class="font-black text-slate-900 text-sm italic">₹{{ s.earned }}</p>
-                                <p class="text-[9px] font-bold text-slate-400 uppercase italic">{{ s.payable }} Days Present</p>
-                            </td>
-                            <td class="p-6 text-right">
-                                <button class="text-slate-300 hover:text-blue-500 px-3"><i class="fas fa-edit"></i></button>
-                                <a href="/delete-staff/{{ s.info.id }}" class="text-slate-300 hover:text-red-500 px-3"><i class="fas fa-trash-alt"></i></a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+            <div class="glass p-8 border-l-4 border-blue-600">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">Total Payroll</p>
+                <h3 class="text-3xl font-black text-slate-900">₹{{ "{:,.2f}".format(total_payroll) }}</h3>
+            </div>
+            <div class="glass p-8 border-l-4 border-slate-900">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">Strength</p>
+                <h3 class="text-3xl font-black text-slate-900">{{ staff|length }} Active Members</h3>
             </div>
         </div>
 
-        <div x-show="tab == 'onboarding'" x-cloak class="animate__animated animate__fadeIn">
-            <h2 class="text-3xl font-black italic mb-10">Asset & <span class="text-blue-600 italic font-light">Onboarding Tracker</span></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for s in staff %}
-                <div class="glass p-6 border-t-2 border-blue-500">
-                    <h4 class="font-black italic text-slate-800 mb-4 border-b pb-2 tracking-tight">{{ s.info.name }}</h4>
-                    <div class="space-y-4">
-                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase italic">Laptop Status</span>
-                            <i class="fas {{ 'fa-check-circle text-green-500' if s.info.laptop_issued else 'fa-times-circle text-slate-300' }}"></i>
-                        </div>
-                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase italic">Official ID Card</span>
-                            <i class="fas {{ 'fa-check-circle text-green-500' if s.info.id_card_issued else 'fa-times-circle text-slate-300' }}"></i>
-                        </div>
-                        <div class="text-[9px] font-bold text-slate-400 uppercase mt-4">Aadhaar: {{ s.info.aadhaar if s.info.aadhaar else 'Pending' }}</div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-
-        <div x-show="tab == 'tasks'" x-cloak class="animate__animated animate__fadeIn">
-            <h2 class="text-3xl font-black italic mb-10 text-slate-900">Task <span class="text-blue-600 italic font-light">Terminal</span></h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {% for t in tasks %}
-                <div class="glass p-6 {{ 'border-t-4 border-red-500 shadow-red-50' if t.priority == 'High' else 'border-t-4 border-slate-300' }}">
-                    <p class="text-[8px] font-bold uppercase tracking-widest text-slate-400 mb-2 italic">{{ t.priority }} Priority</p>
-                    <h5 class="font-bold italic text-slate-800 mb-4">{{ t.title }}</h5>
-                    <div class="flex justify-between items-center border-t pt-4">
-                        <span class="text-[9px] font-black uppercase text-blue-500 bg-blue-50 px-2 py-1 rounded-md">{{ t.status }}</span>
-                        <i class="fas fa-camera text-slate-300"></i>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
+        <div class="glass overflow-hidden shadow-sm">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 text-slate-400 text-[9px] font-bold uppercase tracking-widest border-b italic">
+                    <tr><th class="p-6">Employee</th><th class="p-6">Earnings</th><th class="p-6 text-right">Actions</th></tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for s in staff %}
+                    <tr class="hover:bg-slate-50 transition border-b group">
+                        <td class="p-6">
+                            <p class="font-bold text-slate-800 text-sm italic">{{ s.info.name }}</p>
+                            <p class="text-[9px] font-bold text-blue-500 uppercase">{{ s.info.emp_code }} | {{ s.info.designation }}</p>
+                        </td>
+                        <td class="p-6">
+                            <p class="font-black text-slate-900 text-sm italic">₹{{ s.earned }}</p>
+                        </td>
+                        <td class="p-6 text-right">
+                            <a href="/delete-staff/{{ s.info.id }}" class="text-slate-300 hover:text-red-500 transition-all px-4"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </main>
 
-    <div x-show="modal" x-cloak class="fixed inset-0 z-[100] flex justify-end">
+    <div x-show="modal" style="display:none" class="fixed inset-0 z-[100] flex justify-end">
         <div @click="modal = false" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
-        <div class="relative w-full max-w-sm bg-white h-full shadow-2xl p-10 animate__animated animate__slideInRight overflow-y-auto">
-            <h3 class="text-3xl font-black italic mb-8 border-b pb-4 italic">Digital <span class="text-blue-600">Onboarding</span></h3>
+        <div class="relative w-full max-w-sm bg-white h-full shadow-2xl p-10 overflow-y-auto">
+            <h3 class="text-2xl font-black italic mb-8 border-b pb-4 tracking-tighter italic">New <span class="text-blue-600">Entry</span></h3>
             <form method="POST" class="space-y-6">
-                <input type="text" name="name" placeholder="Full Name" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all">
-                <input type="text" name="designation" placeholder="Designation" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all">
-                <input type="number" name="salary" placeholder="Monthly Salary (₹)" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all">
-                <input type="text" name="aadhaar" placeholder="Aadhaar No." class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all">
-                <input type="text" name="bank" placeholder="Bank Account No." class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all">
-                <div class="p-4 bg-slate-50 rounded-2xl space-y-3">
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 italic">Kit Inventory</p>
-                    <label class="flex items-center gap-3 text-[10px] font-bold text-slate-600 italic cursor-pointer"><input type="checkbox" name="laptop" class="w-4 h-4 rounded"> Laptop Issued</label>
-                    <label class="flex items-center gap-3 text-[10px] font-bold text-slate-600 italic cursor-pointer"><input type="checkbox" name="id_card" class="w-4 h-4 rounded"> ID Card Generated</label>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold uppercase italic tracking-widest shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">Initialize Enrollment</button>
+                <input type="text" name="name" placeholder="Full Name" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all text-sm">
+                <input type="text" name="designation" placeholder="Designation" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all text-sm">
+                <input type="number" name="salary" placeholder="Monthly Salary (₹)" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500 transition-all text-sm">
+                <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-bold uppercase italic tracking-widest shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all">Submit to Cloud</button>
             </form>
         </div>
     </div>
