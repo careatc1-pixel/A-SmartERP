@@ -6,7 +6,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Neon Connection
+# Connection String Fix
 DB_URL = "postgresql://neondb_owner:npg_h85KlFgYbsmE@ep-holy-breeze-amzy28jw-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
@@ -14,7 +14,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATC_ULTRA_FIX_2026'
+    SECRET_KEY='ATC_ULTRA_FINAL_FIX'
 )
 
 db = SQLAlchemy(app)
@@ -76,48 +76,43 @@ def logout():
 @login_required
 def hrm():
     if request.method == 'POST':
+        # Simple Add Logic
         last = Staff.query.order_by(Staff.id.desc()).first()
         code = "AC101" if not last else f"AC{int(last.emp_code.replace('AC', '')) + 1}"
         new_s = Staff(
-            emp_code=code, 
-            name=request.form.get('name'), 
-            designation=request.form.get('designation'), 
-            salary=float(request.form.get('salary')),
-            laptop_issued='laptop' in request.form, 
-            id_card_issued='id_card' in request.form
+            emp_code=code, name=request.form.get('name'), 
+            designation=request.form.get('designation'), salary=float(request.form.get('salary')),
+            laptop_issued='laptop' in request.form, id_card_issued='id_card' in request.form
         )
-        db.session.add(new_s)
-        db.session.commit()
+        db.session.add(new_s); db.session.commit()
         return redirect(url_for('hrm'))
     
-    # Safe Fetching
+    # Initialize Defaults to prevent crash
+    staff_data = []
+    total_payroll = 0.0
+    tasks_list = []
+
     try:
         all_staff = Staff.query.all()
-        tasks = Task.query.all()
-    except:
-        all_staff, tasks = [], []
+        tasks_list = Task.query.all()
+        today = datetime.now()
+        days_in_month = calendar.monthrange(today.year, today.month)[1]
+        
+        for s in all_staff:
+            full = Attendance.query.filter_by(staff_id=s.id, status='Full Day').count()
+            half = Attendance.query.filter_by(staff_id=s.id, status='Half Day').count()
+            payable = full + (half * 0.5)
+            earned = round((s.salary / days_in_month) * payable, 2)
+            total_payroll += earned
+            staff_data.append({'info': s, 'earned': earned, 'payable': payable})
+    except Exception as e:
+        print(f"Error: {e}")
 
-    today = datetime.now()
-    days_in_month = calendar.monthrange(today.year, today.month)[1]
-    
-    staff_data = []
-    total_payroll = 0
-    for s in all_staff:
-        full = Attendance.query.filter_by(staff_id=s.id, status='Full Day').count()
-        half = Attendance.query.filter_by(staff_id=s.id, status='Half Day').count()
-        payable = full + (half * 0.5)
-        earned = round((s.salary / days_in_month) * payable, 2)
-        total_payroll += earned
-        staff_data.append({'info': s, 'earned': earned, 'payable': payable})
-
-    return render_template('hrm.html', staff=staff_data, total_payroll=total_payroll, tasks=tasks, name=current_user.username)
-
-@app.route('/delete-staff/<int:id>')
-@login_required
-def delete_staff(id):
-    s = Staff.query.get_or_404(id)
-    db.session.delete(s); db.session.commit()
-    return redirect(url_for('hrm'))
+    return render_template('hrm.html', 
+                           staff=staff_data, 
+                           total_payroll=total_payroll, 
+                           tasks=tasks_list, 
+                           name=current_user.username)
 
 if __name__ == '__main__':
     with app.app_context():
