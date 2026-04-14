@@ -3,165 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-SmartERP Pro | Workforce Terminal</title>
-    
+    <title>A-SmartERP Pro | Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
-        
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: #f8fafc;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Sidebar Glass Effect */
-        .sidebar-modern {
-            background: #020617;
-            width: 280px;
-            transition: all 0.3s ease;
-        }
-
-        .active-link {
-            background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0) 100%);
-            border-left: 4px solid #3b82f6;
-            color: #fff !important;
-        }
-
-        .glass-card {
-            background: #ffffff;
-            border-radius: 2rem;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
-            transition: transform 0.3s ease;
-        }
-
-        .glass-card:hover {
-            transform: translateY(-5px);
-        }
-
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        .sidebar-modern { background: #020617; width: 260px; transition: all 0.3s ease; }
+        .glass-card { background: white; border-radius: 2rem; border: 1px solid #f1f5f9; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05); }
         [x-cloak] { display: none !important; }
+        @media (max-width: 1024px) { .sidebar-modern { width: 80px; } .sidebar-text { display: none; } }
     </style>
 </head>
-<body class="flex h-screen bg-[#f8fafc] overflow-hidden" x-data="{ onboardModal: false }">
+<body class="flex h-screen overflow-hidden" x-data="{ onboardModal: false }">
 
     <aside class="sidebar-modern text-slate-400 flex flex-col h-full shadow-2xl shrink-0">
-        <div class="p-10">
-            <h1 class="text-2xl font-black italic text-white tracking-tighter">A-Smart<span class="text-blue-500">ERP</span></h1>
-            <p class="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-2 italic">Pro Terminal v1.0</p>
+        <div class="p-8 border-b border-slate-800/50">
+            <h1 class="text-xl font-black italic text-white tracking-tighter sidebar-text">A-Smart<span class="text-blue-500">ERP</span></h1>
+            <div class="w-8 h-8 bg-blue-600 rounded-lg lg:hidden flex items-center justify-center text-white"><i class="fas fa-rocket text-xs"></i></div>
         </div>
 
-        <nav class="flex-grow px-4 space-y-2 mt-4">
-            <a href="/hrm" class="active-link flex items-center gap-4 p-4 rounded-xl font-bold text-sm">
-                <i class="fas fa-id-card-alt text-lg"></i> Workforce
+        <nav class="flex-grow px-4 space-y-2 mt-6">
+            <a href="/hrm" class="flex items-center gap-4 p-4 bg-blue-600/10 border-l-4 border-blue-500 text-white rounded-xl font-bold text-sm transition-all">
+                <i class="fas fa-user-astronaut text-lg text-blue-500"></i> <span class="sidebar-text">Workforce</span>
             </a>
-            <a href="/inventory" class="flex items-center gap-4 p-4 hover:text-white transition rounded-xl font-bold text-sm">
-                <i class="fas fa-boxes"></i> Inventory
+            <a href="#" class="flex items-center gap-4 p-4 hover:bg-slate-800/50 hover:text-white transition rounded-xl font-bold text-sm">
+                <i class="fas fa-boxes text-lg"></i> <span class="sidebar-text">Inventory</span>
             </a>
-            <a href="/invoices" class="flex items-center gap-4 p-4 hover:text-white transition rounded-xl font-bold text-sm">
-                <i class="fas fa-file-invoice-dollar"></i> Financing
+            <a href="#" class="flex items-center gap-4 p-4 hover:bg-slate-800/50 hover:text-white transition rounded-xl font-bold text-sm">
+                <i class="fas fa-file-invoice-dollar text-lg"></i> <span class="sidebar-text">Financing</span>
             </a>
         </nav>
 
-        <div class="p-8 border-t border-slate-800/50">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold italic">V</div>
-                <div>
-                    <p class="text-xs font-bold text-white italic">{{ name }}</p>
-                    <p class="text-[9px] text-slate-500 font-bold uppercase">Administrator</p>
+        <div class="p-6 border-t border-slate-800/50 bg-black/20 mt-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold italic">V</div>
+                    <div class="sidebar-text">
+                        <p class="text-[10px] font-bold text-white italic tracking-tight">{{ name }}</p>
+                        <p class="text-[8px] text-slate-500 font-bold uppercase">Master Admin</p>
+                    </div>
                 </div>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 transition-all transform hover:scale-110" title="Logout">
+                    <i class="fas fa-power-off text-base"></i>
+                </a>
             </div>
         </div>
     </aside>
 
-    <main class="flex-1 overflow-y-auto p-10 relative">
-        
-        <div class="flex justify-between items-center mb-10">
+    <main class="flex-1 overflow-y-auto p-6 lg:p-10">
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-4">
             <div>
-                <h2 class="text-4xl font-black text-slate-900 tracking-tight italic">Team <span class="text-blue-600 font-light underline decoration-blue-100">Dynamics</span></h2>
-                <p class="text-slate-400 font-bold text-[11px] uppercase tracking-widest mt-2">Manage workforce and live payroll stats</p>
+                <h2 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight italic">Team <span class="text-blue-600 font-light underline decoration-blue-100 italic">Dynamics</span></h2>
+                <p class="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-2 italic">Live Payroll & Talent HQ</p>
             </div>
-            <button @click="onboardModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-[1.5rem] font-bold shadow-xl shadow-blue-100 hover:scale-105 active:scale-95 transition-all italic flex items-center gap-3">
+            <button @click="onboardModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-[1.5rem] font-bold shadow-xl shadow-blue-100 hover:scale-105 active:scale-95 transition-all italic flex items-center gap-3 text-sm">
                 <i class="fas fa-plus-circle"></i> Onboard Staff
             </button>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="glass-card p-6 border-b-4 border-blue-500">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 italic">Active Workforce</p>
+                <h3 class="text-3xl font-black text-slate-900 tracking-tighter">{{ staff_list|length }}</h3>
+            </div>
+            <div class="glass-card p-6 border-b-4 border-green-500">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2 italic">Live Payroll Cycle</p>
+                <h3 class="text-3xl font-black text-green-600 tracking-tighter">₹{{ "{:,.2f}".format(total_payroll) }}</h3>
+            </div>
+            <div class="glass-card p-6 bg-slate-950 text-white">
+                <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest mb-2 italic">Database Sync</p>
+                <h3 class="text-xl font-black italic tracking-tighter"><i class="fas fa-bolt text-blue-500 mr-2"></i> Neon SQL Live</h3>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-            <div class="glass-card p-8">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 italic">Total Workforce</p>
-                <h3 class="text-4xl font-black text-slate-900">{{ staff_list|length }}</h3>
-            </div>
-            <div class="glass-card p-8 border-l-4 border-green-500">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 italic">Estimated Payroll</p>
-                <h3 class="text-4xl font-black text-green-600">₹{{ "{:,.2f}".format(total_payroll if total_payroll else 0) }}</h3>
-            </div>
-            <div class="glass-card p-8 bg-slate-950 text-white">
-                <p class="text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-4 italic">Database Link</p>
-                <h3 class="text-2xl font-black italic tracking-tighter">Neon SQL <span class="text-blue-500">Live</span></h3>
-            </div>
-        </div>
-
-        <div class="glass-card overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-slate-50/50 text-slate-400 text-[9px] font-bold uppercase tracking-widest">
-                    <tr>
-                        <th class="p-6">Employee Identity</th>
-                        <th class="p-6">Performance</th>
-                        <th class="p-6 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-50">
-                    {% for s in staff_list %}
-                    <tr class="hover:bg-slate-50/50 transition group">
-                        <td class="p-6">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center font-black text-lg group-hover:bg-blue-600 group-hover:text-white transition-all">
-                                    {{ s.info.name[:1]|upper }}
+        <div class="glass-card overflow-hidden animate__animated animate__fadeInUp">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 text-slate-400 text-[9px] font-bold uppercase tracking-widest italic">
+                        <tr>
+                            <th class="p-6">Employee</th>
+                            <th class="p-6">Earnings (MTD)</th>
+                            <th class="p-6 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        {% for s in staff_list %}
+                        <tr class="hover:bg-slate-50/50 transition group">
+                            <td class="p-6">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center font-black group-hover:bg-blue-600 group-hover:text-white transition-all">{{ s.info.name[:1]|upper }}</div>
+                                    <div>
+                                        <p class="font-bold text-slate-800 italic text-sm">{{ s.info.name }}</p>
+                                        <p class="text-[9px] font-bold text-blue-400 tracking-widest uppercase">{{ s.info.emp_code }} | {{ s.info.designation }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-bold text-slate-800 italic">{{ s.info.name }}</p>
-                                    <p class="text-[9px] font-bold text-blue-400 uppercase tracking-widest">{{ s.info.emp_code }}</p>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="p-6">
-                            <p class="font-black text-green-600 text-base italic">₹{{ s.earned }}</p>
-                            <p class="text-[9px] font-bold text-slate-400 uppercase italic">{{ s.days }} Days Present</p>
-                        </td>
-                        <td class="p-6 text-right space-x-2">
-                            <button class="w-9 h-9 bg-slate-50 text-slate-400 rounded-xl hover:text-blue-500 transition shadow-sm"><i class="fas fa-edit"></i></button>
-                            <a href="/delete-staff/{{ s.info.id }}" class="w-9 h-9 bg-slate-50 text-slate-400 rounded-xl hover:text-red-500 transition shadow-sm inline-flex items-center justify-center"><i class="fas fa-trash-alt"></i></a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </td>
+                            <td class="p-6">
+                                <p class="font-black text-green-600 text-sm">₹{{ s.earned }}</p>
+                                <p class="text-[9px] font-bold text-slate-300 italic uppercase">{{ s.days }} Days Present</p>
+                            </td>
+                            <td class="p-6 text-right">
+                                <a href="/delete-staff/{{ s.info.id }}" onclick="return confirm('Terminate Access?')" class="w-10 h-10 bg-slate-100 text-slate-400 rounded-xl hover:bg-red-600 hover:text-white transition-all inline-flex items-center justify-center">
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div x-show="onboardModal" x-cloak class="fixed inset-0 z-[100] flex justify-end">
+        <div x-show="onboardModal" x-transition x-cloak class="fixed inset-0 z-[100] flex justify-end">
             <div @click="onboardModal = false" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
-            <div class="relative w-96 bg-white h-full shadow-2xl p-10 animate__animated animate__slideInRight">
-                <h3 class="text-3xl font-black italic mb-2">New <span class="text-blue-600">Onboarding</span></h3>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-10">Digital Workforce Entry</p>
+            <div class="relative w-full max-w-sm bg-white h-full shadow-2xl p-10 animate__animated animate__slideInRight">
+                <h3 class="text-3xl font-black italic mb-2 tracking-tighter">Digital <span class="text-blue-600">Entry</span></h3>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-10 italic">Onboard New Team Member</p>
                 <form method="POST" class="space-y-6">
                     <div>
                         <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Full Name</label>
-                        <input type="text" name="name" required class="w-full bg-slate-50 p-3 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100 transition">
+                        <input type="text" name="name" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100">
                     </div>
                     <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Monthly Salary (CTC)</label>
-                        <input type="number" name="salary" required class="w-full bg-slate-50 p-3 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100 transition">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Designation</label>
+                        <input type="text" name="designation" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100">
                     </div>
                     <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Residential Address</label>
-                        <textarea name="address" rows="3" class="w-full bg-slate-50 p-3 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100 transition"></textarea>
+                        <label class="text-[9px] font-bold text-slate-400 uppercase block mb-1">Salary (Monthly)</label>
+                        <input type="number" name="salary" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic focus:ring-2 ring-blue-100">
                     </div>
-                    <button type="submit" class="w-full bg-slate-950 text-white p-4 rounded-2xl font-bold uppercase italic tracking-widest shadow-xl shadow-slate-200">Sync to Cloud</button>
+                    <button type="submit" class="w-full bg-slate-950 text-white p-5 rounded-2xl font-bold uppercase italic tracking-widest shadow-xl shadow-slate-200 hover:scale-[1.02] transition-all">Connect to Cloud</button>
                 </form>
             </div>
         </div>
