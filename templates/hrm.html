@@ -1,43 +1,120 @@
-<div x-data="{ tab: 'workforce' }" class="p-8">
-    <div class="flex gap-4 mb-8 bg-slate-100 p-2 rounded-2xl w-fit">
-        <button @click="tab = 'workforce'" :class="tab == 'workforce' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">Workforce</button>
-        <button @click="tab = 'onboarding'" :class="tab == 'onboarding' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">Onboarding Kit</button>
-        <button @click="tab = 'tasks'" :class="tab == 'tasks' ? 'bg-white shadow-sm' : ''" class="px-6 py-2 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">BTL Tasks</button>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-SmartERP Pro | Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; margin:0; }
+        .sidebar { background: #020617; width: 260px; height: 100vh; position: fixed; }
+        .content { margin-left: 260px; padding: 40px; }
+        .glass { background: white; border-radius: 1.5rem; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        @media (max-width: 1024px) { .sidebar { width: 70px; } .content { margin-left: 70px; } .st { display: none; } }
+    </style>
+</head>
+<body x-data="{ tab: 'workforce', modal: false }">
 
-    <div x-show="tab == 'workforce'" class="animate__animated animate__fadeIn">
+    <aside class="sidebar text-slate-400 flex flex-col shadow-2xl z-50">
+        <div class="p-8 border-b border-slate-800/50">
+            <h1 class="text-xl font-black italic text-white st">A-Smart<span class="text-blue-500">ERP</span></h1>
         </div>
+        <nav class="flex-grow p-4 space-y-2">
+            <button @click="tab = 'workforce'" :class="tab == 'workforce' ? 'bg-blue-600 text-white' : ''" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold text-sm transition-all">
+                <i class="fas fa-id-card-alt"></i> <span class="st">Workforce</span>
+            </button>
+            <button @click="tab = 'onboarding'" :class="tab == 'onboarding' ? 'bg-blue-600 text-white' : ''" class="w-full flex items-center gap-4 p-4 rounded-xl font-bold text-sm transition-all">
+                <i class="fas fa-rocket"></i> <span class="st">Onboarding</span>
+            </button>
+            <a href="/logout" class="flex items-center gap-4 p-4 text-red-500 hover:bg-red-500/10 rounded-xl font-bold text-sm mt-10">
+                <i class="fas fa-power-off"></i> <span class="st">Exit Terminal</span>
+            </a>
+        </nav>
+    </aside>
 
-    <div x-show="tab == 'onboarding'" class="animate__animated animate__fadeIn">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="glass-card p-8">
-                <h3 class="font-black italic mb-4">Joining Kit Checklist</h3>
-                <div class="space-y-4">
-                    <label class="flex items-center gap-3 font-bold text-sm text-slate-600">
-                        <input type="checkbox" class="w-5 h-5 rounded-lg"> Laptop Issued
-                    </label>
-                    <label class="flex items-center gap-3 font-bold text-sm text-slate-600">
-                        <input type="checkbox" class="w-5 h-5 rounded-lg"> SIM Card Provided
-                    </label>
-                    <label class="flex items-center gap-3 font-bold text-sm text-slate-600">
-                        <input type="checkbox" class="w-5 h-5 rounded-lg"> [Aadhaar Redacted] Document Verified
-                    </label>
+    <main class="content">
+        <div x-show="tab == 'workforce'" class="animate__animated animate__fadeIn">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-black italic">Team <span class="text-blue-600">Dynamics</span></h2>
+                <button @click="modal = true" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:scale-105 transition-all italic text-sm">Add Member</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div class="glass p-6 border-l-4 border-blue-500">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase italic">Live Payroll</p>
+                    <h3 class="text-3xl font-black text-green-600">₹{{ "{:,.2f}".format(total_payroll) }}</h3>
+                </div>
+                <div class="glass p-6 border-l-4 border-slate-900">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase italic">Cloud Sync</p>
+                    <h3 class="text-3xl font-black text-slate-900">Neon <span class="text-blue-500 italic">SQL</span></h3>
                 </div>
             </div>
-            <div class="glass-card p-8 bg-slate-900 text-white">
-                <h3 class="font-black italic text-blue-400 mb-2">Offer Letter Engine</h3>
-                <p class="text-[10px] uppercase font-bold tracking-widest mb-6">Generate official PDFs in 1-click</p>
-                <a href="/generate-offer/1" class="inline-block bg-blue-600 p-4 rounded-xl font-bold text-xs uppercase italic">Download PDF Sample</a>
+
+            <div class="glass overflow-hidden">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-slate-400 text-[9px] font-bold uppercase italic border-b">
+                        <tr><th class="p-6">Employee</th><th class="p-6">Monthly Earned</th><th class="p-6 text-right">Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for s in staff %}
+                        <tr class="hover:bg-slate-50 transition border-b">
+                            <td class="p-6">
+                                <p class="font-bold text-slate-800 text-sm italic">{{ s.info.name }}</p>
+                                <p class="text-[9px] font-bold text-blue-500 uppercase">{{ s.info.emp_code }} | {{ s.info.designation }}</p>
+                            </td>
+                            <td class="p-6">
+                                <p class="font-black text-slate-900 text-sm">₹{{ s.earned }}</p>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase italic">{{ s.payable }} Payable Days</p>
+                            </td>
+                            <td class="p-6 text-right">
+                                <a href="/delete-staff/{{ s.info.id }}" class="text-red-400 hover:text-red-600"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
 
-    <div x-show="tab == 'tasks'" class="animate__animated animate__fadeIn">
-        <div class="glass-card p-0 overflow-hidden">
-            <div class="p-8 border-b border-slate-50 flex justify-between">
-                <h3 class="font-black italic">BTL Terminal</h3>
-                <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest">3 High Priority</span>
+        <div x-show="tab == 'onboarding'" class="animate__animated animate__fadeIn">
+            <h2 class="text-3xl font-black italic mb-10">Onboarding <span class="text-blue-600">Kit</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {% for s in staff %}
+                <div class="glass p-8">
+                    <h4 class="font-black italic text-lg mb-4">{{ s.info.name }}</h4>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 text-xs font-bold text-slate-600 uppercase italic">
+                            <input type="checkbox" {% if s.info.laptop %}checked{% endif %} class="w-4 h-4 rounded"> Laptop Issued
+                        </label>
+                        <label class="flex items-center gap-3 text-xs font-bold text-slate-600 uppercase italic">
+                            <input type="checkbox" {% if s.info.id_card %}checked{% endif %} class="w-4 h-4 rounded"> ID Card Generated
+                        </label>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-            </div>
+        </div>
+    </main>
+
+    <div x-show="modal" x-cloak class="fixed inset-0 z-[100] flex justify-end">
+        <div @click="modal = false" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+        <div class="relative w-full max-w-sm bg-white h-full shadow-2xl p-10 animate__animated animate__slideInRight">
+            <h3 class="text-3xl font-black italic mb-8">Staff <span class="text-blue-600 text-lg">Digital Entry</span></h3>
+            <form method="POST" class="space-y-6">
+                <input type="text" name="name" placeholder="Full Name" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500">
+                <input type="text" name="designation" placeholder="Designation" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500">
+                <input type="number" name="salary" placeholder="Monthly CTC" required class="w-full bg-slate-50 p-4 rounded-xl outline-none font-bold italic border focus:border-blue-500">
+                <div class="flex gap-4">
+                    <label class="text-[10px] font-bold italic text-slate-500 uppercase"><input type="checkbox" name="laptop"> Laptop</label>
+                    <label class="text-[10px] font-bold italic text-slate-500 uppercase"><input type="checkbox" name="id_card"> ID Card</label>
+                </div>
+                <button type="submit" class="w-full bg-slate-950 text-white p-5 rounded-2xl font-bold uppercase italic tracking-widest shadow-xl">Push to Cloud</button>
+            </form>
+        </div>
     </div>
-</div>
+</body>
+</html>

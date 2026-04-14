@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request, send_file
+from flask import Flask, render_template, redirect, url_for, request, send_file, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import os, calendar, io
@@ -6,20 +6,22 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Neon SQL Connection
+# Neon SQL String
 DB_URL = "postgresql://neondb_owner:npg_h85KlFgYbsmE@ep-holy-breeze-amzy28jw-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'A-SmartERP-Pro-Vikas-2026'
+app.config.update(
+    SQLALCHEMY_DATABASE_URI=DB_URL,
+    SQLALCHEMY_TRACK_MODIFICATIONS=False,
+    SECRET_KEY='ATC_PRO_SECRET_2026'
+)
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- SQL MODELS ---
+# --- MODELS ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
@@ -31,19 +33,22 @@ class Staff(db.Model):
     name = db.Column(db.String(100))
     designation = db.Column(db.String(100))
     salary = db.Column(db.Float)
-    laptop_issued = db.Column(db.Boolean, default=False)
+    # Onboarding Assets
+    laptop = db.Column(db.Boolean, default=False)
+    id_card = db.Column(db.Boolean, default=False)
+    sim_card = db.Column(db.Boolean, default=False)
 
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'))
     date = db.Column(db.Date, default=datetime.utcnow().date())
-    status = db.Column(db.String(20)) # Full Day, Half Day
+    status = db.Column(db.String(20)) # Full Day, Half Day, Short Leave
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- ROUTES ---
+# --- CORE ROUTES ---
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -66,26 +71,32 @@ def logout():
 @login_required
 def hrm():
     if request.method == 'POST':
-        last_s = Staff.query.order_by(Staff.id.desc()).first()
-        new_code = "AC101" if not last_s else f"AC{int(last_s.emp_code.replace('AC', '')) + 1}"
-        new_s = Staff(emp_code=new_code, name=request.form.get('name'), 
-                      designation=request.form.get('designation'), salary=float(request.form.get('salary')))
+        last = Staff.query.order_by(Staff.id.desc()).first()
+        code = "AC101" if not last else f"AC{int(last.emp_code.replace('AC', '')) + 1}"
+        new_s = Staff(
+            emp_code=code, name=request.form.get('name'), 
+            designation=request.form.get('designation'), salary=float(request.form.get('salary')),
+            laptop='laptop' in request.form, id_card='id_card' in request.form
+        )
         db.session.add(new_s); db.session.commit()
         return redirect(url_for('hrm'))
     
     all_staff = Staff.query.all()
     today = datetime.now()
-    days = calendar.monthrange(today.year, today.month)[1]
+    days_in_month = calendar.monthrange(today.year, today.month)[1]
     
-    staff_list = []
+    staff_data = []
     total_payroll = 0
     for s in all_staff:
-        presents = Attendance.query.filter_by(staff_id=s.id, status='Full Day').count()
-        earned = round((s.salary / days) * presents, 2)
+        # Attendance Logic
+        full = Attendance.query.filter_by(staff_id=s.id, status='Full Day').count()
+        half = Attendance.query.filter_by(staff_id=s.id, status='Half Day').count()
+        payable = full + (half * 0.5)
+        earned = round((s.salary / days_in_month) * payable, 2)
         total_payroll += earned
-        staff_list.append({'info': s, 'earned': earned, 'days': presents})
-        
-    return render_template('hrm.html', staff_list=staff_list, total_payroll=total_payroll, name=current_user.username)
+        staff_data.append({'info': s, 'payable': payable, 'earned': earned})
+
+    return render_template('hrm.html', staff=staff_data, total_payroll=total_payroll, name=current_user.username)
 
 if __name__ == '__main__':
     with app.app_context():
