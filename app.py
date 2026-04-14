@@ -1,7 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request, send_file, flash
+from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-import os, calendar, io
+import os, calendar
 from datetime import datetime
 
 app = Flask(__name__)
@@ -21,7 +21,7 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- MODELS ---
+# --- SQL MODELS ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
@@ -33,10 +33,8 @@ class Staff(db.Model):
     name = db.Column(db.String(100))
     designation = db.Column(db.String(100))
     salary = db.Column(db.Float)
-    # Onboarding Assets
     laptop = db.Column(db.Boolean, default=False)
     id_card = db.Column(db.Boolean, default=False)
-    sim_card = db.Column(db.Boolean, default=False)
 
 class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -48,7 +46,7 @@ class Attendance(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- CORE ROUTES ---
+# --- ROUTES ---
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -88,7 +86,7 @@ def hrm():
     staff_data = []
     total_payroll = 0
     for s in all_staff:
-        # Attendance Logic
+        # Attendance Logic: Full Day = 1, Half = 0.5
         full = Attendance.query.filter_by(staff_id=s.id, status='Full Day').count()
         half = Attendance.query.filter_by(staff_id=s.id, status='Half Day').count()
         payable = full + (half * 0.5)
@@ -96,7 +94,15 @@ def hrm():
         total_payroll += earned
         staff_data.append({'info': s, 'payable': payable, 'earned': earned})
 
+    # 'staff' aur 'total_payroll' dono bhej rahe hain taaki HTML error na de
     return render_template('hrm.html', staff=staff_data, total_payroll=total_payroll, name=current_user.username)
+
+@app.route('/delete-staff/<int:id>')
+@login_required
+def delete_staff(id):
+    s = Staff.query.get_or_404(id)
+    db.session.delete(s); db.session.commit()
+    return redirect(url_for('hrm'))
 
 if __name__ == '__main__':
     with app.app_context():
