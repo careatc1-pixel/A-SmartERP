@@ -1,12 +1,12 @@
-from flask import Flask, render_template, redirect, url_for, request, flash, send_file
+from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-import os, calendar, io
+import os, calendar
 from datetime import datetime
 
 app = Flask(__name__)
 
-# Neon SQL String
+# Neon Connection
 DB_URL = "postgresql://neondb_owner:npg_h85KlFgYbsmE@ep-holy-breeze-amzy28jw-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
@@ -14,7 +14,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATC_ULTRA_PRO_2026_SECRET'
+    SECRET_KEY='ATC_ULTRA_FIX_2026'
 )
 
 db = SQLAlchemy(app)
@@ -40,13 +40,13 @@ class Attendance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'))
     date = db.Column(db.Date, default=datetime.utcnow().date())
-    status = db.Column(db.String(20)) # Full Day, Half Day
+    status = db.Column(db.String(20))
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
     assigned_to = db.Column(db.Integer, db.ForeignKey('staff.id'))
-    priority = db.Column(db.String(20)) # High, Low
+    priority = db.Column(db.String(20))
     status = db.Column(db.String(20), default='Pending')
 
 @login_manager.user_loader
@@ -54,7 +54,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # --- ROUTES ---
-
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -80,15 +79,24 @@ def hrm():
         last = Staff.query.order_by(Staff.id.desc()).first()
         code = "AC101" if not last else f"AC{int(last.emp_code.replace('AC', '')) + 1}"
         new_s = Staff(
-            emp_code=code, name=request.form.get('name'), 
-            designation=request.form.get('designation'), salary=float(request.form.get('salary')),
-            laptop_issued='laptop' in request.form, id_card_issued='id_card' in request.form
+            emp_code=code, 
+            name=request.form.get('name'), 
+            designation=request.form.get('designation'), 
+            salary=float(request.form.get('salary')),
+            laptop_issued='laptop' in request.form, 
+            id_card_issued='id_card' in request.form
         )
-        db.session.add(new_s); db.session.commit()
+        db.session.add(new_s)
+        db.session.commit()
         return redirect(url_for('hrm'))
     
-    # Data Fetching
-    all_staff = Staff.query.all()
+    # Safe Fetching
+    try:
+        all_staff = Staff.query.all()
+        tasks = Task.query.all()
+    except:
+        all_staff, tasks = [], []
+
     today = datetime.now()
     days_in_month = calendar.monthrange(today.year, today.month)[1]
     
@@ -102,9 +110,6 @@ def hrm():
         total_payroll += earned
         staff_data.append({'info': s, 'earned': earned, 'payable': payable})
 
-    tasks = Task.query.all()
-    
-    # Ye teeno variables pass karna zaroori hai
     return render_template('hrm.html', staff=staff_data, total_payroll=total_payroll, tasks=tasks, name=current_user.username)
 
 @app.route('/delete-staff/<int:id>')
