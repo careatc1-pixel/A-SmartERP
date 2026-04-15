@@ -4,7 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import os
 from datetime import datetime
 
-# Vercel needs this "app" variable to be clearly defined
+# Vercel Production Variable
 app = Flask(__name__)
 
 # Neon Connection
@@ -15,7 +15,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_FORCE_V5'
+    SECRET_KEY='ATHARV_ERP_PRO_V6' # Secret key updated to force build
 )
 
 db = SQLAlchemy(app)
@@ -31,7 +31,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
 
-class Invoice(db.Model):
+class Invoice(db.Model): # Purana general invoice model
     id = db.Column(db.Integer, primary_key=True)
     invoice_no = db.Column(db.String(20), unique=True)
     client_name = db.Column(db.String(100))
@@ -39,8 +39,7 @@ class Invoice(db.Model):
     status = db.Column(db.String(20), default='Unpaid')
     date_created = db.Column(db.Date, default=datetime.utcnow().date())
 
-# --- NAYE MODELS (SALES & INVENTORY) ---
-class Product(db.Model):
+class Product(db.Model): # Inventory Module
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String(100), nullable=False)
@@ -48,13 +47,13 @@ class Product(db.Model):
     stock = db.Column(db.Integer, default=0)
     price = db.Column(db.Float, default=0.0)
 
-class SaleInvoice(db.Model):
+class SaleInvoice(db.Model): # Advanced Billing Module
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     inv_no = db.Column(db.String(50), unique=True)
     client_name = db.Column(db.String(100))
-    total_amount = db.Column(db.Float)
-    gst_amount = db.Column(db.Float)
+    total_amount = db.Column(db.Float) # Final amount with variable GST
+    gst_amount = db.Column(db.Float)   # Total tax calculated
     status = db.Column(db.String(20), default='Paid')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -70,7 +69,7 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     with app.app_context():
-        db.create_all() # Saare naye tables yahan ban jayenge
+        db.create_all() 
         if not User.query.filter_by(username='admin').first():
             db.session.add(User(username='admin', password='password123'))
             db.session.commit()
@@ -92,16 +91,22 @@ def dashboard():
         "email": "care.atc1@gmail.com",
         "initial": "A"
     }
-    invoices = Invoice.query.all()
+    invoices = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.id.desc()).all()
     return render_template('dashboard.html', invoices=invoices, company=company_info, name=current_user.username)
 
 @app.route('/accounting')
 @login_required
 def accounting():
-    stats = { "total_invoices": 124, "pending_bills": 12, "cash_flow": "₹4,50,000" }
+    # Dynamic counts from SaleInvoice table
+    user_sales = SaleInvoice.query.filter_by(user_id=current_user.id).all()
+    total_val = sum(s.total_amount for s in user_sales)
+    stats = { 
+        "total_invoices": len(user_sales), 
+        "pending_bills": 0, 
+        "cash_flow": f"₹{total_val:,.2f}" 
+    }
     return render_template('accounting.html', stats=stats, name=current_user.username)
 
-# --- NAYE ROUTES (SALES FUNCTIONALITY) ---
 @app.route('/sales/new')
 @login_required
 def new_sales():
@@ -113,6 +118,7 @@ def new_sales():
 def save_sale():
     data = request.json
     try:
+        # Multi-GST entry saving logic
         new_sale = SaleInvoice(
             user_id=current_user.id,
             inv_no=data['inv_no'],
@@ -121,9 +127,14 @@ def save_sale():
             gst_amount=float(data['gst'])
         )
         db.session.add(new_sale)
+        
+        # Optional: Yahan hum naye products ko auto-add bhi kar sakte hain inventory mein
+        # Logic: Agar product exist nahi karta, toh insert kar do.
+
         db.session.commit()
-        return jsonify({"status": "success", "message": "Sale Recorded"})
+        return jsonify({"status": "success", "message": "Invoice Synced & Saved"})
     except Exception as e:
+        db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
 
 @app.route('/logout')
