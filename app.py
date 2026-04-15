@@ -75,3 +75,13 @@ def dashboard():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+    @app.route('/accounting')
+@login_required
+def accounting():
+    # Dynamic Dashboard Data
+    stats = {
+        "total_invoices": 124,
+        "pending_bills": 12,
+        "cash_flow": "₹4,50,000"
+    }
+    return render_template('accounting.html', stats=stats, name=current_user.username)
