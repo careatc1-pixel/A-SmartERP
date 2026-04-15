@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import os
 from datetime import datetime
 
+# Vercel needs this "app" variable to be clearly defined
 app = Flask(__name__)
 
 # Neon Connection
@@ -14,12 +15,15 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_FORCE_V3'
+    SECRET_KEY='ATHARV_FORCE_V4'
 )
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
+# Vercel sometimes looks for 'handler'
+handler = app
 
 # --- MODELS ---
 class User(UserMixin, db.Model):
@@ -46,10 +50,11 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    db.create_all()
-    if not User.query.filter_by(username='admin').first():
-        db.session.add(User(username='admin', password='password123'))
-        db.session.commit()
+    with app.app_context():
+        db.create_all()
+        if not User.query.filter_by(username='admin').first():
+            db.session.add(User(username='admin', password='password123'))
+            db.session.commit()
 
     if request.method == 'POST':
         u = User.query.filter_by(username=request.form.get('username')).first()
@@ -71,17 +76,16 @@ def dashboard():
     invoices = Invoice.query.all()
     return render_template('dashboard.html', invoices=invoices, company=company_info, name=current_user.username)
 
+@app.route('/accounting')
+@login_required
+def accounting():
+    stats = { "total_invoices": 124, "pending_bills": 12, "cash_flow": "₹4,50,000" }
+    return render_template('accounting.html', stats=stats, name=current_user.username)
+
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('login'))
-    @app.route('/accounting')
-@login_required
-def accounting():
-    # Dynamic Dashboard Data
-    stats = {
-        "total_invoices": 124,
-        "pending_bills": 12,
-        "cash_flow": "₹4,50,000"
-    }
-    return render_template('accounting.html', stats=stats, name=current_user.username)
+
+if __name__ == '__main__':
+    app.run(debug=True)
