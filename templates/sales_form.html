@@ -32,7 +32,7 @@
                 <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Atharv Tech Core | Secure Billing</span>
             </div>
             <div class="flex gap-3">
-                <button @click="generatePDF()" class="bg-slate-900 text-white px-5 py-2 rounded-lg font-bold text-xs shadow-lg hover:bg-black transition-all">
+                <button @click="generatePDF()" x-show="isSaved" class="bg-slate-900 text-white px-5 py-2 rounded-lg font-bold text-xs shadow-lg hover:bg-black transition-all">
                     <i class="fa-solid fa-file-pdf mr-2"></i> DOWNLOAD PDF
                 </button>
                 <a href="/accounting" class="bg-white border px-5 py-2 rounded-lg font-bold text-xs text-slate-600 hover:bg-slate-50">EXIT</a>
@@ -46,13 +46,13 @@
                     <div class="text-[12px] text-slate-500 font-medium leading-relaxed">
                         <p>Plot No. 12, Sector 5, Dwarka</p>
                         <p>New Delhi, India - 110075</p>
-                        <p class="mt-2 text-slate-900 font-bold">GSTIN: 07AAAAA0000A1Z5</p>
+                        <p class="mt-2 text-slate-900 font-bold uppercase tracking-tight">GSTIN: 07AAAAA0000A1Z5</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Tax Invoice</h2>
                     <div class="space-y-1">
-                        <p class="text-2xl font-light text-slate-900">ATC/26-27/001</p>
+                        <p class="text-2xl font-light text-slate-900" x-text="invNo"></p>
                         <p class="text-xs font-semibold text-slate-400 uppercase" x-text="invoiceDate"></p>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                                 <input type="number" x-model.number="item.price" @input="calculate()" class="w-full text-right outline-none">
                             </td>
                             <td class="py-6 text-center">
-                                <select x-model.number="item.gstSlab" @change="calculate()" class="no-print font-bold text-[11px] bg-slate-50 p-1 rounded outline-none">
+                                <select x-model.number="item.gstSlab" @change="calculate()" class="no-print font-bold text-[11px] bg-slate-50 p-1 rounded outline-none cursor-pointer">
                                     <option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option>
                                 </select>
                                 <span class="hidden print:block text-[11px] font-bold" x-text="item.gstSlab + '%'"></span>
@@ -109,7 +109,7 @@
             <div class="flex justify-between items-start border-t pt-10 border-slate-100">
                 <div class="max-w-[280px]">
                     <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Bank Credentials</h4>
-                    <div class="text-[11px] text-slate-600 space-y-1 font-medium">
+                    <div class="text-[11px] text-slate-600 space-y-1 font-medium italic">
                         <p>Bank: <span class="text-slate-900 font-bold">HDFC BANK LTD</span></p>
                         <p>Account: <span class="text-slate-900 font-bold">ATHARV TECH CO.</span></p>
                         <p>A/c No: <span class="text-slate-900 font-bold">50200012345678</span></p>
@@ -126,7 +126,7 @@
                         <span x-text="'₹' + totalGst.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
                     </div>
                     <div class="flex justify-between text-xl font-extrabold text-slate-900 pt-4 border-t border-slate-200">
-                        <span class="tracking-tighter">GRAND TOTAL</span>
+                        <span class="tracking-tighter uppercase">Grand Total</span>
                         <span x-text="'₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
                     </div>
                 </div>
@@ -143,7 +143,7 @@
             </div>
 
             <button @click="saveAndLock()" x-show="!isSaved" 
-                    class="no-print w-full bg-slate-900 text-white p-6 rounded-xl font-black uppercase tracking-widest mt-16 shadow-xl hover:bg-black transition-all">
+                    class="no-print w-full bg-slate-900 text-white p-6 rounded-xl font-black uppercase tracking-widest mt-16 shadow-xl hover:bg-black transition-all active:scale-[0.98]">
                 Validate & Finalize Invoice
             </button>
         </div>
@@ -153,7 +153,8 @@
         function invoiceSystem() {
             return {
                 clientName: '',
-                invNo: 'ATC/26-27/001', 
+                // UNIQUE COUNTER LOGIC ADDED HERE
+                invNo: 'ATC/26-27/' + String(Math.floor(Date.now() / 1000)).slice(-3),
                 invoiceDate: new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}),
                 items: [{ name: '', qty: 1, price: 0, gstSlab: 18 }],
                 subtotal: 0,
@@ -175,7 +176,7 @@
                 },
 
                 async saveAndLock() {
-                    if(!this.clientName) return alert('Enter Client Name');
+                    if(!this.clientName) return alert('Customer Name is required!');
                     
                     try {
                         const response = await fetch('/api/save-sale', {
@@ -189,15 +190,17 @@
                             })
                         });
 
+                        const result = await response.json();
+
                         if(response.ok) {
                             this.isSaved = true;
-                            alert('Invoice Synced with Cloud. Opening PDF Viewer...');
-                            setTimeout(() => { this.generatePDF(); }, 1000);
+                            alert('Cloud Sync Complete! You can now download the PDF.');
+                            setTimeout(() => { this.generatePDF(); }, 800);
                         } else {
-                            alert('Cloud Sync Failed. Try again.');
+                            alert('Cloud Sync Failed: ' + (result.message || 'Unknown Error'));
                         }
                     } catch (e) {
-                        alert('Network Error. Check your connection.');
+                        alert('Network Error! Please check your connection.');
                     }
                 }
             }

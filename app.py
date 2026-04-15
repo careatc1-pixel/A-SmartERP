@@ -1,8 +1,10 @@
-from flask import Flask, render_template, redirect, url_for, request, jsonify
+from flask import Flask, render_template, redirect, url_for, request, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import os
 from datetime import datetime
+import pandas as pd
+from io import BytesIO
 
 # Vercel Production Variable
 app = Flask(__name__)
@@ -15,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_PRO_V6' # Secret key updated to force build
+    SECRET_KEY='ATHARV_ERP_V7_SYNC_FIX' # Key updated to force Vercel refresh
 )
 
 db = SQLAlchemy(app)
@@ -31,7 +33,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
 
-class Invoice(db.Model): # Purana general invoice model
+class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     invoice_no = db.Column(db.String(20), unique=True)
     client_name = db.Column(db.String(100))
@@ -39,7 +41,7 @@ class Invoice(db.Model): # Purana general invoice model
     status = db.Column(db.String(20), default='Unpaid')
     date_created = db.Column(db.Date, default=datetime.utcnow().date())
 
-class Product(db.Model): # Inventory Module
+class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String(100), nullable=False)
@@ -47,13 +49,13 @@ class Product(db.Model): # Inventory Module
     stock = db.Column(db.Integer, default=0)
     price = db.Column(db.Float, default=0.0)
 
-class SaleInvoice(db.Model): # Advanced Billing Module
+class SaleInvoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     inv_no = db.Column(db.String(50), unique=True)
     client_name = db.Column(db.String(100))
-    total_amount = db.Column(db.Float) # Final amount with variable GST
-    gst_amount = db.Column(db.Float)   # Total tax calculated
+    total_amount = db.Column(db.Float)
+    gst_amount = db.Column(db.Float)
     status = db.Column(db.String(20), default='Paid')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -97,7 +99,6 @@ def dashboard():
 @app.route('/accounting')
 @login_required
 def accounting():
-    # Dynamic counts from SaleInvoice table
     user_sales = SaleInvoice.query.filter_by(user_id=current_user.id).all()
     total_val = sum(s.total_amount for s in user_sales)
     stats = { 
@@ -113,29 +114,56 @@ def new_sales():
     products = Product.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', products=products)
 
+# --- SYNC ERROR FIX ROUTE ---
 @app.route('/api/save-sale', methods=['POST'])
 @login_required
 def save_sale():
     data = request.json
     try:
-        # Multi-GST entry saving logic
+        # Check if invoice number already exists to avoid cloud sync error
+        existing = SaleInvoice.query.filter_by(inv_no=data['inv_no']).first()
+        final_inv_no = data['inv_no']
+        if existing:
+            # If exists, append unique timestamp suffix
+            final_inv_no = f"{data['inv_no']}-{datetime.now().strftime('%M%S')}"
+
         new_sale = SaleInvoice(
             user_id=current_user.id,
-            inv_no=data['inv_no'],
+            inv_no=final_inv_no,
             client_name=data['client'],
             total_amount=float(data['total']),
             gst_amount=float(data['gst'])
         )
         db.session.add(new_sale)
-        
-        # Optional: Yahan hum naye products ko auto-add bhi kar sakte hain inventory mein
-        # Logic: Agar product exist nahi karta, toh insert kar do.
-
         db.session.commit()
-        return jsonify({"status": "success", "message": "Invoice Synced & Saved"})
+        return jsonify({"status": "success", "message": "Cloud Sync Complete"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
+
+# --- EXCEL REPORT EXPORT ---
+@app.route('/export/sales')
+@login_required
+def export_sales():
+    sales = SaleInvoice.query.filter_by(user_id=current_user.id).all()
+    data = [{
+        "Date": s.date.strftime('%d-%m-%Y'),
+        "Invoice No": s.inv_no,
+        "Client Name": s.client_name,
+        "GST Amount": f"Rs.{s.gst_amount:,.2f}",
+        "Total Amount": f"Rs.{s.total_amount:,.2f}",
+        "Status": s.status
+    } for s in sales]
+
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sales_Report')
+    output.seek(0)
+    
+    return send_file(output, 
+                     download_name=f"ATC_Sales_Report_{datetime.now().strftime('%d_%m_%Y')}.xlsx", 
+                     as_attachment=True)
 
 @app.route('/logout')
 def logout():
