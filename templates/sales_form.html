@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Sale | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 p-10">
+    <div class="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-xl">
+        <div class="flex justify-between items-center mb-10 border-b pb-6">
+            <h2 class="text-3xl font-black italic text-[#875A7B]">Create <span class="text-gray-900">Tax Invoice</span></h2>
+            <a href="/accounting" class="text-sm font-bold text-gray-400 hover:text-black">Cancel & Exit</a>
+        </div>
+
+        <div class="grid grid-cols-2 gap-8 mb-10">
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2">Customer Name</label>
+                <input id="client_name" type="text" class="w-full bg-slate-50 border-none p-4 rounded-xl font-bold outline-none ring-2 ring-transparent focus:ring-purple-200 transition-all">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2">Invoice Number</label>
+                <input id="inv_no" type="text" value="INV-2026-001" class="w-full bg-slate-100 p-4 rounded-xl font-bold outline-none cursor-not-allowed" readonly>
+            </div>
+        </div>
+
+        <table class="w-full mb-10">
+            <thead class="text-left text-[10px] font-bold text-gray-400 uppercase border-b pb-4">
+                <tr>
+                    <th class="pb-4">Product/Service</th>
+                    <th class="pb-4">Qty</th>
+                    <th class="pb-4">Price</th>
+                    <th class="pb-4 text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="border-b">
+                    <td class="py-6">
+                        <select class="bg-transparent font-bold outline-none text-slate-700">
+                            <option>Select Product</option>
+                            {% for p in products %}
+                            <option value="{{ p.price }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="number" value="1" class="w-16 bg-transparent font-bold outline-none"></td>
+                    <td><input type="number" placeholder="0.00" class="bg-transparent font-bold outline-none"></td>
+                    <td class="text-right font-black italic">₹0.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="flex justify-end border-t pt-8">
+            <div class="w-64 space-y-3">
+                <div class="flex justify-between text-gray-500 font-bold text-sm"><span>Subtotal:</span> <span>₹0.00</span></div>
+                <div class="flex justify-between text-gray-500 font-bold text-sm"><span>GST (18%):</span> <span>₹0.00</span></div>
+                <div class="flex justify-between text-2xl font-black text-[#875A7B] pt-2 border-t"><span>Total:</span> <span>₹0.00</span></div>
+            </div>
+        </div>
+
+        <button onclick="saveInvoice()" class="w-full bg-[#875A7B] text-white p-5 rounded-2xl font-black italic uppercase tracking-widest mt-12 shadow-xl hover:bg-[#6b4762] transition-all">
+            Validate & Push to Books
+        </button>
+    </div>
+</body>
+</html>

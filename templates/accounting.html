@@ -45,7 +45,7 @@
             box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1);
         }
 
-        /* Standard ATC Color Palette (Differentiated from Odoo) */
+        /* Standard ATC Color Palette */
         .bg-sales { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #b91c1c; }
         .bg-purchase { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #1e40af; }
         .bg-expenses { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #065f46; }
@@ -97,7 +97,7 @@
 
         <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
             
-            <div class="module-card group">
+            <div onclick="window.location.href='/sales/new'" class="module-card group">
                 <div class="icon-wrapper bg-sales">
                     <i class="fa-solid fa-chart-line"></i>
                 </div>
@@ -148,7 +148,7 @@
             </div>
 
             <div class="flex items-center p-8">
-                <a href="#" class="text-2xl font-extrabold text-[#875A7B] hover:translate-x-3 transition-transform italic">
+                <a href="/dashboard" class="text-2xl font-extrabold text-[#875A7B] hover:translate-x-3 transition-transform italic">
                     See all Apps <i class="fa-solid fa-arrow-right-long ml-2"></i>
                 </a>
             </div>
