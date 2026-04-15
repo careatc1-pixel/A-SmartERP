@@ -2,13 +2,7 @@ from flask import Flask, render_template, redirect, url_for, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import io
-import os
-
-# PDF Library import (Iske liye requirements.txt zaroori hai)
-try:
-    from reportlab.pdfgen import canvas
-except ImportError:
-    canvas = None
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -20,7 +14,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_PHASE2_FINAL_2026'
+    SECRET_KEY='ATHARV_INVOICE_PRO_2026'
 )
 
 db = SQLAlchemy(app)
@@ -33,18 +27,13 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
 
-class Staff(db.Model):
+class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    emp_code = db.Column(db.String(20), unique=True)
-    name = db.Column(db.String(100))
-    designation = db.Column(db.String(100))
-    salary = db.Column(db.Float, default=0.0)
-    address = db.Column(db.Text)
-    aadhaar_no = db.Column(db.String(20))
-    bank_acc = db.Column(db.String(50))
-    laptop_issued = db.Column(db.Boolean, default=False)
-    sim_issued = db.Column(db.Boolean, default=False)
-    id_card_issued = db.Column(db.Boolean, default=False)
+    invoice_no = db.Column(db.String(20), unique=True)
+    client_name = db.Column(db.String(100))
+    amount = db.Column(db.Float)
+    status = db.Column(db.String(20), default='Unpaid') # Unpaid, Paid
+    date_created = db.Column(db.Date, default=datetime.utcnow().date())
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -58,62 +47,42 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Force table creation
-    with app.app_context():
-        db.create_all()
-        if not User.query.filter_by(username='admin').first():
-            db.session.add(User(username='admin', password='password123'))
-            db.session.commit()
+    db.create_all()
+    if not User.query.filter_by(username='admin').first():
+        db.session.add(User(username='admin', password='password123'))
+        db.session.commit()
 
     if request.method == 'POST':
         u = User.query.filter_by(username=request.form.get('username')).first()
         if u and u.password == request.form.get('password'):
             login_user(u)
-            return redirect(url_for('hrm'))
+            return redirect(url_for('dashboard'))
     return render_template('login.html')
 
-@app.route('/hrm', methods=['GET', 'POST'])
+@app.route('/dashboard', methods=['GET', 'POST'])
 @login_required
-def hrm():
+def dashboard():
     if request.method == 'POST':
-        last_s = Staff.query.order_by(Staff.id.desc()).first()
-        new_code = "AC101" if not last_s else f"AC{int(last_s.emp_code.replace('AC', '')) + 1}"
+        last_inv = Invoice.query.order_by(Invoice.id.desc()).first()
+        inv_no = "INV-101" if not last_inv else f"INV-{int(last_inv.invoice_no.split('-')[1]) + 1}"
         
-        new_staff = Staff(
-            emp_code=new_code,
-            name=request.form.get('name'),
-            designation=request.form.get('designation'),
-            salary=float(request.form.get('salary')),
-            address=request.form.get('address'),
-            aadhaar_no=request.form.get('aadhaar'),
-            bank_acc=request.form.get('bank'),
-            laptop_issued='laptop' in request.form,
-            sim_issued='sim' in request.form,
-            id_card_issued='id_card' in request.form
+        new_inv = Invoice(
+            invoice_no=inv_no,
+            client_name=request.form.get('client_name'),
+            amount=float(request.form.get('amount')),
+            status=request.form.get('status')
         )
-        db.session.add(new_staff); db.session.commit()
-        return redirect(url_for('hrm'))
+        db.session.add(new_inv); db.session.commit()
+        return redirect(url_for('dashboard'))
     
-    staff_list = Staff.query.all()
-    return render_template('hrm.html', staff=staff_list, name=current_user.username)
-
-@app.route('/generate-offer/<int:id>')
-@login_required
-def generate_offer(id):
-    if not canvas:
-        return "PDF Library not installed on server.", 500
-    s = Staff.query.get_or_404(id)
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer)
-    p.drawString(100, 800, "ATHARV TECH CO. - OFFER LETTER")
-    p.drawString(100, 750, f"Name: {s.name}")
-    p.drawString(100, 730, f"Code: {s.emp_code}")
-    p.drawString(100, 710, f"Role: {s.designation}")
-    p.showPage(); p.save()
-    buffer.seek(0)
-    return send_file(buffer, as_attachment=True, download_name=f"Offer_{s.name}.pdf")
+    invoices = Invoice.query.all()
+    total_revenue = sum(inv.amount for inv in invoices if inv.status == 'Paid')
+    return render_template('dashboard.html', invoices=invoices, total_revenue=total_revenue, name=current_user.username)
 
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
