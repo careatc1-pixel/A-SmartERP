@@ -17,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V7_SYNC_FIX' # Key updated to force Vercel refresh
+    SECRET_KEY='ATHARV_ERP_V8_MASTER' # Key updated to trigger new table creation
 )
 
 db = SQLAlchemy(app)
@@ -57,6 +57,17 @@ class SaleInvoice(db.Model):
     total_amount = db.Column(db.Float)
     gst_amount = db.Column(db.Float)
     status = db.Column(db.String(20), default='Paid')
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- NEW MODELS ADDED (PURCHASE & INVENTORY LOG) ---
+
+class PurchaseInvoice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    bill_no = db.Column(db.String(50), unique=True)
+    vendor_name = db.Column(db.String(100))
+    total_amount = db.Column(db.Float)
+    gst_amount = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
@@ -120,11 +131,9 @@ def new_sales():
 def save_sale():
     data = request.json
     try:
-        # Check if invoice number already exists to avoid cloud sync error
         existing = SaleInvoice.query.filter_by(inv_no=data['inv_no']).first()
         final_inv_no = data['inv_no']
         if existing:
-            # If exists, append unique timestamp suffix
             final_inv_no = f"{data['inv_no']}-{datetime.now().strftime('%M%S')}"
 
         new_sale = SaleInvoice(
@@ -141,29 +150,53 @@ def save_sale():
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
 
-# --- EXCEL REPORT EXPORT ---
-@app.route('/export/sales')
+# --- NEW: MASTER EXPORT ROUTE (Sales, Purchase, Inventory) ---
+@app.route('/export/<module>')
 @login_required
-def export_sales():
-    sales = SaleInvoice.query.filter_by(user_id=current_user.id).all()
-    data = [{
-        "Date": s.date.strftime('%d-%m-%Y'),
-        "Invoice No": s.inv_no,
-        "Client Name": s.client_name,
-        "GST Amount": f"Rs.{s.gst_amount:,.2f}",
-        "Total Amount": f"Rs.{s.total_amount:,.2f}",
-        "Status": s.status
-    } for s in sales]
+def export_master(module):
+    data_list = []
+    filename = f"ATC_{module}_Report.xlsx"
 
-    df = pd.DataFrame(data)
+    if module == 'sales':
+        items = SaleInvoice.query.filter_by(user_id=current_user.id).all()
+        data_list = [{
+            "Date": i.date.strftime('%d-%m-%Y'),
+            "Invoice No": i.inv_no,
+            "Client": i.client_name,
+            "GST Amount": i.gst_amount,
+            "Total Amount": i.total_amount
+        } for i in items]
+
+    elif module == 'purchase':
+        items = PurchaseInvoice.query.filter_by(user_id=current_user.id).all()
+        data_list = [{
+            "Date": i.date.strftime('%d-%m-%Y'),
+            "Bill No": i.bill_no,
+            "Vendor": i.vendor_name,
+            "GST Amount": i.gst_amount,
+            "Total Amount": i.total_amount
+        } for i in items]
+
+    elif module == 'inventory':
+        items = Product.query.filter_by(user_id=current_user.id).all()
+        data_list = [{
+            "Item Name": i.name,
+            "SKU": i.sku,
+            "Current Stock": i.stock,
+            "Unit Price": i.price,
+            "Valuation": i.stock * i.price
+        } for i in items]
+
+    if not data_list:
+        return "No data found to export", 404
+
+    df = pd.DataFrame(data_list)
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name='Sales_Report')
+        df.to_excel(writer, index=False, sheet_name=module.capitalize())
     output.seek(0)
     
-    return send_file(output, 
-                     download_name=f"ATC_Sales_Report_{datetime.now().strftime('%d_%m_%Y')}.xlsx", 
-                     as_attachment=True)
+    return send_file(output, download_name=filename, as_attachment=True)
 
 @app.route('/logout')
 def logout():
