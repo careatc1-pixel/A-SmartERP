@@ -3,37 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accounting | A-SmartERP</title>
+    <title>Accounting Hub | A-SmartERP Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
-<body class="bg-white">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Dancing+Script:wght@700&display=swap');
+        
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ffffff; color: #111827; }
+        
+        .handwritten { font-family: 'Dancing Script', cursive; color: #4f46e5; }
+        
+        /* Premium Module Cards */
+        .module-card {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 24px;
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
 
-    <nav class="flex justify-between items-center px-12 py-4 border-b bg-white sticky top-0 z-50">
-        <div class="flex items-center gap-8">
-            <a href="/dashboard" class="text-xl font-bold text-[#875A7B]">A-Smart<span class="text-gray-900">ERP</span></a>
-            <div class="flex gap-6 text-sm font-semibold text-gray-500">
-                <a href="/dashboard" class="hover:text-[#875A7B]"><i class="fa-solid fa-house"></i> Dashboard</a>
-                <span class="text-gray-300">|</span>
-                <span class="text-[#875A7B]">Accounting Overview</span>
+        .module-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+            border-color: #e2e8f0;
+        }
+
+        .icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: inset 0 -4px 0 rgba(0,0,0,0.1);
+        }
+
+        /* Standard ATC Color Palette (Differentiated from Odoo) */
+        .bg-sales { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #b91c1c; }
+        .bg-purchase { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); color: #1e40af; }
+        .bg-expenses { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); color: #065f46; }
+        .bg-inventory { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); color: #6b21a8; }
+        .bg-docs { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); color: #3730a3; }
+
+        .secondary-nav a {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            padding: 12px 20px;
+            transition: all 0.2s;
+        }
+        .secondary-nav a:hover, .secondary-nav a.active {
+            color: #875A7B;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body x-data="{ appsMenu: false }">
+
+    <nav class="flex justify-between items-center px-12 py-5 border-b border-gray-50 sticky top-0 bg-white z-50">
+        <div class="flex items-center gap-10">
+            <a href="/dashboard" class="text-2xl font-extrabold text-[#875A7B]">A-Smart<span class="text-gray-900 font-medium">ERP</span></a>
+            <div class="flex items-center gap-2">
+                <button @click="appsMenu = !appsMenu" class="text-sm font-bold text-gray-700 hover:text-[#875A7B]">Accounting <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i></button>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm font-bold text-gray-600">{{ name }}</span>
-            <a href="/logout" class="bg-red-50 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase">Logout</a>
+        <div class="flex items-center gap-6">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Terminal</span>
+            <a href="/logout" class="bg-[#875A7B] text-white px-5 py-2 rounded-lg text-xs font-bold shadow-lg hover:bg-[#6b4762]">EXIT</a>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-12 py-20 text-center">
-        <h1 class="text-6xl font-extrabold mb-6">Accounting <span class="italic text-sky-500 font-light">made effortless</span></h1>
-        <p class="text-xl text-gray-500 max-w-3xl mx-auto mb-10 leading-relaxed">
-            All your financial operations—from reconciliation and expenses to tax returns and real-time reporting.
-        </p>
-        <div class="flex justify-center gap-4">
-            <button class="bg-[#875A7B] text-white px-10 py-4 rounded-lg font-bold shadow-lg">Start now - It's free</button>
-            <button class="bg-gray-100 text-gray-700 px-10 py-4 rounded-lg font-bold">Meet an advisor</button>
-        </div>
+    <div class="secondary-nav flex justify-center py-3 bg-white border-b px-12 gap-2 overflow-x-auto">
+        <a href="#" class="active">Overview</a>
+        <a href="#">Customers</a>
+        <a href="#">Vendors</a>
+        <a href="#">Automation</a>
+        <a href="#">Find an Accountant</a>
     </div>
+
+    <section class="py-20 text-center px-6">
+        <h2 class="text-6xl font-black tracking-tight mb-4 animate__animated animate__fadeInDown">
+            One <span class="handwritten underline decoration-indigo-200">need</span>, one <span class="text-[#875A7B]">app.</span>
+        </h2>
+        <p class="text-2xl text-slate-400 font-medium mb-16 animate__animated animate__fadeInUp">Expand your business as you grow.</p>
+
+        <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+            
+            <div class="module-card group">
+                <div class="icon-wrapper bg-sales">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900">Sales</h4>
+                    <p class="text-sm text-slate-500 font-medium">Generate & Track Invoices</p>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="icon-wrapper bg-purchase">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900">Purchase</h4>
+                    <p class="text-sm text-slate-500 font-medium">Control Vendor Bills</p>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="icon-wrapper bg-expenses">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900">Expenses</h4>
+                    <p class="text-sm text-slate-500 font-medium">Track and Re-invoice</p>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="icon-wrapper bg-inventory">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900">Inventory</h4>
+                    <p class="text-sm text-slate-500 font-medium">Real-time Valuation</p>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <div class="icon-wrapper bg-docs">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-slate-900">Documents</h4>
+                    <p class="text-sm text-slate-500 font-medium">Cloud Management</p>
+                </div>
+            </div>
+
+            <div class="flex items-center p-8">
+                <a href="#" class="text-2xl font-extrabold text-[#875A7B] hover:translate-x-3 transition-transform italic">
+                    See all Apps <i class="fa-solid fa-arrow-right-long ml-2"></i>
+                </a>
+            </div>
+
+        </div>
+    </section>
 
 </body>
 </html>
