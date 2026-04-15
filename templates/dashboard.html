@@ -3,151 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Account | A-SmartERP</title>
+    <title>A-SmartERP | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #111827; overflow-x: hidden; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #eef2f3 0%, #8e9eab 100%); 
+            min-height: 100vh;
+            color: #111827; 
+        }
         
-        .mega-menu { box-shadow: 0 20px 50px rgba(0,0,0,0.1); border-top: 1px solid #f1f5f9; z-index: 1000; }
-        .module-link { color: #4B5563; font-size: 13px; transition: all 0.2s; display: block; padding: 6px 0; text-decoration: none; }
-        .module-link:hover { color: #875A7B; transform: translateX(4px); }
-        .category-title { font-size: 14px; font-weight: 700; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 2px solid #f8fafc; }
-        
-        .icon-box { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-radius: 16px; border: 1px solid transparent; }
-        .icon-box:hover { background-color: #f9fafb; border-color: #f1f5f9; transform: translateY(-3px); }
-        
-        .avatar-box { background-color: #714B23; color: white; width: 56px; height: 56px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
-        [x-cloak] { display: none !important; }
+        /* App Icon Launcher Style */
+        .app-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-card:hover .app-icon {
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .app-card p {
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 10px;
+            color: #1f2937;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+        }
+
+        /* Frosted Glass Sidebar */
+        .sidebar-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 28px;
+        }
+
+        .nav-link {
+            font-size: 14px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .nav-link:hover { color: #875A7B; }
     </style>
 </head>
-<body x-data="{ appsMenu: false }">
+<body x-data="{ userMenu: false }">
 
-    <nav class="relative z-[100] flex justify-between items-center px-12 py-5 border-b border-gray-100 bg-white">
-        <div class="flex items-center gap-12">
-            <h1 class="text-2xl font-bold text-[#875A7B]">A-Smart<span class="text-gray-900">ERP</span></h1>
-            
-            <div class="hidden lg:flex items-center gap-8 text-[15px] font-medium">
-                <button @click="appsMenu = !appsMenu" class="flex items-center gap-1 text-gray-600 hover:text-[#875A7B] transition-colors">
-                    Apps <i class="fa-solid fa-chevron-down text-[10px] ml-1 transition-transform" :class="appsMenu ? 'rotate-180' : ''"></i>
-                </button>
-                <a href="#" class="text-gray-600 hover:text-[#875A7B]">Industries</a>
-                <a href="#" class="text-gray-600 hover:text-[#875A7B]">Community</a>
-            </div>
+    <header class="flex justify-between items-center px-8 py-4 bg-white/60 backdrop-blur-md sticky top-0 z-50 border-b border-white/20">
+        <div class="flex items-center gap-10">
+            <h1 class="text-xl font-black text-[#875A7B]">A-Smart<span class="text-slate-900 font-medium">ERP</span></h1>
+            <nav class="hidden md:flex gap-8">
+                <a href="/dashboard" class="nav-link">Apps</a>
+                <a href="#" class="nav-link">Community</a>
+                <a href="#" class="nav-link">Support</a>
+            </nav>
         </div>
-
+        
         <div class="flex items-center gap-6">
-            <div class="flex items-center gap-3 text-sm font-semibold text-gray-700">
-                <i class="fa-regular fa-circle-user text-xl text-gray-400"></i>
-                <span>{{ name }}</span>
-            </div>
-            <a href="/logout" class="bg-[#875A7B] hover:bg-[#6b4762] text-white px-5 py-2 rounded shadow-sm text-sm font-bold transition-all uppercase">Logout</a>
-        </div>
-
-        <div x-show="appsMenu" 
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-4"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             @click.away="appsMenu = false" 
-             x-cloak 
-             class="mega-menu absolute top-full left-0 w-full bg-white p-12">
-            
-            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                <div>
-                    <h4 class="category-title text-emerald-600 uppercase">Finance</h4>
-                    <div class="space-y-1">
-                        <a href="/accounting" class="module-link font-bold text-[#875A7B]">Accounting & Invoicing</a>
-                        <a href="#" class="module-link">Expenses</a>
-                        <a href="#" class="module-link">Documents</a>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="category-title text-rose-500 uppercase">Sales</h4>
-                    <div class="space-y-1">
-                        <a href="#" class="module-link">CRM</a>
-                        <a href="#" class="module-link">Sales Terminal</a>
-                        <a href="#" class="module-link">POS Shop</a>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="category-title text-indigo-600 uppercase">Human Resources</h4>
-                    <div class="space-y-1">
-                        <a href="#" class="module-link">Employees</a>
-                        <a href="#" class="module-link">Recruitment</a>
-                        <a href="#" class="module-link">Time Off</a>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="category-title text-slate-700 uppercase">Services</h4>
-                    <div class="space-y-1">
-                        <a href="#" class="module-link">Project</a>
-                        <a href="#" class="module-link">Timesheets</a>
-                        <a href="#" class="module-link">Helpdesk</a>
-                    </div>
+            <div class="relative">
+                <button @click="userMenu = !userMenu" class="flex items-center gap-2">
+                    <img src="https://ui-avatars.com/api/?name={{ name }}&background=875A7B&color=fff" class="w-8 h-8 rounded-lg shadow-sm">
+                    <span class="text-sm font-bold text-gray-700 hidden sm:inline">{{ name }}</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-gray-400"></i>
+                </button>
+                <div x-show="userMenu" @click.away="userMenu = false" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border p-2">
+                    <a href="/logout" class="block px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg">Logout</a>
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <div class="max-w-7xl mx-auto px-12 py-16 flex flex-col lg:flex-row gap-20">
+    <main class="max-w-[1400px] mx-auto px-8 py-16 flex flex-col lg:flex-row gap-12">
         
         <div class="flex-grow">
-            <h2 class="text-4xl font-bold tracking-tight mb-12">My account</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-                <div onclick="window.location.href='/accounting'" class="icon-box p-4 flex gap-6 items-start">
-                    <img src="https://cdn-icons-png.flaticon.com/512/2300/2300010.png" class="w-16 h-16 shadow-sm rounded-lg">
-                    <div>
-                        <h4 class="text-lg font-bold">Your Invoices</h4>
-                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Follow, download or pay your invoices</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-y-16 gap-x-8">
+                
+                <a href="/accounting" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-sky-500 to-blue-600">
+                        <i class="fa-solid fa-file-invoice"></i>
                     </div>
-                </div>
+                    <p>Invoicing</p>
+                </a>
 
-                <div class="icon-box p-4 flex gap-6 items-start">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3500/3500833.png" class="w-16 h-16 shadow-sm rounded-lg">
-                    <div>
-                        <h4 class="text-lg font-bold">Your Orders</h4>
-                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Follow, view or pay your orders</p>
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-orange-400 to-orange-600">
+                        <i class="fa-solid fa-tag"></i>
                     </div>
-                </div>
+                    <p>Sales</p>
+                </a>
 
-                <div class="icon-box p-4 flex gap-6 items-start">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3239/3239147.png" class="w-16 h-16 shadow-sm rounded-lg">
-                    <div>
-                        <h4 class="text-lg font-bold">Timesheets</h4>
-                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Review all timesheets related to projects</p>
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-indigo-500 to-indigo-700">
+                        <i class="fa-solid fa-users"></i>
                     </div>
-                </div>
+                    <p>CRM</p>
+                </a>
 
-                <div class="icon-box p-4 flex gap-6 items-start">
-                    <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" class="w-16 h-16 shadow-sm rounded-lg">
-                    <div>
-                        <h4 class="text-lg font-bold">Addresses</h4>
-                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Add, remove or modify your addresses</p>
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-emerald-400 to-teal-600">
+                        <i class="fa-solid fa-box-open"></i>
                     </div>
-                </div>
+                    <p>Inventory</p>
+                </a>
+
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-purple-500 to-indigo-600">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <p>Employees</p>
+                </a>
+
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-red-500 to-rose-600">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                    </div>
+                    <p>Purchase</p>
+                </a>
+
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-slate-600 to-slate-800">
+                        <i class="fa-solid fa-industry"></i>
+                    </div>
+                    <p>Manufacturing</p>
+                </a>
+
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-amber-400 to-orange-500">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+                    <p>Project</p>
+                </a>
+
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-blue-400 to-cyan-500">
+                        <i class="fa-solid fa-comment-dots"></i>
+                    </div>
+                    <p>Discuss</p>
+                </a>
+
+                <a href="#" class="app-card flex flex-col items-center group">
+                    <div class="app-icon bg-gradient-to-br from-slate-400 to-slate-500">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <p>Settings</p>
+                </a>
+
             </div>
         </div>
 
-        <aside class="w-full lg:w-80 space-y-8">
-            <div class="flex items-start gap-4">
-                <div class="avatar-box">A</div>
-                <div>
-                    <h3 class="font-bold text-xl leading-tight">Atharv Tech co.</h3>
-                    <button class="text-xs text-[#875A7B] font-bold mt-1 hover:underline">Edit information</button>
+        <aside class="w-full lg:w-80">
+            <div class="sidebar-card p-10 shadow-sm">
+                <div class="flex flex-col items-center text-center mb-10">
+                    <div class="w-20 h-20 bg-[#875A7B] text-white text-3xl font-black flex items-center justify-center rounded-2xl shadow-lg mb-4">
+                        A
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 leading-tight">Atharv Tech Co.</h3>
+                    <p class="text-[10px] font-black uppercase text-[#875A7B] tracking-widest mt-1">SaaS Administrator</p>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex items-center gap-4 text-sm text-slate-700">
+                        <i class="fa-solid fa-location-dot w-5 text-[#875A7B]"></i>
+                        <span class="font-medium">New Delhi, India</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-slate-700">
+                        <i class="fa-solid fa-phone w-5 text-[#875A7B]"></i>
+                        <span class="font-medium">+91 93107 21874</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-slate-700">
+                        <i class="fa-solid fa-envelope w-5 text-[#875A7B]"></i>
+                        <span class="font-medium truncate">care.atc1@gmail.com</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 pt-8 border-t border-white/30">
+                    <div class="flex justify-between items-center bg-white/40 p-3 rounded-xl border border-white/50">
+                        <span class="text-[10px] font-bold text-slate-500 uppercase">Cloud Sync</span>
+                        <div class="flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                            <span class="text-[10px] font-bold text-green-600 uppercase">Active</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="space-y-4 text-[13px] text-gray-600 border-t pt-6">
-                <p class="flex items-center gap-3"><i class="fa-solid fa-location-dot w-4 text-gray-400"></i> New Delhi, India</p>
-                <p class="flex items-center gap-3"><i class="fa-solid fa-phone w-4 text-gray-400"></i> +91 93107 21874</p>
-                <p class="flex items-center gap-3"><i class="fa-solid fa-envelope w-4 text-gray-400"></i> care.atc1@gmail.com</p>
-            </div>
         </aside>
-    </div>
+
+    </main>
 
 </body>
 </html>
