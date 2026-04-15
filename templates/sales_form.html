@@ -3,20 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Billing | A-SmartERP</title>
+    <title>Tax Invoice | Atharv Tech Co.</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; }
+        
+        /* Corporate Printing Fixes */
         .print-only { display: none; }
+        
         @media print {
-            .no-print { display: none; }
+            .no-print, .no-print * { 
+                display: none !important; 
+                height: 0; 
+                margin: 0; 
+                padding: 0;
+            }
             .print-only { display: block; }
-            body { background: white; padding: 0; }
-            .invoice-card { box-shadow: none; border: none; width: 100%; }
+            body { background: white; padding: 0; margin: 0; }
+            .invoice-card { 
+                box-shadow: none !important; 
+                border: none !important; 
+                width: 100% !important; 
+                margin: 0 !important;
+                padding: 20px !important;
+            }
+            @page { margin: 1.5cm; }
         }
+
+        input, select { border: none; outline: none; background: transparent; }
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -26,99 +43,129 @@
         
         <div class="p-8 border-b flex justify-between items-center bg-slate-50 no-print">
             <div>
-                <h2 class="text-3xl font-black text-slate-900 italic">Smart <span class="text-[#875A7B]">GST Billing</span></h2>
+                <h2 class="text-2xl font-black text-slate-900 italic">Invoice <span class="text-[#875A7B]">Generator</span></h2>
             </div>
             <div class="flex gap-4">
-                <button @click="window.print()" x-show="isSaved" class="bg-emerald-500 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg">
-                    <i class="fa-solid fa-download mr-2"></i> Download PDF
+                <button @click="generatePDF()" x-show="isSaved" class="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-sm shadow-lg hover:bg-emerald-700 transition-all">
+                    <i class="fa-solid fa-file-pdf mr-2"></i> Print / Download PDF
                 </button>
                 <a href="/accounting" class="text-slate-400 hover:text-red-500 mt-2"><i class="fa-solid fa-circle-xmark text-2xl"></i></a>
             </div>
         </div>
 
-        <div class="p-6 md:p-12" id="invoice-area">
-            <div class="flex justify-between mb-12">
+        <div class="p-8 md:p-16">
+            <div class="flex justify-between items-start mb-16">
                 <div>
-                    <h1 class="text-4xl font-black text-[#875A7B] mb-2">Atharv Tech Co.</h1>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest">New Delhi, India | care.atc1@gmail.com</p>
+                    <h1 class="text-4xl font-extrabold text-[#875A7B] tracking-tighter mb-2">ATHARV TECH CO.</h1>
+                    <div class="text-[11px] font-bold text-slate-500 leading-relaxed uppercase tracking-widest">
+                        <p>Plot No. 12, Sector 5, Dwarka</p>
+                        <p>New Delhi, India - 110075</p>
+                        <p>Email: care.atc1@gmail.com</p>
+                        <p>GSTIN: 07AAAAA0000A1Z5 (Sample)</p>
+                    </div>
                 </div>
                 <div class="text-right">
-                    <h2 class="text-xl font-bold text-slate-900">TAX INVOICE</h2>
-                    <p class="text-sm text-slate-500" x-text="'No: ' + invNo"></p>
-                    <p class="text-sm text-slate-500" x-text="'Date: ' + new Date().toLocaleDateString()"></p>
+                    <h2 class="text-3xl font-black text-slate-900 mb-1">TAX INVOICE</h2>
+                    <div class="space-y-1">
+                        <p class="text-sm font-bold text-slate-600">Invoice No: <span class="text-slate-900" x-text="invNo"></span></p>
+                        <p class="text-sm font-bold text-slate-600">Date: <span class="text-slate-900" x-text="new Date().toLocaleDateString('en-IN')"></span></p>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 no-print">
-                <div class="space-y-2">
-                    <label class="text-[10px] font-bold text-slate-400 uppercase">Customer Name</label>
-                    <input type="text" x-model="clientName" placeholder="Business / Client Name" 
-                           class="w-full bg-slate-50 p-4 rounded-2xl border-none ring-2 ring-slate-100 focus:ring-[#875A7B] outline-none font-bold">
+            <div class="grid grid-cols-2 gap-10 mb-12">
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Bill To:</p>
+                    <input type="text" x-model="clientName" placeholder="Enter Client/Company Name" 
+                           class="w-full text-xl font-bold text-slate-800 placeholder:text-slate-300 no-print">
+                    <p class="print-only text-xl font-bold text-slate-800" x-text="clientName"></p>
                 </div>
             </div>
-            <div class="print-only mb-8">
-                <p class="text-xs font-bold text-slate-400 uppercase">Bill To:</p>
-                <p class="text-xl font-bold text-slate-900" x-text="clientName"></p>
-            </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
-                            <th class="pb-4 px-2">Description</th>
-                            <th class="pb-4 px-2 w-20 text-center">Qty</th>
-                            <th class="pb-4 px-2 w-32">Price</th>
-                            <th class="pb-4 px-2 w-32">GST %</th>
-                            <th class="pb-4 px-2 w-32 text-right">Total</th>
-                            <th class="pb-4 px-2 w-10 no-print"></th>
+            <table class="w-full mb-10">
+                <thead>
+                    <tr class="text-left text-[11px] font-black text-slate-400 uppercase tracking-widest border-b-2 border-slate-100">
+                        <th class="pb-4 px-2">Description of Services/Goods</th>
+                        <th class="pb-4 px-2 w-20 text-center">Qty</th>
+                        <th class="pb-4 px-2 w-32">Rate (₹)</th>
+                        <th class="pb-4 px-2 w-24">GST %</th>
+                        <th class="pb-4 px-2 w-36 text-right">Amount (₹)</th>
+                        <th class="pb-4 px-2 w-10 no-print"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    <template x-for="(item, index) in items" :key="index">
+                        <tr class="group">
+                            <td class="py-5 px-2">
+                                <input type="text" x-model="item.name" class="w-full font-bold text-slate-700">
+                            </td>
+                            <td class="py-5 px-2 text-center font-bold text-slate-700">
+                                <input type="number" x-model.number="item.qty" @input="calculate()" class="w-full text-center">
+                            </td>
+                            <td class="py-5 px-2 font-bold text-slate-700">
+                                <input type="number" x-model.number="item.price" @input="calculate()" class="w-full">
+                            </td>
+                            <td class="py-5 px-2 font-bold text-slate-700">
+                                <select x-model.number="item.gstSlab" @change="calculate()" class="bg-transparent no-print cursor-pointer">
+                                    <option value="0">0%</option>
+                                    <option value="5">5%</option>
+                                    <option value="12">12%</option>
+                                    <option value="18">18%</option>
+                                    <option value="28">28%</option>
+                                </select>
+                                <span class="print-only" x-text="item.gstSlab + '%'"></span>
+                            </td>
+                            <td class="py-5 px-2 text-right font-black text-slate-900" 
+                                x-text="(item.qty * item.price * (1 + item.gstSlab/100)).toLocaleString('en-IN', {minimumFractionDigits: 2})"></td>
+                            <td class="py-5 px-2 text-right no-print">
+                                <button @click="removeItem(index)" class="text-slate-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50">
-                        <template x-for="(item, index) in items" :key="index">
-                            <tr>
-                                <td class="py-4 px-2">
-                                    <input type="text" x-model="item.name" class="w-full bg-transparent border-none outline-none font-bold text-slate-700">
-                                </td>
-                                <td class="py-4 px-2">
-                                    <input type="number" x-model.number="item.qty" @input="calculate()" class="w-full bg-transparent text-center font-bold">
-                                </td>
-                                <td class="py-4 px-2">
-                                    <input type="number" x-model.number="item.price" @input="calculate()" class="w-full bg-transparent font-bold">
-                                </td>
-                                <td class="py-4 px-2">
-                                    <select x-model.number="item.gstSlab" @change="calculate()" class="bg-slate-50 p-2 rounded-lg font-bold text-xs outline-none no-print">
-                                        <option value="0">0% (Nil)</option>
-                                        <option value="5">5%</option>
-                                        <option value="12">12%</option>
-                                        <option value="18">18%</option>
-                                        <option value="28">28%</option>
-                                    </select>
-                                    <span class="print-only" x-text="item.gstSlab + '%'"></span>
-                                </td>
-                                <td class="py-4 px-2 text-right font-black italic text-slate-900" 
-                                    x-text="'₹' + (item.qty * item.price * (1 + item.gstSlab/100)).toFixed(2)"></td>
-                                <td class="py-4 px-2 text-right no-print">
-                                    <button @click="removeItem(index)" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button>
-                                </td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
+                    </template>
+                </tbody>
+            </table>
 
-            <button @click="addItem()" class="mt-6 text-[#875A7B] font-bold text-xs uppercase no-print">+ Add Row</button>
+            <button @click="addItem()" class="no-print bg-slate-100 text-slate-600 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-slate-200 transition-all">
+                + Add Line Item
+            </button>
 
-            <div class="mt-12 pt-8 border-t flex flex-col items-end">
+            <div class="mt-16 border-t-2 border-slate-100 pt-8 flex justify-end">
                 <div class="w-full md:w-80 space-y-3">
-                    <div class="flex justify-between font-bold text-slate-500"><span>Subtotal:</span><span x-text="'₹' + subtotal.toFixed(2)"></span></div>
-                    <div class="flex justify-between font-bold text-slate-500"><span>Total GST:</span><span x-text="'₹' + totalGst.toFixed(2)"></span></div>
-                    <div class="flex justify-between text-3xl font-black text-[#875A7B] pt-4 border-t-2 italic"><span>Grand Total:</span><span x-text="'₹' + total.toFixed(2)"></span></div>
+                    <div class="flex justify-between text-sm font-bold text-slate-500">
+                        <span>Taxable Value:</span>
+                        <span x-text="'₹' + subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold text-slate-500">
+                        <span>Total Tax (GST):</span>
+                        <span x-text="'₹' + totalGst.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
+                    </div>
+                    <div class="flex justify-between text-2xl font-black text-[#875A7B] pt-4 border-t border-slate-100 italic">
+                        <span>Grand Total:</span>
+                        <span x-text="'₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
+                    </div>
                 </div>
             </div>
 
-            <button @click="saveAndPrint()" x-show="!isSaved" 
-                    class="w-full bg-slate-900 text-white p-6 rounded-2xl font-black italic uppercase tracking-widest mt-12 no-print shadow-xl">
-                Validate & Save Invoice
+            <div class="mt-24 grid grid-cols-2 gap-10 print-only">
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase mb-2">Terms & Conditions:</p>
+                    <ul class="text-[9px] text-slate-500 font-bold space-y-1">
+                        <li>1. Subject to Delhi Jurisdiction.</li>
+                        <li>2. E. & O.E.</li>
+                        <li>3. Payments should be made via Digital Modes only.</li>
+                    </ul>
+                </div>
+                <div class="text-right flex flex-col items-end justify-end">
+                    <div class="border-t border-slate-900 w-48 pt-2">
+                        <p class="text-[10px] font-black text-slate-900 uppercase">Authorised Signatory</p>
+                        <p class="text-[9px] font-bold text-slate-500">For Atharv Tech Co.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="saveInvoice()" x-show="!isSaved" 
+                    class="w-full bg-slate-900 text-white p-6 rounded-2xl font-black italic uppercase tracking-widest mt-12 no-print shadow-2xl hover:bg-black active:scale-[0.99] transition-all">
+                Validate & Generate Bill
             </button>
         </div>
     </div>
@@ -127,8 +174,9 @@
         function invoiceSystem() {
             return {
                 clientName: '',
-                invNo: 'INV-' + Math.floor(1000 + Math.random() * 9000),
-                items: [{ name: 'Service/Product', qty: 1, price: 0, gstSlab: 18 }],
+                // Series starts from 001
+                invNo: 'ATC/26-27/001', 
+                items: [{ name: 'Technical Consultancy Service', qty: 1, price: 0, gstSlab: 18 }],
                 subtotal: 0,
                 totalGst: 0,
                 total: 0,
@@ -143,8 +191,8 @@
                     this.total = this.subtotal + this.totalGst;
                 },
 
-                async saveAndPrint() {
-                    if(!this.clientName) return alert('Customer name missing!');
+                async saveInvoice() {
+                    if(!this.clientName) return alert('Please enter Client Name');
                     
                     const response = await fetch('/api/save-sale', {
                         method: 'POST',
@@ -159,10 +207,12 @@
 
                     if(response.ok) {
                         this.isSaved = true;
-                        alert('Invoice Saved in Database!');
-                        // Print trigger directly converts to PDF in browser
-                        setTimeout(() => { window.print(); }, 500);
+                        alert('Invoice Validated! You can now download the PDF.');
                     }
+                },
+
+                generatePDF() {
+                    window.print();
                 }
             }
         }
