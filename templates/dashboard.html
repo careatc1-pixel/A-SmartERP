@@ -12,22 +12,19 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #111827; overflow-x: hidden; }
         
-        /* Mega Menu Styling */
         .mega-menu { box-shadow: 0 20px 50px rgba(0,0,0,0.1); border-top: 1px solid #f1f5f9; z-index: 1000; }
-        .module-link { color: #4B5563; font-size: 13px; transition: all 0.2s; display: block; padding: 6px 0; }
+        .module-link { color: #4B5563; font-size: 13px; transition: all 0.2s; display: block; padding: 6px 0; text-decoration: none; }
         .module-link:hover { color: #875A7B; transform: translateX(4px); }
         .category-title { font-size: 14px; font-weight: 700; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 2px solid #f8fafc; }
         
-        /* Grid Icons Styling */
         .icon-box { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border-radius: 16px; border: 1px solid transparent; }
         .icon-box:hover { background-color: #f9fafb; border-color: #f1f5f9; transform: translateY(-3px); }
         
         .avatar-box { background-color: #714B23; color: white; width: 56px; height: 56px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; }
-        
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body x-data="{ appsMenu: false, modal: false }">
+<body x-data="{ appsMenu: false }">
 
     <nav class="relative z-[100] flex justify-between items-center px-12 py-5 border-b border-gray-100 bg-white">
         <div class="flex items-center gap-12">
@@ -60,24 +57,23 @@
             
             <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                 <div>
-                    <h4 class="category-title text-emerald-600">FINANCE</h4>
+                    <h4 class="category-title text-emerald-600 uppercase">Finance</h4>
                     <div class="space-y-1">
-                        <a href="#" class="module-link font-bold text-[#875A7B]">Invoicing</a>
-                        <a href="#" class="module-link">Accounting</a>
+                        <a href="/accounting" class="module-link font-bold text-[#875A7B]">Accounting & Invoicing</a>
                         <a href="#" class="module-link">Expenses</a>
                         <a href="#" class="module-link">Documents</a>
                     </div>
                 </div>
                 <div>
-                    <h4 class="category-title text-rose-500">SALES</h4>
+                    <h4 class="category-title text-rose-500 uppercase">Sales</h4>
                     <div class="space-y-1">
                         <a href="#" class="module-link">CRM</a>
-                        <a href="#" class="module-link">Sales</a>
+                        <a href="#" class="module-link">Sales Terminal</a>
                         <a href="#" class="module-link">POS Shop</a>
                     </div>
                 </div>
                 <div>
-                    <h4 class="category-title text-indigo-600">HUMAN RESOURCES</h4>
+                    <h4 class="category-title text-indigo-600 uppercase">Human Resources</h4>
                     <div class="space-y-1">
                         <a href="#" class="module-link">Employees</a>
                         <a href="#" class="module-link">Recruitment</a>
@@ -85,11 +81,11 @@
                     </div>
                 </div>
                 <div>
-                    <h4 class="category-title text-slate-700">SERVICES</h4>
+                    <h4 class="category-title text-slate-700 uppercase">Services</h4>
                     <div class="space-y-1">
                         <a href="#" class="module-link">Project</a>
                         <a href="#" class="module-link">Timesheets</a>
-                        <a href="#" class="module-link">Field Service</a>
+                        <a href="#" class="module-link">Helpdesk</a>
                     </div>
                 </div>
             </div>
@@ -102,11 +98,11 @@
             <h2 class="text-4xl font-bold tracking-tight mb-12">My account</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
-                <div @click="modal = true" class="icon-box p-4 flex gap-6 items-start">
+                <div onclick="window.location.href='/accounting'" class="icon-box p-4 flex gap-6 items-start">
                     <img src="https://cdn-icons-png.flaticon.com/512/2300/2300010.png" class="w-16 h-16 shadow-sm rounded-lg">
                     <div>
                         <h4 class="text-lg font-bold">Your Invoices</h4>
-                        <p class="text-gray-400 text-sm mt-1">Follow, download or pay your invoices</p>
+                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Follow, download or pay your invoices</p>
                     </div>
                 </div>
 
@@ -114,7 +110,7 @@
                     <img src="https://cdn-icons-png.flaticon.com/512/3500/3500833.png" class="w-16 h-16 shadow-sm rounded-lg">
                     <div>
                         <h4 class="text-lg font-bold">Your Orders</h4>
-                        <p class="text-gray-400 text-sm mt-1">Follow, view or pay your orders</p>
+                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Follow, view or pay your orders</p>
                     </div>
                 </div>
 
@@ -122,7 +118,7 @@
                     <img src="https://cdn-icons-png.flaticon.com/512/3239/3239147.png" class="w-16 h-16 shadow-sm rounded-lg">
                     <div>
                         <h4 class="text-lg font-bold">Timesheets</h4>
-                        <p class="text-gray-400 text-sm mt-1">Review all projects timesheets</p>
+                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Review all timesheets related to projects</p>
                     </div>
                 </div>
 
@@ -130,7 +126,7 @@
                     <img src="https://cdn-icons-png.flaticon.com/512/854/854878.png" class="w-16 h-16 shadow-sm rounded-lg">
                     <div>
                         <h4 class="text-lg font-bold">Addresses</h4>
-                        <p class="text-gray-400 text-sm mt-1">Add or modify your addresses</p>
+                        <p class="text-gray-400 text-sm mt-1 leading-relaxed">Add, remove or modify your addresses</p>
                     </div>
                 </div>
             </div>
@@ -145,38 +141,12 @@
                 </div>
             </div>
 
-            <div class="space-y-4 text-[13px] text-gray-600">
+            <div class="space-y-4 text-[13px] text-gray-600 border-t pt-6">
                 <p class="flex items-center gap-3"><i class="fa-solid fa-location-dot w-4 text-gray-400"></i> New Delhi, India</p>
                 <p class="flex items-center gap-3"><i class="fa-solid fa-phone w-4 text-gray-400"></i> +91 93107 21874</p>
                 <p class="flex items-center gap-3"><i class="fa-solid fa-envelope w-4 text-gray-400"></i> care.atc1@gmail.com</p>
             </div>
         </aside>
-    </div>
-
-    <div x-show="modal" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-6">
-        <div @click="modal = false" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-        <div class="relative bg-white w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden animate__animated animate__zoomIn">
-            <div class="p-6 border-b flex justify-between items-center bg-gray-50/50">
-                <h3 class="text-xl font-bold">Invoices Records</h3>
-                <button @click="modal = false" class="text-gray-400 hover:text-black"><i class="fa-solid fa-xmark text-xl"></i></button>
-            </div>
-            <div class="p-8">
-                <table class="w-full text-left">
-                    <thead class="text-gray-400 uppercase text-[10px] tracking-widest border-b">
-                        <tr><th class="pb-4">Invoice #</th><th class="pb-4">Client</th><th class="pb-4 text-right">Amount</th></tr>
-                    </thead>
-                    <tbody class="divide-y">
-                        {% for inv in invoices %}
-                        <tr>
-                            <td class="py-4 font-bold text-[#875A7B]">#{{ inv.invoice_no }}</td>
-                            <td class="py-4">{{ inv.client_name }}</td>
-                            <td class="py-4 text-right font-black italic">₹{{ inv.amount }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
 </body>

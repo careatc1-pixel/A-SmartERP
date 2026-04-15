@@ -5,93 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accounting | A-SmartERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Dancing+Script:wght@700&display=swap');
-        body { font-family: 'Inter', sans-serif; color: #111827; }
-        .odoo-purple { color: #875A7B; }
-        .bg-odoo { background-color: #875A7B; }
-        .secondary-nav a { font-size: 14px; font-weight: 500; color: #4B5563; padding: 10px 15px; border-bottom: 2px solid transparent; }
-        .secondary-nav a.active { color: #875A7B; border-bottom-color: #875A7B; }
-        .handwritten { font-family: 'Dancing Script', cursive; color: #00A1DE; }
-        .hero-title { font-size: 3.5rem; font-weight: 800; line-height: 1.2; }
-    </style>
 </head>
-<body x-data="{ appsMenu: false }">
+<body class="bg-white">
 
-    <nav class="relative z-[100] flex justify-between items-center px-12 py-4 border-b border-gray-100 bg-white">
-        <div class="flex items-center gap-10">
-            <a href="/dashboard" class="text-2xl font-bold odoo-purple">A-Smart<span class="text-gray-900">ERP</span></a>
-            <div class="flex items-center gap-6">
-                <button @click="appsMenu = !appsMenu" class="font-semibold text-gray-600">Accounting <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i></button>
+    <nav class="flex justify-between items-center px-12 py-4 border-b bg-white sticky top-0 z-50">
+        <div class="flex items-center gap-8">
+            <a href="/dashboard" class="text-xl font-bold text-[#875A7B]">A-Smart<span class="text-gray-900">ERP</span></a>
+            <div class="flex gap-6 text-sm font-semibold text-gray-500">
+                <a href="/dashboard" class="hover:text-[#875A7B]"><i class="fa-solid fa-house"></i> Dashboard</a>
+                <span class="text-gray-300">|</span>
+                <span class="text-[#875A7B]">Accounting Overview</span>
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <a href="/logout" class="bg-odoo text-white px-4 py-2 rounded font-bold text-xs uppercase">Logout</a>
+            <span class="text-sm font-bold text-gray-600">{{ name }}</span>
+            <a href="/logout" class="bg-red-50 text-red-600 px-4 py-2 rounded text-xs font-bold uppercase">Logout</a>
         </div>
     </nav>
 
-    <div class="secondary-nav flex items-center justify-center gap-8 border-b bg-gray-50/50">
-        <a href="#" class="active">Overview</a>
-        <a href="#">Customers</a>
-        <a href="#">Vendors</a>
-        <a href="#">Reporting</a>
-        <a href="#">Configuration</a>
+    <div class="max-w-7xl mx-auto px-12 py-20 text-center">
+        <h1 class="text-6xl font-extrabold mb-6">Accounting <span class="italic text-sky-500 font-light">made effortless</span></h1>
+        <p class="text-xl text-gray-500 max-w-3xl mx-auto mb-10 leading-relaxed">
+            All your financial operations—from reconciliation and expenses to tax returns and real-time reporting.
+        </p>
+        <div class="flex justify-center gap-4">
+            <button class="bg-[#875A7B] text-white px-10 py-4 rounded-lg font-bold shadow-lg">Start now - It's free</button>
+            <button class="bg-gray-100 text-gray-700 px-10 py-4 rounded-lg font-bold">Meet an advisor</button>
+        </div>
     </div>
-
-    <section class="pt-20 pb-16 text-center bg-white px-6">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="hero-title animate__animated animate__fadeInDown">
-                Accounting <span class="handwritten">made effortless</span>
-            </h1>
-            <p class="text-xl text-gray-500 mt-6 leading-relaxed max-w-3xl mx-auto">
-                Imagine one <strong>AI-native Accounting platform</strong> for all your financial operations—from reconciliation and expenses to tax returns and real-time reporting. Fast, complete, and simple.
-            </p>
-            <div class="mt-10 flex justify-center gap-4">
-                <button class="bg-odoo text-white px-8 py-4 rounded-lg font-bold shadow-xl hover:bg-[#6b4762] transition-all">Start now - It's free</button>
-                <button class="bg-gray-100 text-gray-700 px-8 py-4 rounded-lg font-bold hover:bg-gray-200">Meet an advisor</button>
-            </div>
-            <p class="mt-6 text-xs text-gray-400 font-medium">Send and receive unlimited invoices and bills, for free, forever. <span class="text-odoo underline cursor-pointer">See why</span></p>
-        </div>
-    </section>
-
-    <section class="max-w-6xl mx-auto mb-20 px-6">
-        <div class="bg-white border rounded-2xl shadow-2xl overflow-hidden border-gray-100 transition-all hover:scale-[1.01]">
-            <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
-                <div class="flex gap-4 items-center">
-                    <span class="bg-odoo text-white p-2 rounded text-[10px] font-bold uppercase">Accounting</span>
-                    <div class="flex gap-4 text-[11px] font-bold text-gray-500 uppercase">
-                        <span>Dashboard</span>
-                        <span>Customers</span>
-                        <span>Vendors</span>
-                    </div>
-                </div>
-                <div class="flex gap-4 items-center text-gray-400">
-                    <i class="fa-solid fa-bell"></i>
-                    <i class="fa-solid fa-cog"></i>
-                    <img src="https://ui-avatars.com/api/?name=Vikas&background=875A7B&color=fff" class="w-6 h-6 rounded-full">
-                </div>
-            </div>
-            <div class="p-10 grid grid-cols-1 md:grid-cols-2 gap-10 bg-slate-50/30">
-                <div class="bg-white p-8 rounded-xl border border-teal-100 shadow-sm">
-                    <h5 class="font-bold text-teal-600 uppercase text-xs tracking-widest mb-4">Customer Invoices</h5>
-                    <div class="flex justify-between items-end">
-                        <span class="text-3xl font-black italic">₹{{ stats.total_invoices }}</span>
-                        <button class="text-teal-600 font-bold text-xs underline">NEW INVOICE</button>
-                    </div>
-                </div>
-                <div class="bg-white p-8 rounded-xl border border-rose-100 shadow-sm">
-                    <h5 class="font-bold text-rose-600 uppercase text-xs tracking-widest mb-4">Vendor Bills</h5>
-                    <div class="flex justify-between items-end">
-                        <span class="text-3xl font-black italic">₹{{ stats.pending_bills }}</span>
-                        <button class="text-rose-600 font-bold text-xs underline">UPLOAD BILL</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
 </body>
 </html>
