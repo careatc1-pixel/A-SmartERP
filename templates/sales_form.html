@@ -3,19 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tax Invoice | A-SmartERP Premium</title>
+    <title>Premium Tax Invoice | A-SmartERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
         body { font-family: 'Inter', sans-serif; background: #f4f7f9; color: #1a1f36; }
-        
-        /* Neutral Billionaire-Style Palette */
         .text-premium { color: #1a1f36; }
         .bg-premium { background-color: #1a1f36; }
-        
         @media print {
             .no-print { display: none !important; }
             body { background: white !important; }
@@ -23,7 +19,6 @@
             @page { size: A4; margin: 0; }
             .content-area { padding: 40px !important; }
         }
-
         .input-clean { border-bottom: 1px solid #e3e8ee; transition: all 0.2s; }
         .input-clean:focus { border-bottom-color: #5469d4; }
     </style>
@@ -34,11 +29,11 @@
         
         <div class="p-4 bg-slate-50 border-b flex justify-between items-center no-print">
             <div class="flex items-center gap-2">
-                <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">A-Smart Pro | Multi-Slab GST Terminal</span>
+                <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Atharv Tech Core | Billing Terminal</span>
             </div>
             <div class="flex gap-3">
-                <button @click="window.print()" x-show="isSaved" class="bg-premium text-white px-5 py-2 rounded-lg font-bold text-xs transition-transform active:scale-95 shadow-lg">
+                <button @click="window.print()" x-show="isSaved" class="bg-premium text-white px-5 py-2 rounded-lg font-bold text-xs shadow-lg transition-transform active:scale-95">
                     <i class="fa-solid fa-download mr-2"></i> DOWNLOAD INVOICE
                 </button>
                 <a href="/accounting" class="bg-white border px-5 py-2 rounded-lg font-bold text-xs text-slate-600 hover:bg-slate-50">EXIT</a>
@@ -52,29 +47,23 @@
                     <div class="text-[12px] text-slate-500 font-medium leading-relaxed">
                         <p>Plot No. 12, Sector 5, Dwarka</p>
                         <p>New Delhi, India - 110075</p>
-                        <p class="mt-2 text-premium font-bold">GSTIN: 07AAAAA0000A1Z5</p>
+                        <p class="mt-2 text-premium font-bold italic">GSTIN: 07AAAAA0000A1Z5</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <h2 class="text-sm font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Tax Invoice</h2>
                     <div class="space-y-1">
                         <p class="text-2xl font-light text-premium" x-text="invNo"></p>
-                        <p class="text-xs font-semibold text-slate-400" x-text="new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})"></p>
+                        <p class="text-xs font-semibold text-slate-400 uppercase" x-text="new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'})"></p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-20 mb-16 border-t border-b py-10 border-slate-100">
-                <div>
-                    <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Bill To</h4>
-                    <input type="text" x-model="clientName" placeholder="Customer Name" class="no-print text-xl font-bold text-premium w-full focus:outline-none input-clean">
-                    <p class="hidden print:block text-xl font-bold text-premium" x-text="clientName || 'Valued Client'"></p>
-                    <p class="text-xs text-slate-400 mt-2">Business Associate</p>
-                </div>
-                <div class="text-right">
-                    <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Payment Status</h4>
-                    <span class="inline-block px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase rounded-full">Fully Paid</span>
-                </div>
+            <div class="mb-16 border-t border-b py-10 border-slate-100">
+                <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Bill To</h4>
+                <input type="text" x-model="clientName" placeholder="Client / Company Name" class="no-print text-xl font-bold text-premium w-full focus:outline-none input-clean">
+                <p class="hidden print:block text-xl font-bold text-premium" x-text="clientName || 'VALUED CUSTOMER'"></p>
+                <p class="text-xs text-slate-400 mt-2 font-medium">Business Associate</p>
             </div>
 
             <table class="w-full mb-10 text-left">
@@ -92,16 +81,16 @@
                     <template x-for="(item, index) in items" :key="index">
                         <tr class="group">
                             <td class="py-6">
-                                <input type="text" x-model="item.name" placeholder="Service Name" class="w-full font-semibold text-premium focus:outline-none">
+                                <input type="text" x-model="item.name" placeholder="Service/Product Description" class="w-full font-semibold text-premium focus:outline-none">
                             </td>
                             <td class="py-6 text-center">
-                                <input type="number" x-model.number="item.qty" @input="calculate()" class="w-full text-center font-medium">
+                                <input type="number" x-model.number="item.qty" @input="calculate()" class="w-full text-center font-medium outline-none">
                             </td>
                             <td class="py-6 text-right font-medium">
-                                <input type="number" x-model.number="item.price" @input="calculate()" class="w-full text-right">
+                                <input type="number" x-model.number="item.price" @input="calculate()" class="w-full text-right outline-none">
                             </td>
                             <td class="py-6 text-center">
-                                <select x-model.number="item.gstSlab" @change="calculate()" class="no-print font-bold text-[11px] bg-slate-50 p-1 rounded cursor-pointer">
+                                <select x-model.number="item.gstSlab" @change="calculate()" class="no-print font-bold text-[11px] bg-slate-50 p-1 rounded cursor-pointer outline-none">
                                     <option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option><option value="28">28%</option>
                                 </select>
                                 <span class="hidden print:block text-[11px] font-bold" x-text="item.gstSlab + '%'"></span>
@@ -115,12 +104,18 @@
                 </tbody>
             </table>
 
-            <button @click="addItem()" class="no-print text-[10px] font-black uppercase text-slate-400 hover:text-premium tracking-widest transition-colors mb-20">+ Add New Item</button>
+            <button @click="addItem()" class="no-print text-[10px] font-black uppercase text-slate-400 hover:text-premium tracking-widest transition-colors mb-20">+ Add Line Item</button>
 
-            <div class="flex justify-between items-end border-t pt-10 border-slate-100">
-                <div class="max-w-[240px]">
-                    <p class="text-[9px] font-bold text-slate-400 uppercase mb-3 tracking-widest">Important Note</p>
-                    <p class="text-[10px] text-slate-500 leading-relaxed italic">All services are subject to the master agreement. Digital payments are processed securely via A-Smart Gateway.</p>
+            <div class="flex justify-between items-start border-t pt-10 border-slate-100">
+                <div class="max-w-[280px]">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Bank Details (NEFT/RTGS)</h4>
+                    <div class="text-[11px] text-slate-600 space-y-1 font-medium italic">
+                        <p>Bank: <span class="text-premium font-bold">HDFC BANK LTD</span></p>
+                        <p>A/c Name: <span class="text-premium font-bold">ATHARV TECH CO.</span></p>
+                        <p>A/c No: <span class="text-premium font-bold">50200012345678</span></p>
+                        <p>IFSC: <span class="text-premium font-bold">HDFC0001234</span></p>
+                        <p>Branch: <span class="text-premium font-bold">DWARKA, NEW DELHI</span></p>
+                    </div>
                 </div>
                 <div class="w-64 space-y-3">
                     <div class="flex justify-between text-xs font-semibold text-slate-500">
@@ -132,22 +127,27 @@
                         <span x-text="'₹' + totalGst.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
                     </div>
                     <div class="flex justify-between text-xl font-extrabold text-premium pt-4 border-t border-slate-200">
-                        <span class="tracking-tighter">TOTAL AMOUNT</span>
+                        <span class="tracking-tighter">GRAND TOTAL</span>
                         <span x-text="'₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-24 hidden print:flex justify-end">
-                <div class="text-right border-t border-premium w-48 pt-3">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-premium">Authorized Seal</p>
-                    <p class="text-[9px] font-medium text-slate-400 mt-1">FOR ATHARV TECH CO.</p>
+            <div class="mt-24 flex justify-between items-end">
+                <div class="text-[9px] text-slate-400 max-w-[300px]">
+                    <p class="font-bold uppercase mb-1">Terms:</p>
+                    <p>1. Certified that the particulars given above are true and correct.</p>
+                    <p>2. Subject to Delhi Jurisdiction.</p>
+                </div>
+                <div class="text-right border-t border-premium w-56 pt-3">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-premium">Authorized Signatory</p>
+                    <p class="text-[9px] font-medium text-slate-400 mt-1 italic">For ATHARV TECH CO.</p>
                 </div>
             </div>
 
             <button @click="saveAndLock()" x-show="!isSaved" 
                     class="no-print w-full bg-premium text-white p-6 rounded-xl font-black uppercase tracking-widest mt-20 shadow-xl hover:shadow-2xl transition-all active:scale-[0.98]">
-                Validate & Finalize Invoice
+                Finalize & Generate Invoice
             </button>
         </div>
     </div>
@@ -156,7 +156,8 @@
         function invoiceSystem() {
             return {
                 clientName: '',
-                invNo: 'ATC/26-27/' + String(Math.floor(Math.random()*99) + 1).padStart(3, '0'),
+                // Fixed series starting from 001
+                invNo: 'ATC/26-27/001', 
                 items: [{ name: '', qty: 1, price: 0, gstSlab: 18 }],
                 subtotal: 0,
                 totalGst: 0,
@@ -173,8 +174,7 @@
                 },
 
                 async saveAndLock() {
-                    if(!this.clientName) return alert('Enter Client Details');
-                    
+                    if(!this.clientName) return alert('Enter Client Name');
                     const response = await fetch('/api/save-sale', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -185,11 +185,9 @@
                             gst: this.totalGst
                         })
                     });
-
                     if(response.ok) {
                         this.isSaved = true;
-                        alert('Invoice Registered in Core Database.');
-                        // Final Print Trigger
+                        alert('Invoice Validated. Preparing PDF...');
                         setTimeout(() => { window.print(); }, 800);
                     }
                 }
