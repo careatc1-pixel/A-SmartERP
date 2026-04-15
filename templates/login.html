@@ -3,147 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-SmartERP | All-in-One Business Platform</title>
+    <title>A-SmartERP | Business Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Dancing+Script:wght@700&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; background-color: #fff; color: #111827; overflow-x: hidden; }
-        
-        .hero-title { font-size: 4.5rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; }
-        .handwritten { font-family: 'Dancing+Script', cursive; color: #00A1DE; position: relative; }
-        
-        .highlight-box {
-            background: #FFAD33;
-            padding: 0 15px;
-            border-radius: 10px;
-            display: inline-block;
-            transform: rotate(-1deg);
-        }
-
-        .wave-bg {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 300px;
-            background: #f8fafc;
-            clip-path: ellipse(80% 100% at 50% 100%);
-            z-index: -1;
-        }
-
-        .app-icon {
-            width: 80px;
-            height: 80px;
-            background: white;
-            border-radius: 18px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.3s ease;
-        }
-        .app-icon:hover { transform: translateY(-10px); }
+        body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #111827; }
+        .hero-title { font-size: 4rem; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; color: #111827; }
+        .handwritten { font-family: 'Dancing Script', cursive; color: #00A1DE; }
+        .highlight-orange { background: #FFAD33; padding: 0 12px; border-radius: 8px; display: inline-block; transform: rotate(-1deg); color: #111827; }
+        .wave-bottom { position: absolute; bottom: 0; left: 0; width: 100%; height: 250px; background: #f1f5f9; clip-path: ellipse(80% 100% at 50% 100%); z-index: -1; }
+        .app-card { background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); transition: all 0.3s ease; border: 1px solid #f1f5f9; }
+        .app-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body x-data="{ loginModal: false }">
+<body x-data="{ openLogin: false }">
 
-    <nav class="flex justify-between items-center px-12 py-6">
-        <div class="flex items-center gap-12">
+    <nav class="flex justify-between items-center px-12 py-6 border-b border-gray-50 bg-white sticky top-0 z-50">
+        <div class="flex items-center gap-10">
             <h1 class="text-2xl font-bold text-[#875A7B]">A-Smart<span class="text-gray-900">ERP</span></h1>
-            <div class="hidden lg:flex gap-8 text-sm font-medium text-gray-600">
+            <div class="hidden lg:flex gap-8 text-sm font-medium text-gray-500">
                 <a href="#" class="hover:text-[#875A7B]">Apps</a>
                 <a href="#" class="hover:text-[#875A7B]">Industries</a>
                 <a href="#" class="hover:text-[#875A7B]">Community</a>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <button @click="loginModal = true" class="text-sm font-bold text-gray-700 hover:text-[#875A7B]">Sign in</button>
-            <button @click="loginModal = true" class="bg-[#875A7B] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg hover:bg-[#6b4762] transition-all">Try it free</button>
+        <div class="flex items-center gap-5">
+            <button @click="openLogin = true" class="text-sm font-bold text-gray-600 hover:text-[#875A7B]">Sign in</button>
+            <button @click="openLogin = true" class="bg-[#875A7B] text-white px-6 py-2.5 rounded text-sm font-bold shadow-md hover:bg-[#6b4762]">Try it free</button>
         </div>
     </nav>
 
-    <section class="relative pt-20 pb-40 text-center px-4">
-        <div class="max-w-5xl mx-auto">
+    <section class="relative pt-24 pb-32 text-center px-6 min-h-[80vh]">
+        <div class="max-w-4xl mx-auto">
             <h2 class="hero-title animate__animated animate__fadeInDown">
                 All your business on <br>
-                <span class="highlight-box mt-2">one platform.</span>
+                <span class="highlight-orange">one platform.</span>
             </h2>
-            <p class="text-5xl font-light mt-8 italic text-gray-800 animate__animated animate__fadeInUp">
-                Simple, efficient, yet <span class="handwritten underline decoration-sky-400 decoration-4">affordable!</span>
+            <p class="text-4xl font-light mt-10 italic text-gray-700">
+                Simple, efficient, yet <span class="handwritten underline decoration-sky-400 decoration-2">affordable!</span>
             </p>
 
-            <div class="mt-12 flex justify-center gap-4 animate__animated animate__fadeIn">
-                <button @click="loginModal = true" class="bg-[#875A7B] text-white px-10 py-5 rounded-xl text-lg font-bold shadow-2xl hover:scale-105 transition-all">Start now - It's free</button>
-                <button class="bg-[#f1f5f9] text-gray-700 px-10 py-5 rounded-xl text-lg font-bold hover:bg-gray-200 transition-all">Meet an advisor</button>
+            <div class="mt-12 flex justify-center gap-5">
+                <button @click="openLogin = true" class="bg-[#875A7B] text-white px-10 py-5 rounded-lg text-lg font-bold shadow-xl hover:scale-105 transition-all">Start now - It's free</button>
+                <button class="bg-gray-100 text-gray-700 px-10 py-5 rounded-lg text-lg font-bold hover:bg-gray-200 transition-all">Meet an advisor</button>
+            </div>
+
+            <div class="mt-20 inline-flex items-center gap-3 bg-white border rounded-full px-6 py-2.5 shadow-sm text-sm">
+                <img src="https://flagcdn.com/in.svg" class="w-5"> 
+                <span class="font-medium text-gray-600">Business Show: Ludhiana - Punjab</span> 
+                <span class="text-gray-300">|</span> 
+                <span class="font-bold text-[#875A7B]">Register →</span>
             </div>
         </div>
-
-        <div class="wave-bg"></div>
+        <div class="wave-bottom"></div>
     </section>
 
-    <div class="flex justify-center -mt-20 mb-20">
-        <div class="bg-white border rounded-full px-8 py-3 flex items-center gap-4 shadow-sm text-sm font-medium">
-            <span class="flex items-center gap-2"><img src="https://flagcdn.com/in.svg" class="w-5"> Business Show: Ludhiana - Punjab (India)</span>
-            <span class="text-gray-400">|</span>
-            <span>Apr 15, 2026</span>
-            <a href="#" class="text-[#875A7B] font-bold">Register →</a>
+    <section class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-6 gap-8 px-10 mb-20">
+        <div class="flex flex-col items-center gap-4">
+            <div class="app-card w-20 h-20 flex items-center justify-center text-orange-500"><i class="fa-solid fa-file-invoice text-3xl"></i></div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Invoicing</span>
         </div>
-    </div>
-
-    <section class="max-w-6xl mx-auto grid grid-cols-3 md:grid-cols-6 gap-8 px-12 mb-20">
-        <div class="flex flex-col items-center gap-3">
-            <div class="app-icon text-orange-500"><i class="fa-solid fa-file-invoice-dollar text-3xl"></i></div>
-            <span class="text-xs font-bold text-gray-500 uppercase">Invoicing</span>
+        <div class="flex flex-col items-center gap-4">
+            <div class="app-card w-20 h-20 flex items-center justify-center text-blue-500"><i class="fa-solid fa-users text-3xl"></i></div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">HRM</span>
         </div>
-        <div class="flex flex-col items-center gap-3">
-            <div class="app-icon text-blue-500"><i class="fa-solid fa-users text-3xl"></i></div>
-            <span class="text-xs font-bold text-gray-500 uppercase">HRM</span>
+        <div class="flex flex-col items-center gap-4">
+            <div class="app-card w-20 h-20 flex items-center justify-center text-purple-500"><i class="fa-solid fa-handshake text-3xl"></i></div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CRM</span>
         </div>
-        <div class="flex flex-col items-center gap-3">
-            <div class="app-icon text-purple-500"><i class="fa-solid fa-handshake text-3xl"></i></div>
-            <span class="text-xs font-bold text-gray-500 uppercase">CRM</span>
+        <div class="flex flex-col items-center gap-4">
+            <div class="app-card w-20 h-20 flex items-center justify-center text-green-500"><i class="fa-solid fa-boxes-stacked text-3xl"></i></div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Inventory</span>
         </div>
-        <div class="flex flex-col items-center gap-3">
-            <div class="app-icon text-teal-500"><i class="fa-solid fa-boxes-stacked text-3xl"></i></div>
-            <span class="text-xs font-bold text-gray-500 uppercase">Inventory</span>
+        <div class="flex flex-col items-center gap-4">
+            <div class="app-card w-20 h-20 flex items-center justify-center text-rose-500"><i class="fa-solid fa-gears text-3xl"></i></div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Automation</span>
         </div>
-        <div class="flex flex-col items-center gap-3">
-            <div class="app-icon text-rose-500"><i class="fa-solid fa-gears text-3xl"></i></div>
-            <span class="text-xs font-bold text-gray-500 uppercase">Automation</span>
-        </div>
-        <div class="flex flex-col items-center gap-3">
-            <div class="app-icon text-indigo-500"><i class="fa-solid fa-chart-line text-3xl"></i></div>
-            <span class="text-xs font-bold text-gray-500 uppercase">Analytics</span>
+        <div class="flex flex-col items-center gap-4">
+            <div class="app-card w-20 h-20 flex items-center justify-center text-indigo-500"><i class="fa-solid fa-chart-line text-3xl"></i></div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Analytics</span>
         </div>
     </section>
 
-    <div x-show="loginModal" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-6">
-        <div @click="loginModal = false" class="absolute inset-0 bg-black/60 backdrop-blur-md"></div>
+    <div x-show="openLogin" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div @click="openLogin = false" class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
         <div class="relative bg-white w-full max-w-md rounded-3xl p-10 shadow-2xl animate__animated animate__zoomIn">
-            <div class="text-center mb-8">
-                <h3 class="text-2xl font-black text-[#875A7B]">Welcome Back</h3>
-                <p class="text-gray-400 text-xs font-bold uppercase mt-2">Atharv Tech Co. Terminal</p>
+            <div class="text-center mb-10">
+                <h3 class="text-2xl font-extrabold text-[#875A7B]">Login to Account</h3>
+                <p class="text-gray-400 text-xs font-bold uppercase mt-2 tracking-widest">Atharv Tech Co. ERP</p>
             </div>
             <form method="POST" class="space-y-6">
-                <div>
-                    <input type="text" name="username" placeholder="Username" required 
-                           class="w-full bg-gray-50 p-4 rounded-xl border focus:border-[#875A7B] outline-none font-semibold">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Email/Username</label>
+                    <input type="text" name="username" placeholder="admin" required class="w-full bg-gray-50 p-4 rounded-xl border focus:ring-2 ring-purple-100 outline-none font-medium">
                 </div>
-                <div>
-                    <input type="password" name="password" placeholder="Password" required 
-                           class="w-full bg-gray-50 p-4 rounded-xl border focus:border-[#875A7B] outline-none font-semibold">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-2">Password</label>
+                    <input type="password" name="password" placeholder="••••••••" required class="w-full bg-gray-50 p-4 rounded-xl border focus:ring-2 ring-purple-100 outline-none font-medium">
                 </div>
                 <button type="submit" class="w-full bg-[#875A7B] text-white p-5 rounded-2xl font-bold uppercase tracking-widest shadow-xl hover:bg-[#6b4762] transition-all">
-                    Enter Terminal
+                    Access My Apps
                 </button>
             </form>
-            <p class="mt-6 text-center text-[10px] text-gray-400 font-bold uppercase tracking-tighter italic">
-                Secure Cloud Infrastructure &copy; 2026
-            </p>
+            <div class="mt-8 text-center">
+                <button @click="openLogin = false" class="text-xs font-bold text-gray-400 uppercase hover:text-red-500 transition-colors">Cancel Access</button>
+            </div>
         </div>
     </div>
 
