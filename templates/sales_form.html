@@ -1,65 +1,161 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>New Sale | A-SmartERP</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Tax Invoice | A-SmartERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    </style>
 </head>
-<body class="bg-slate-50 p-10">
-    <div class="max-w-4xl mx-auto bg-white p-10 rounded-3xl shadow-xl">
-        <div class="flex justify-between items-center mb-10 border-b pb-6">
-            <h2 class="text-3xl font-black italic text-[#875A7B]">Create <span class="text-gray-900">Tax Invoice</span></h2>
-            <a href="/accounting" class="text-sm font-bold text-gray-400 hover:text-black">Cancel & Exit</a>
-        </div>
+<body class="p-6 md:p-12">
 
-        <div class="grid grid-cols-2 gap-8 mb-10">
+    <div class="max-w-5xl mx-auto bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden" 
+         x-data="invoiceSystem()">
+        
+        <div class="p-8 border-b flex justify-between items-center bg-slate-50/50">
             <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2">Customer Name</label>
-                <input id="client_name" type="text" class="w-full bg-slate-50 border-none p-4 rounded-xl font-bold outline-none ring-2 ring-transparent focus:ring-purple-200 transition-all">
+                <h2 class="text-3xl font-black text-slate-900 italic">Tax <span class="text-[#875A7B]">Invoice</span></h2>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Atharv Tech Co. Billing Terminal</p>
             </div>
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-2">Invoice Number</label>
-                <input id="inv_no" type="text" value="INV-2026-001" class="w-full bg-slate-100 p-4 rounded-xl font-bold outline-none cursor-not-allowed" readonly>
-            </div>
+            <a href="/accounting" class="text-slate-400 hover:text-red-500 transition-colors"><i class="fa-solid fa-circle-xmark text-2xl"></i></a>
         </div>
 
-        <table class="w-full mb-10">
-            <thead class="text-left text-[10px] font-bold text-gray-400 uppercase border-b pb-4">
-                <tr>
-                    <th class="pb-4">Product/Service</th>
-                    <th class="pb-4">Qty</th>
-                    <th class="pb-4">Price</th>
-                    <th class="pb-4 text-right">Total</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr class="border-b">
-                    <td class="py-6">
-                        <select class="bg-transparent font-bold outline-none text-slate-700">
-                            <option>Select Product</option>
-                            {% for p in products %}
-                            <option value="{{ p.price }}">{{ p.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td><input type="number" value="1" class="w-16 bg-transparent font-bold outline-none"></td>
-                    <td><input type="number" placeholder="0.00" class="bg-transparent font-bold outline-none"></td>
-                    <td class="text-right font-black italic">₹0.00</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="flex justify-end border-t pt-8">
-            <div class="w-64 space-y-3">
-                <div class="flex justify-between text-gray-500 font-bold text-sm"><span>Subtotal:</span> <span>₹0.00</span></div>
-                <div class="flex justify-between text-gray-500 font-bold text-sm"><span>GST (18%):</span> <span>₹0.00</span></div>
-                <div class="flex justify-between text-2xl font-black text-[#875A7B] pt-2 border-t"><span>Total:</span> <span>₹0.00</span></div>
+        <div class="p-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Customer / Client Name</label>
+                    <input type="text" x-model="clientName" placeholder="Enter Business Name" 
+                           class="w-full bg-slate-50 p-4 rounded-2xl border-none ring-2 ring-slate-100 focus:ring-[#875A7B] outline-none font-bold text-slate-700">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase ml-2">Invoice Number</label>
+                    <input type="text" value="INV-2026-001" disabled 
+                           class="w-full bg-slate-100 p-4 rounded-2xl border-none font-bold text-slate-400 cursor-not-allowed">
+                </div>
             </div>
-        </div>
 
-        <button onclick="saveInvoice()" class="w-full bg-[#875A7B] text-white p-5 rounded-2xl font-black italic uppercase tracking-widest mt-12 shadow-xl hover:bg-[#6b4762] transition-all">
-            Validate & Push to Books
-        </button>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
+                            <th class="pb-4 px-2">Description / Product</th>
+                            <th class="pb-4 px-2 w-24 text-center">Qty</th>
+                            <th class="pb-4 px-2 w-40">Price (₹)</th>
+                            <th class="pb-4 px-2 w-40 text-right">Total</th>
+                            <th class="pb-4 px-2 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        <template x-for="(item, index) in items" :key="index">
+                            <tr class="group">
+                                <td class="py-4 px-2">
+                                    <input type="text" x-model="item.name" placeholder="Search or Type New Product" 
+                                           class="w-full bg-transparent border-none outline-none font-bold text-slate-700 focus:text-[#875A7B]">
+                                </td>
+                                <td class="py-4 px-2 text-center">
+                                    <input type="number" x-model.number="item.qty" @input="calculate()" 
+                                           class="w-full bg-slate-50 text-center p-2 rounded-lg font-bold outline-none">
+                                </td>
+                                <td class="py-4 px-2">
+                                    <input type="number" x-model.number="item.price" @input="calculate()" 
+                                           class="w-full bg-slate-50 p-2 rounded-lg font-bold outline-none">
+                                </td>
+                                <td class="py-4 px-2 text-right font-black italic text-slate-900" 
+                                    x-text="'₹' + (item.qty * item.price).toLocaleString()"></td>
+                                <td class="py-4 px-2 text-right">
+                                    <button @click="removeItem(index)" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <button @click="addItem()" class="mt-6 flex items-center gap-2 text-[#875A7B] font-bold text-xs uppercase tracking-tighter hover:opacity-70">
+                <i class="fa-solid fa-circle-plus text-lg"></i> Add New Row
+            </button>
+
+            <div class="mt-12 pt-8 border-t flex flex-col md:flex-row justify-between items-start gap-8">
+                <div class="max-w-xs text-[11px] text-slate-400 font-medium">
+                    <p>* By validating this invoice, items not found in inventory will be automatically created as new products.</p>
+                </div>
+                <div class="w-full md:w-80 space-y-4">
+                    <div class="flex justify-between font-bold text-slate-500">
+                        <span>Subtotal</span>
+                        <span x-text="'₹' + subtotal.toLocaleString()"></span>
+                    </div>
+                    <div class="flex justify-between font-bold text-slate-500">
+                        <span>GST (18%)</span>
+                        <span x-text="'₹' + gst.toLocaleString()"></span>
+                    </div>
+                    <div class="flex justify-between text-3xl font-black text-[#875A7B] pt-4 border-t-2 border-slate-100 italic">
+                        <span>Grand Total</span>
+                        <span x-text="'₹' + total.toLocaleString()"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="saveInvoice()" 
+                    class="w-full bg-slate-900 text-white p-6 rounded-2xl font-black italic uppercase tracking-widest mt-12 shadow-2xl hover:bg-black transition-all transform active:scale-[0.98]">
+                Validate & Post to Books
+            </button>
+        </div>
     </div>
+
+    <script>
+        function invoiceSystem() {
+            return {
+                clientName: '',
+                items: [{ name: '', qty: 1, price: 0 }],
+                subtotal: 0,
+                gst: 0,
+                total: 0,
+
+                addItem() {
+                    this.items.push({ name: '', qty: 1, price: 0 });
+                },
+
+                removeItem(index) {
+                    if(this.items.length > 1) this.items.splice(index, 1);
+                    this.calculate();
+                },
+
+                calculate() {
+                    this.subtotal = this.items.reduce((acc, item) => acc + (item.qty * item.price), 0);
+                    this.gst = Math.round(this.subtotal * 0.18);
+                    this.total = this.subtotal + this.gst;
+                },
+
+                async saveInvoice() {
+                    if(!this.clientName) return alert('Please enter client name');
+                    
+                    const response = await fetch('/api/save-sale', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            client: this.clientName,
+                            inv_no: 'INV-' + Date.now(),
+                            items: this.items,
+                            total: this.total,
+                            gst: this.gst
+                        })
+                    });
+
+                    if(response.ok) {
+                        alert('Invoice Saved Successfully!');
+                        window.location.href = '/accounting';
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>
