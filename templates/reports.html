@@ -15,7 +15,7 @@
         .folder-card:hover { transform: translateY(-5px); }
     </style>
 </head>
-<body x-data="{ activeFolder: 'none' }">
+<body x-data="reportState" class="antialiased">
 
     <nav class="bg-white border-b px-8 py-4 flex justify-between items-center sticky top-0 z-50">
         <div class="flex items-center gap-4">
@@ -31,19 +31,19 @@
     <div class="max-w-6xl mx-auto p-8">
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12" x-show="activeFolder === 'none'">
-            <div @click="activeFolder = 'sales'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center">
+            <div @click="setFolder('sales')" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center">
                 <div class="text-6xl text-amber-400 mb-4"><i class="fa-solid fa-folder-open"></i></div>
                 <h3 class="font-bold text-slate-800">Sales Reports</h3>
                 <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Orders & Invoices</p>
             </div>
 
-            <div @click="activeFolder = 'purchase'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center opacity-60">
+            <div @click="setFolder('purchase')" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center opacity-60">
                 <div class="text-6xl text-blue-400 mb-4"><i class="fa-solid fa-folder"></i></div>
                 <h3 class="font-bold text-slate-800">Purchase Reports</h3>
                 <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Vendor Bills</p>
             </div>
 
-            <div @click="activeFolder = 'expenses'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center opacity-60">
+            <div @click="setFolder('expenses')" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center opacity-60">
                 <div class="text-6xl text-rose-400 mb-4"><i class="fa-solid fa-folder"></i></div>
                 <h3 class="font-bold text-slate-800">Expense Reports</h3>
                 <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Business Spends</p>
@@ -52,7 +52,7 @@
 
         <div x-show="activeFolder === 'sales'" class="animate__animated animate__fadeIn">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                <button @click="activeFolder = 'none'" class="text-sm font-bold text-[#875A7B] hover:underline">
+                <button @click="setFolder('none')" class="text-sm font-bold text-[#875A7B] hover:underline">
                     <i class="fa-solid fa-chevron-left mr-2"></i> Back to Folders
                 </button>
                 <div class="flex flex-wrap gap-3">
@@ -75,8 +75,8 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                             <tr>
                                 <th class="p-6">Date</th>
                                 <th class="p-6">Invoice No</th>
@@ -111,8 +111,8 @@
                     <p class="text-xs text-amber-600">Active quotations and confirmed orders</p>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                             <tr>
                                 <th class="p-6">Date</th>
                                 <th class="p-6">Order No</th>
@@ -129,7 +129,7 @@
                                 <td class="p-6 text-sm font-bold text-slate-900 uppercase">{{ o.client_name }}</td>
                                 <td class="p-6 text-sm font-black text-slate-900">₹{{ "{:,.2f}".format(o.total_amount) }}</td>
                                 <td class="p-6 text-right">
-                                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-[9px] font-black uppercase rounded-full">Confirmed</span>
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-[9px] font-black uppercase rounded-full">{{ o.status }}</span>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -143,7 +143,24 @@
                 </div>
             </div>
         </div>
-    </div>
+        </div>
 
+    <script>
+        document.addEventListener('alpine:init', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const folderFromUrl = urlParams.get('folder') || 'none';
+
+            Alpine.data('reportState', () => ({
+                activeFolder: folderFromUrl,
+                
+                setFolder(name) {
+                    this.activeFolder = name;
+                    // Dynamic URL Update
+                    const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?folder=' + name;
+                    window.history.pushState({path:newUrl}, '', newUrl);
+                }
+            }))
+        });
+    </script>
 </body>
 </html>
