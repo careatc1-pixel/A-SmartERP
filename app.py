@@ -17,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V9_REPORTS' # Updated key for sync
+    SECRET_KEY='ATHARV_ERP_V10_SALES_ORDER' # Key updated for new model
 )
 
 db = SQLAlchemy(app)
@@ -59,6 +59,16 @@ class SaleInvoice(db.Model):
     status = db.Column(db.String(20), default='Paid')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+# --- NEW MODEL: SALES ORDER ---
+class SalesOrder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    so_no = db.Column(db.String(50), unique=True)
+    client_name = db.Column(db.String(100))
+    total_amount = db.Column(db.Float)
+    status = db.Column(db.String(20), default='Confirmed') # Confirmed, Invoiced
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
 class PurchaseInvoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -68,7 +78,6 @@ class PurchaseInvoice(db.Model):
     gst_amount = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Added Expense Model for Complete Reporting Center
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -126,19 +135,25 @@ def accounting():
     }
     return render_template('accounting.html', stats=stats, name=current_user.username)
 
-# --- NEW: REPORT CENTER ROUTE ---
 @app.route('/reports')
 @login_required
 def reports():
-    # Fetching Sales for the History Table inside reports
+    # Fetching both Sales Order and Invoices for the Reports View
     sales = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.date.desc()).all()
-    return render_template('reports.html', sales=sales, name=current_user.username)
+    orders = SalesOrder.query.filter_by(user_id=current_user.id).order_by(SalesOrder.date.desc()).all()
+    return render_template('reports.html', sales=sales, orders=orders, name=current_user.username)
 
 @app.route('/sales/new')
 @login_required
 def new_sales():
     products = Product.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', products=products)
+
+# --- NAYA ROUTE: SALES ORDER FORM ---
+@app.route('/sales/order/new')
+@login_required
+def new_sales_order():
+    return render_template('sales_order_form.html', name=current_user.username)
 
 @app.route('/api/save-sale', methods=['POST'])
 @login_required
@@ -160,6 +175,25 @@ def save_sale():
         db.session.add(new_sale)
         db.session.commit()
         return jsonify({"status": "success", "message": "Cloud Sync Complete"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
+
+# --- NAYA API: SAVE SALES ORDER ---
+@app.route('/api/save-so', methods=['POST'])
+@login_required
+def save_so():
+    data = request.json
+    try:
+        new_so = SalesOrder(
+            user_id=current_user.id,
+            so_no=data['so_no'],
+            client_name=data['client'],
+            total_amount=float(data['total'])
+        )
+        db.session.add(new_so)
+        db.session.commit()
+        return jsonify({"status": "success", "message": "Sales Order Created"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
