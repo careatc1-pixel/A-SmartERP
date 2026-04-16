@@ -9,13 +9,13 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
-        .option-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .option-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
         .option-card:hover { transform: translateY(-10px); box-shadow: 0 30px 50px -12px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="p-6 md:p-12">
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-12">
             <div>
                 <h1 class="text-4xl font-black text-slate-900 italic">Sales <span class="text-[#875A7B]">Management</span></h1>
@@ -26,21 +26,35 @@
             </a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             
-            <div class="option-card bg-white p-10 rounded-[2.5rem] border border-slate-100 group">
+            <div class="option-card bg-white p-8 rounded-[2.5rem] border border-slate-100 group">
+                <div onclick="window.location.href='/sales/customers'" class="cursor-pointer">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-900 mb-2">Customer Master</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed mb-6">Onboard and manage your business clients for faster billing.</p>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-blue-600 bg-blue-50 px-4 py-2 rounded-full italic">Manage Database</span>
+                </div>
+                <div class="mt-8 pt-6 border-t border-slate-50 flex justify-between items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <span><i class="fa-solid fa-database mr-1"></i> Client Records</span>
+                    <span class="text-blue-600 italic">Active</span>
+                </div>
+            </div>
+
+            <div class="option-card bg-white p-8 rounded-[2.5rem] border border-slate-100 group">
                 <div onclick="window.location.href='/sales/order/new'" class="cursor-pointer">
-                    <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center text-3xl mb-8 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                    <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-amber-500 group-hover:text-white transition-all">
                         <i class="fa-solid fa-file-signature"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-slate-900 mb-2">Sales Order</h3>
-                    <p class="text-slate-500 leading-relaxed mb-6">Create quotations and booking orders for clients. (Pre-Billing Stage)</p>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 px-4 py-2 rounded-full italic">Generate Quotation</span>
+                    <h3 class="text-xl font-extrabold text-slate-900 mb-2">Sales Order</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed mb-6">Create quotations and booking orders for clients. (Pre-Billing Stage)</p>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 px-4 py-2 rounded-full italic">Generate Quotation</span>
                 </div>
-                
                 <div class="mt-8 pt-6 border-t border-slate-50 flex justify-between items-center">
                     <a href="/sales/approvals/orders" class="text-[10px] font-black text-amber-600 hover:text-amber-800 tracking-widest uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-user-check"></i> Order Approvals
+                        <i class="fa-solid fa-user-check"></i> Approvals
                     </a>
                     <span class="bg-amber-100 text-amber-700 text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-tighter">
                         Pending: {{ so_count }}
@@ -48,25 +62,25 @@
                 </div>
             </div>
 
-            <div class="option-card bg-white p-10 rounded-[2.5rem] border border-slate-100 group">
+            <div class="option-card bg-white p-8 rounded-[2.5rem] border border-slate-100 group">
                 <div onclick="window.location.href='/sales/new'" class="cursor-pointer">
-                    <div class="w-20 h-20 bg-purple-100 text-[#875A7B] rounded-3xl flex items-center justify-center text-3xl mb-8 group-hover:bg-[#875A7B] group-hover:text-white transition-all">
+                    <div class="w-16 h-16 bg-purple-100 text-[#875A7B] rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-[#875A7B] group-hover:text-white transition-all">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
                     </div>
-                    <h3 class="text-2xl font-extrabold text-slate-900 mb-2">Tax Invoice</h3>
-                    <p class="text-slate-500 leading-relaxed mb-6">Final GST billing for delivered services or goods. (Final Billing Stage)</p>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-[#875A7B] bg-purple-50 px-4 py-2 rounded-full italic">Generate GST Bill</span>
+                    <h3 class="text-xl font-extrabold text-slate-900 mb-2">Tax Invoice</h3>
+                    <p class="text-sm text-slate-500 leading-relaxed mb-6">Final GST billing for delivered services or goods. (Final Billing Stage)</p>
+                    <span class="text-[9px] font-black uppercase tracking-widest text-[#875A7B] bg-purple-50 px-4 py-2 rounded-full italic">Generate GST Bill</span>
                 </div>
-
                 <div class="mt-8 pt-6 border-t border-slate-50 flex justify-between items-center">
                     <a href="/sales/approvals/invoices" class="text-[10px] font-black text-[#875A7B] hover:text-slate-900 tracking-widest uppercase flex items-center gap-2">
-                        <i class="fa-solid fa-stamp"></i> Invoice Approvals
+                        <i class="fa-solid fa-stamp"></i> Approvals
                     </a>
                     <span class="bg-purple-100 text-[#875A7B] text-[9px] px-3 py-1 rounded-full font-black uppercase tracking-tighter">
-                        Review Required
+                        Review
                     </span>
                 </div>
             </div>
+
         </div>
 
         <div class="mt-12 p-8 bg-slate-900 rounded-[2rem] text-white flex justify-between items-center opacity-80">

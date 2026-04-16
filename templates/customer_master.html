@@ -1,0 +1,14 @@
+<div x-data="{ showModal: false, name: '', phone: '', gstin: '' }">
+    <button @click="showModal = true" class="...">+ Add New Customer</button>
+    
+    <table>
+        {% for c in customers %}
+        <tr>
+            <td>{{ c.name }}</td>
+            <td>{{ c.gstin }}</td>
+            <td>{{ c.phone }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    </div>
