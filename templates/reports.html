@@ -6,6 +6,7 @@
     <title>Report Center | A-SmartERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -21,7 +22,10 @@
             <a href="/accounting" class="text-slate-400 hover:text-slate-900"><i class="fa-solid fa-arrow-left"></i></a>
             <h1 class="text-xl font-bold text-slate-800 italic">Report <span class="text-[#875A7B]">Management</span></h1>
         </div>
-        <a href="/dashboard" class="text-xs font-bold text-slate-500 uppercase">Back to Apps</a>
+        <div class="flex items-center gap-4">
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-100 px-3 py-1 rounded-full">Secure Terminal</span>
+            <a href="/dashboard" class="text-xs font-bold text-slate-500 uppercase hover:text-[#875A7B]">Back to Apps</a>
+        </div>
     </nav>
 
     <div class="max-w-6xl mx-auto p-8">
@@ -30,7 +34,7 @@
             <div @click="activeFolder = 'sales'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center">
                 <div class="text-6xl text-amber-400 mb-4"><i class="fa-solid fa-folder-open"></i></div>
                 <h3 class="font-bold text-slate-800">Sales Reports</h3>
-                <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Invoices & GST</p>
+                <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Orders & Invoices</p>
             </div>
 
             <div @click="activeFolder = 'purchase'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center opacity-60">
@@ -47,19 +51,27 @@
         </div>
 
         <div x-show="activeFolder === 'sales'" class="animate__animated animate__fadeIn">
-            <button @click="activeFolder = 'none'" class="mb-6 text-sm font-bold text-[#875A7B] hover:underline">
-                <i class="fa-solid fa-chevron-left mr-2"></i> Back to Folders
-            </button>
-            
-            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-8 bg-slate-50 border-b flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-bold text-slate-900">Sales Invoices & Reports</h2>
-                        <p class="text-xs text-slate-500">Manage your billing records and exports</p>
-                    </div>
-                    <a href="/export/sales" class="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-lg hover:bg-emerald-700">
-                        <i class="fa-solid fa-file-excel mr-2"></i> EXPORT MASTER EXCEL
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <button @click="activeFolder = 'none'" class="text-sm font-bold text-[#875A7B] hover:underline">
+                    <i class="fa-solid fa-chevron-left mr-2"></i> Back to Folders
+                </button>
+                <div class="flex flex-wrap gap-3">
+                    <a href="/sales/order/new" class="bg-amber-500 text-white px-5 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wider shadow-lg hover:bg-amber-600 transition-all">
+                        <i class="fa-solid fa-file-signature mr-2"></i> + New Sales Order
                     </a>
+                    <a href="/sales/new" class="bg-[#875A7B] text-white px-5 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wider shadow-lg hover:bg-slate-900 transition-all">
+                        <i class="fa-solid fa-file-invoice mr-2"></i> + Create Invoice
+                    </a>
+                    <a href="/export/sales" class="bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-[11px] uppercase tracking-wider shadow-lg hover:bg-emerald-700 transition-all">
+                        <i class="fa-solid fa-file-excel mr-2"></i> Export Master
+                    </a>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden mb-10">
+                <div class="p-8 bg-slate-50 border-b">
+                    <h2 class="text-xl font-bold text-slate-900">Invoices History</h2>
+                    <p class="text-xs text-slate-500">List of all generated tax invoices</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -81,9 +93,9 @@
                                 <td class="p-6 text-sm font-bold text-slate-900 uppercase">{{ s.client_name }}</td>
                                 <td class="p-6 text-sm font-black text-slate-900">₹{{ "{:,.2f}".format(s.total_amount) }}</td>
                                 <td class="p-6 text-right">
-                                    <button onclick="alert('PDF Re-generation for {{ s.inv_no }} coming soon!')" 
-                                            class="text-xs font-bold text-[#875A7B] border border-[#875A7B] px-4 py-2 rounded-lg hover:bg-[#875A7B] hover:text-white transition-all">
-                                        <i class="fa-solid fa-download mr-1"></i> PDF
+                                    <button onclick="alert('PDF Re-generation for {{ s.inv_no }} is coming in next update!')" 
+                                            class="text-[10px] font-black text-[#875A7B] border-2 border-[#875A7B] px-4 py-1.5 rounded-lg hover:bg-[#875A7B] hover:text-white transition-all uppercase">
+                                        Download PDF
                                     </button>
                                 </td>
                             </tr>
@@ -92,8 +104,45 @@
                     </table>
                 </div>
             </div>
-        </div>
 
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-8 bg-amber-50/50 border-b">
+                    <h2 class="text-xl font-bold text-amber-900">Sales Orders (Drafts)</h2>
+                    <p class="text-xs text-amber-600">Active quotations and confirmed orders</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">
+                            <tr>
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Order No</th>
+                                <th class="p-6">Client Name</th>
+                                <th class="p-6">Amount</th>
+                                <th class="p-6 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for o in orders %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6 text-sm font-medium text-slate-600">{{ o.date.strftime('%d %b, %Y') }}</td>
+                                <td class="p-6 text-sm font-bold text-slate-900">{{ o.so_no }}</td>
+                                <td class="p-6 text-sm font-bold text-slate-900 uppercase">{{ o.client_name }}</td>
+                                <td class="p-6 text-sm font-black text-slate-900">₹{{ "{:,.2f}".format(o.total_amount) }}</td>
+                                <td class="p-6 text-right">
+                                    <span class="px-3 py-1 bg-amber-100 text-amber-700 text-[9px] font-black uppercase rounded-full">Confirmed</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not orders %}
+                            <tr>
+                                <td colspan="5" class="p-10 text-center text-slate-400 text-sm italic font-medium">No Sales Orders found.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
 </body>
