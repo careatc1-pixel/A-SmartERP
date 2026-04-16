@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Sales Order | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f4f7f9; color: #1a1f36; }
+        @media print { .no-print { display: none !important; } }
+        .input-clean { border-bottom: 2px solid #e2e8f0; transition: border-color 0.3s; }
+        .input-clean:focus { border-bottom-color: #f59e0b; outline: none; }
+    </style>
+</head>
+<body class="p-0 md:p-12">
+
+    <div class="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden border border-slate-200" x-data="salesOrderSystem()">
+        
+        <div class="p-4 bg-amber-50 border-b flex justify-between items-center no-print">
+            <div class="flex items-center gap-2 text-amber-600">
+                <i class="fa-solid fa-file-signature"></i>
+                <span class="text-[10px] font-black uppercase tracking-widest">Sales Order Draft Terminal</span>
+            </div>
+            <a href="/sales/hub" class="bg-white border px-5 py-2 rounded-lg font-bold text-xs text-slate-600 hover:bg-slate-50 transition-all">
+                <i class="fa-solid fa-arrow-left mr-2"></i> EXIT TO HUB
+            </a>
+        </div>
+
+        <div class="p-12 md:p-20 bg-white">
+            <div class="flex justify-between items-start mb-16">
+                <div>
+                    <h1 class="text-3xl font-extrabold tracking-tighter text-slate-900">ATHARV TECH CO.</h1>
+                    <p class="text-xs text-slate-400 font-bold uppercase mt-1">Sales Order / Quotation</p>
+                </div>
+                <div class="text-right">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Order No</h2>
+                    <p class="text-xl font-light text-slate-900" x-text="soNo"></p>
+                </div>
+            </div>
+
+            <div class="mb-12 py-8 border-t border-b border-slate-100">
+                <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bill To</label>
+                <input type="text" x-model="clientName" placeholder="Enter Customer Name" class="text-2xl font-bold text-slate-900 w-full mt-2 input-clean">
+            </div>
+
+            <table class="w-full mb-10 text-left">
+                <thead>
+                    <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
+                        <th class="py-4">Description</th>
+                        <th class="py-4 w-20 text-center">Qty</th>
+                        <th class="py-4 w-32 text-right">Estimate Rate</th>
+                        <th class="py-4 w-32 text-right">Total</th>
+                        <th class="py-4 w-8 no-print"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    <template x-for="(item, index) in items" :key="index">
+                        <tr>
+                            <td class="py-6"><input type="text" x-model="item.name" class="w-full font-semibold focus:outline-none" placeholder="Item/Service Name"></td>
+                            <td class="py-6 text-center"><input type="number" x-model.number="item.qty" @input="calculate()" class="w-full text-center font-medium"></td>
+                            <td class="py-6 text-right"><input type="number" x-model.number="item.price" @input="calculate()" class="w-full text-right font-medium"></td>
+                            <td class="py-6 text-right font-bold" x-text="'₹' + (item.qty * item.price).toLocaleString('en-IN')"></td>
+                            <td class="py-6 text-right no-print">
+                                <button @click="removeItem(index)" class="text-slate-200 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+
+            <button @click="addItem()" class="no-print text-[10px] font-black uppercase text-amber-500 hover:text-amber-700 tracking-widest mb-20">+ Add New Line</button>
+
+            <div class="flex justify-end border-t pt-10">
+                <div class="w-64">
+                    <div class="flex justify-between text-2xl font-black text-slate-900">
+                        <span>GRAND TOTAL</span>
+                        <span x-text="'₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="saveSO()" x-show="!isSaved" class="no-print w-full bg-amber-500 text-white p-6 rounded-xl font-black uppercase tracking-widest mt-20 shadow-xl hover:bg-amber-600 transition-all">
+                Confirm & Register Sales Order
+            </button>
+            
+            <div x-show="isSaved" class="mt-10 p-6 bg-green-50 rounded-xl text-green-700 font-bold text-center animate__animated animate__pulse">
+                <i class="fa-solid fa-check-double mr-2"></i> SALES ORDER SAVED TO CLOUD
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function salesOrderSystem() {
+            return {
+                clientName: '',
+                soNo: 'SO-' + String(Math.floor(Date.now() / 1000)).slice(-4),
+                items: [{ name: '', qty: 1, price: 0 }],
+                total: 0,
+                isSaved: false,
+
+                addItem() { this.items.push({ name: '', qty: 1, price: 0 }); },
+                removeItem(i) { if(this.items.length > 1) this.items.splice(i, 1); this.calculate(); },
+                calculate() { this.total = this.items.reduce((acc, item) => acc + (item.qty * item.price), 0); },
+
+                async saveSO() {
+                    if(!this.clientName) return alert('Enter Client Name');
+                    const response = await fetch('/api/save-so', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            so_no: this.soNo,
+                            client: this.clientName,
+                            total: this.total
+                        })
+                    });
+                    if(response.ok) {
+                        this.isSaved = true;
+                        alert('Order Recorded!');
+                    } else {
+                        alert('Error saving order.');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
