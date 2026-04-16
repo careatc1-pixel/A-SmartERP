@@ -24,14 +24,13 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 handler = app
 
-# --- MODELS ---
+# --- MODELS (No changes here) ---
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
 
-# NAYA MODEL: CUSTOMER MASTER
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -107,27 +106,38 @@ def accounting():
     stats = {"total_invoices": len(user_sales), "pending_bills": 0, "cash_flow": f"₹{total_val:,.2f}"}
     return render_template('accounting.html', stats=stats, name=current_user.username)
 
-# --- SALES HUB & CUSTOMER MASTER ROUTES ---
-
 @app.route('/sales/hub')
 @login_required
 def sales_hub():
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
 
-@app.route('/sales/customers') # CUSTOMER MASTER VIEW
+# --- MISSING APPROVAL ROUTES FIXED HERE ---
+@app.route('/sales/approvals/orders')
+@login_required
+def approval_orders_page():
+    data = SalesOrder.query.filter_by(user_id=current_user.id).order_by(SalesOrder.date.desc()).all()
+    return render_template('approval_list.html', data=data, title="Sales Order Approval Queue", type='orders', name=current_user.username)
+
+@app.route('/sales/approvals/invoices')
+@login_required
+def approval_invoices_page():
+    data = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.date.desc()).all()
+    return render_template('approval_list.html', data=data, title="Tax Invoice Approval Queue", type='invoices', name=current_user.username)
+
+@app.route('/sales/customers') 
 @login_required
 def customer_master():
     customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.name.asc()).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
 
-@app.route('/sales/new') # TAX INVOICE FORM (With Customer Dropdown)
+@app.route('/sales/new') 
 @login_required
 def new_sales():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', customers=customers, name=current_user.username)
 
-@app.route('/sales/order/new') # SALES ORDER FORM (With Customer Dropdown)
+@app.route('/sales/order/new') 
 @login_required
 def new_sales_order():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
