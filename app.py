@@ -6,10 +6,9 @@ from datetime import datetime
 import pandas as pd
 from io import BytesIO
 
-# Vercel Production Variable
 app = Flask(__name__)
 
-# Neon Connection
+# Neon Connection Setup
 DB_URL = "postgresql://neondb_owner:npg_h85KlFgYbsmE@ep-holy-breeze-amzy28jw-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require"
 if DB_URL.startswith("postgres://"):
     DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
@@ -17,17 +16,15 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V13_AUDIT_LOG' # Key updated for new columns
+    SECRET_KEY='ATHARV_ERP_V16_MASTER_FIX' # Updated to force refresh
 )
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
-# Vercel handler
 handler = app
 
-# --- MODELS ---
+# --- MODELS (Fixed Structure) ---
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
@@ -49,7 +46,7 @@ class SaleInvoice(db.Model):
     total_amount = db.Column(db.Float)
     gst_amount = db.Column(db.Float)
     status = db.Column(db.String(20), default='Pending')
-    cancel_reason = db.Column(db.String(255)) # Naya Column for Audit
+    cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class SalesOrder(db.Model):
@@ -59,7 +56,7 @@ class SalesOrder(db.Model):
     client_name = db.Column(db.String(100))
     total_amount = db.Column(db.Float)
     status = db.Column(db.String(20), default='Pending')
-    cancel_reason = db.Column(db.String(255)) # Naya Column for Audit
+    cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class PurchaseInvoice(db.Model):
@@ -83,7 +80,8 @@ class Expense(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- ROUTES ---
+# --- CORE ROUTES ---
+
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -91,11 +89,10 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     with app.app_context():
-        db.create_all() 
+        db.create_all() # Re-creates tables with new columns
         if not User.query.filter_by(username='admin').first():
             db.session.add(User(username='admin', password='password123'))
             db.session.commit()
-
     if request.method == 'POST':
         u = User.query.filter_by(username=request.form.get('username')).first()
         if u and u.password == request.form.get('password'):
@@ -106,7 +103,7 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    company_info = {"name": "Atharv Tech co.", "location": "New Delhi", "phone": "+91 93107 21874"}
+    company_info = {"name": "Atharv Tech co.", "location": "New Delhi"}
     invoices = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.id.desc()).all()
     return render_template('dashboard.html', invoices=invoices, company=company_info, name=current_user.username)
 
@@ -118,11 +115,25 @@ def accounting():
     stats = {"total_invoices": len(user_sales), "pending_bills": 0, "cash_flow": f"₹{total_val:,.2f}"}
     return render_template('accounting.html', stats=stats, name=current_user.username)
 
+# --- SALES HUB ROUTES ---
+
 @app.route('/sales/hub')
 @login_required
 def sales_hub():
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
+
+@app.route('/sales/new') # TAX INVOICE FORM
+@login_required
+def new_sales():
+    return render_template('sales_form.html', name=current_user.username)
+
+@app.route('/sales/order/new') # SALES ORDER FORM
+@login_required
+def new_sales_order():
+    return render_template('sales_order_form.html', name=current_user.username)
+
+# --- APPROVALS & STATUS ROUTES ---
 
 @app.route('/sales/approvals/<type>')
 @login_required
@@ -135,7 +146,6 @@ def approval_page(type):
         title = "Tax Invoice Approval Queue"
     return render_template('approval_list.html', data=data, title=title, type=type, name=current_user.username)
 
-# --- UPDATED STATUS API WITH REASON ---
 @app.route('/api/update-status', methods=['POST'])
 @login_required
 def update_status():
@@ -145,17 +155,17 @@ def update_status():
             target = SalesOrder.query.filter_by(so_no=req['id']).first()
         else:
             target = SaleInvoice.query.filter_by(inv_no=req['id']).first()
-            
         if target:
             target.status = req['status']
-            if 'reason' in req and req['reason']:
-                target.cancel_reason = req['reason']
+            if 'reason' in req: target.cancel_reason = req['reason']
             db.session.commit()
             return jsonify({"status": "success"})
-        return jsonify({"status": "error", "message": "Record not found"}), 404
+        return jsonify({"status": "error", "message": "Not found"}), 404
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
+
+# --- REPORTS & LOGOUT ---
 
 @app.route('/reports')
 @login_required
