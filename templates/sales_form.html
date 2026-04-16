@@ -22,7 +22,7 @@
             .content-area { padding: 20mm !important; }
         }
         .input-clean { border-bottom: 1px solid #e3e8ee; transition: all 0.2s; }
-        .input-clean:focus { border-bottom-color: #875A7B; }
+        .input-clean:focus { border-bottom-color: #875A7B; outline: none; }
     </style>
 </head>
 <body class="p-0 md:p-12">
@@ -141,6 +141,22 @@
                         <span>GST Total Tax</span>
                         <span x-text="'₹' + totalGst.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
                     </div>
+
+                    <div class="flex justify-between items-center text-xs font-semibold text-blue-600">
+                        <span>Freight / Commission</span>
+                        <div class="flex items-center">
+                            <span class="no-print mr-1">₹</span>
+                            <input type="number" x-model.number="freight" @input="calculate()" 
+                                   class="no-print w-20 text-right bg-blue-50 rounded px-1 outline-none font-bold py-0.5 border-b border-blue-200 focus:border-blue-500">
+                            <span class="hidden print:block font-bold" x-text="'₹' + (parseFloat(freight) || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between text-xs font-semibold text-slate-400">
+                        <span>Round Off</span>
+                        <span x-text="(roundOff >= 0 ? '+' : '') + roundOff.toFixed(2)"></span>
+                    </div>
+
                     <div class="flex justify-between text-xl font-extrabold text-slate-900 pt-4 border-t border-slate-200">
                         <span class="tracking-tighter uppercase">Grand Total</span>
                         <span x-text="'₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
@@ -174,6 +190,8 @@
                 items: [{ name: '', qty: 1, price: 0, gstSlab: 18 }],
                 subtotal: 0,
                 totalGst: 0,
+                freight: 0,
+                roundOff: 0,
                 total: 0,
                 isSaved: false,
 
@@ -181,9 +199,19 @@
                 removeItem(i) { if(this.items.length > 1) this.items.splice(i, 1); this.calculate(); },
 
                 calculate() {
+                    // 1. Basic Calculation
                     this.subtotal = this.items.reduce((acc, item) => acc + (item.qty * item.price), 0);
                     this.totalGst = this.items.reduce((acc, item) => acc + (item.qty * item.price * (item.gstSlab / 100)), 0);
-                    this.total = this.subtotal + this.totalGst;
+                    
+                    // 2. Add Freight and Calculate Raw Total
+                    let rawTotal = this.subtotal + this.totalGst + (parseFloat(this.freight) || 0);
+                    
+                    // 3. Rounding Logic
+                    let roundedTotal = Math.round(rawTotal);
+                    this.roundOff = roundedTotal - rawTotal;
+                    
+                    // 4. Final Total for display
+                    this.total = roundedTotal;
                 },
 
                 generatePDF() { window.print(); },
