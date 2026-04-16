@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Center | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; }
+        .folder-card { transition: all 0.3s ease; cursor: pointer; }
+        .folder-card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body x-data="{ activeFolder: 'none' }">
+
+    <nav class="bg-white border-b px-8 py-4 flex justify-between items-center sticky top-0 z-50">
+        <div class="flex items-center gap-4">
+            <a href="/accounting" class="text-slate-400 hover:text-slate-900"><i class="fa-solid fa-arrow-left"></i></a>
+            <h1 class="text-xl font-bold text-slate-800 italic">Report <span class="text-[#875A7B]">Management</span></h1>
+        </div>
+        <a href="/dashboard" class="text-xs font-bold text-slate-500 uppercase">Back to Apps</a>
+    </nav>
+
+    <div class="max-w-6xl mx-auto p-8">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12" x-show="activeFolder === 'none'">
+            <div @click="activeFolder = 'sales'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center">
+                <div class="text-6xl text-amber-400 mb-4"><i class="fa-solid fa-folder-open"></i></div>
+                <h3 class="font-bold text-slate-800">Sales Reports</h3>
+                <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Invoices & GST</p>
+            </div>
+
+            <div @click="activeFolder = 'purchase'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center opacity-60">
+                <div class="text-6xl text-blue-400 mb-4"><i class="fa-solid fa-folder"></i></div>
+                <h3 class="font-bold text-slate-800">Purchase Reports</h3>
+                <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Vendor Bills</p>
+            </div>
+
+            <div @click="activeFolder = 'expenses'" class="folder-card bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col items-center opacity-60">
+                <div class="text-6xl text-rose-400 mb-4"><i class="fa-solid fa-folder"></i></div>
+                <h3 class="font-bold text-slate-800">Expense Reports</h3>
+                <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest mt-2">Business Spends</p>
+            </div>
+        </div>
+
+        <div x-show="activeFolder === 'sales'" class="animate__animated animate__fadeIn">
+            <button @click="activeFolder = 'none'" class="mb-6 text-sm font-bold text-[#875A7B] hover:underline">
+                <i class="fa-solid fa-chevron-left mr-2"></i> Back to Folders
+            </button>
+            
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden">
+                <div class="p-8 bg-slate-50 border-b flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Sales Invoices & Reports</h2>
+                        <p class="text-xs text-slate-500">Manage your billing records and exports</p>
+                    </div>
+                    <a href="/export/sales" class="bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-xs shadow-lg hover:bg-emerald-700">
+                        <i class="fa-solid fa-file-excel mr-2"></i> EXPORT MASTER EXCEL
+                    </a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">
+                            <tr>
+                                <th class="p-6">Date</th>
+                                <th class="p-6">Invoice No</th>
+                                <th class="p-6">Client Name</th>
+                                <th class="p-6">Amount</th>
+                                <th class="p-6 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for s in sales %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6 text-sm font-medium text-slate-600">{{ s.date.strftime('%d %b, %Y') }}</td>
+                                <td class="p-6 text-sm font-bold text-slate-900">{{ s.inv_no }}</td>
+                                <td class="p-6 text-sm font-bold text-slate-900 uppercase">{{ s.client_name }}</td>
+                                <td class="p-6 text-sm font-black text-slate-900">₹{{ "{:,.2f}".format(s.total_amount) }}</td>
+                                <td class="p-6 text-right">
+                                    <button onclick="alert('PDF Re-generation for {{ s.inv_no }} coming soon!')" 
+                                            class="text-xs font-bold text-[#875A7B] border border-[#875A7B] px-4 py-2 rounded-lg hover:bg-[#875A7B] hover:text-white transition-all">
+                                        <i class="fa-solid fa-download mr-1"></i> PDF
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

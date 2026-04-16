@@ -17,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V8_MASTER' # Key updated to trigger new table creation
+    SECRET_KEY='ATHARV_ERP_V9_REPORTS' # Updated key for sync
 )
 
 db = SQLAlchemy(app)
@@ -59,8 +59,6 @@ class SaleInvoice(db.Model):
     status = db.Column(db.String(20), default='Paid')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# --- NEW MODELS ADDED (PURCHASE & INVENTORY LOG) ---
-
 class PurchaseInvoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -68,6 +66,15 @@ class PurchaseInvoice(db.Model):
     vendor_name = db.Column(db.String(100))
     total_amount = db.Column(db.Float)
     gst_amount = db.Column(db.Float)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# Added Expense Model for Complete Reporting Center
+class Expense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    category = db.Column(db.String(100))
+    description = db.Column(db.String(200))
+    amount = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
@@ -119,13 +126,20 @@ def accounting():
     }
     return render_template('accounting.html', stats=stats, name=current_user.username)
 
+# --- NEW: REPORT CENTER ROUTE ---
+@app.route('/reports')
+@login_required
+def reports():
+    # Fetching Sales for the History Table inside reports
+    sales = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.date.desc()).all()
+    return render_template('reports.html', sales=sales, name=current_user.username)
+
 @app.route('/sales/new')
 @login_required
 def new_sales():
     products = Product.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', products=products)
 
-# --- SYNC ERROR FIX ROUTE ---
 @app.route('/api/save-sale', methods=['POST'])
 @login_required
 def save_sale():
@@ -150,7 +164,6 @@ def save_sale():
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
 
-# --- NEW: MASTER EXPORT ROUTE (Sales, Purchase, Inventory) ---
 @app.route('/export/<module>')
 @login_required
 def export_master(module):
