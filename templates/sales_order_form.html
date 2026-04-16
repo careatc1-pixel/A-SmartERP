@@ -46,15 +46,18 @@
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bill To</label>
                     <a href="/sales/customers" class="no-print text-[9px] font-bold text-amber-600 hover:underline">+ REGISTER NEW CUSTOMER</a>
                 </div>
-                <select x-model="clientName" class="no-print text-2xl font-bold text-slate-900 w-full mt-2 input-clean bg-white py-1">
-                    <option value="">-- Select Registered Customer --</option>
+                
+                <input list="customerList" x-model="clientName" placeholder="Search customer name here..." 
+                       class="no-print text-lg font-semibold text-slate-900 w-full mt-1 input-clean bg-white py-1 focus:border-amber-500 placeholder:text-slate-300 placeholder:font-normal">
+                
+                <datalist id="customerList">
                     {% for c in customers %}
-                    <option value="{{ c.name }}">{{ c.name }}</option>
+                    <option value="{{ c.name }}">
                     {% endfor %}
-                </select>
-                <p class="hidden print:block text-2xl font-bold text-slate-900" x-text="clientName || 'CUSTOMER NAME'"></p>
-            </div>
+                </datalist>
 
+                <p class="hidden print:block text-xl font-bold text-slate-900" x-text="clientName || 'CUSTOMER NAME'"></p>
+            </div>
             <table class="w-full mb-10 text-left">
                 <thead>
                     <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
@@ -115,7 +118,7 @@
                 calculate() { this.total = this.items.reduce((acc, item) => acc + (item.qty * item.price), 0); },
 
                 async saveSO() {
-                    if(!this.clientName) return alert('Select Customer Name');
+                    if(!this.clientName) return alert('Select or type Customer Name');
                     const response = await fetch('/api/save-so', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

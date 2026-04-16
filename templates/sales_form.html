@@ -68,12 +68,16 @@
                     <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bill To</h4>
                     <a href="/sales/customers" class="no-print text-[9px] font-bold text-[#875A7B] hover:underline italic">+ REGISTER NEW CUSTOMER</a>
                 </div>
-                <select x-model="clientName" class="no-print text-xl font-bold text-slate-900 w-full focus:outline-none input-clean bg-white py-1">
-                    <option value="">-- Select Registered Customer --</option>
+                
+                <input list="customerList" x-model="clientName" placeholder="Type or select customer name..." 
+                       class="no-print w-full text-lg font-semibold text-slate-800 bg-white focus:outline-none input-clean py-1 placeholder:text-slate-300 placeholder:font-normal">
+                
+                <datalist id="customerList">
                     {% for c in customers %}
-                    <option value="{{ c.name }}">{{ c.name }} {% if c.gstin %}({{ c.gstin }}){% endif %}</option>
+                    <option value="{{ c.name }}">
                     {% endfor %}
-                </select>
+                </datalist>
+
                 <p class="hidden print:block text-xl font-bold text-slate-900" x-text="clientName || 'VALUED CUSTOMER'"></p>
                 <p class="text-xs text-slate-400 mt-2 font-medium">Verified Business Associate</p>
             </div>
@@ -185,7 +189,7 @@
                 generatePDF() { window.print(); },
 
                 async saveAndLock() {
-                    if(!this.clientName) return alert('Customer Selection is required!');
+                    if(!this.clientName) return alert('Customer Name is required!');
                     try {
                         const response = await fetch('/api/save-sale', {
                             method: 'POST',
@@ -206,7 +210,7 @@
                             alert('Cloud Sync Failed: ' + (result.message || 'Unknown Error'));
                         }
                     } catch (e) {
-                        alert('Network Error!');
+                        alert('Network Error! Please check your connection.');
                     }
                 }
             }
