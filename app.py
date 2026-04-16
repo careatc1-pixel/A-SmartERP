@@ -17,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V10_SALES_ORDER' # Key updated for new model
+    SECRET_KEY='ATHARV_ERP_V11_SALES_HUB' # Updated for Sales Hub deployment
 )
 
 db = SQLAlchemy(app)
@@ -59,14 +59,13 @@ class SaleInvoice(db.Model):
     status = db.Column(db.String(20), default='Paid')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# --- NEW MODEL: SALES ORDER ---
 class SalesOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     so_no = db.Column(db.String(50), unique=True)
     client_name = db.Column(db.String(100))
     total_amount = db.Column(db.Float)
-    status = db.Column(db.String(20), default='Confirmed') # Confirmed, Invoiced
+    status = db.Column(db.String(20), default='Confirmed')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class PurchaseInvoice(db.Model):
@@ -135,10 +134,17 @@ def accounting():
     }
     return render_template('accounting.html', stats=stats, name=current_user.username)
 
+# --- NAYA ROUTE: SALES HUB (Sub-Menu) ---
+@app.route('/sales/hub')
+@login_required
+def sales_hub():
+    # Fetch count of confirmed SO for the dashboard feel
+    so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Confirmed').count()
+    return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
+
 @app.route('/reports')
 @login_required
 def reports():
-    # Fetching both Sales Order and Invoices for the Reports View
     sales = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.date.desc()).all()
     orders = SalesOrder.query.filter_by(user_id=current_user.id).order_by(SalesOrder.date.desc()).all()
     return render_template('reports.html', sales=sales, orders=orders, name=current_user.username)
@@ -149,7 +155,6 @@ def new_sales():
     products = Product.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', products=products)
 
-# --- NAYA ROUTE: SALES ORDER FORM ---
 @app.route('/sales/order/new')
 @login_required
 def new_sales_order():
@@ -179,7 +184,6 @@ def save_sale():
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
 
-# --- NAYA API: SAVE SALES ORDER ---
 @app.route('/api/save-so', methods=['POST'])
 @login_required
 def save_so():

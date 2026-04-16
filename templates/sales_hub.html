@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Hub | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        .option-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .option-card:hover { transform: translateY(-10px); box-shadow: 0 30px 50px -12px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <div class="max-w-5xl mx-auto">
+        <div class="flex items-center justify-between mb-12">
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 italic">Sales <span class="text-[#875A7B]">Management</span></h1>
+                <p class="text-slate-500 font-medium mt-2">Select your workflow to proceed</p>
+            </div>
+            <a href="/accounting" class="bg-white border p-4 rounded-2xl text-slate-400 hover:text-slate-900 transition-all shadow-sm">
+                <i class="fa-solid fa-house-chimney text-xl"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div onclick="window.location.href='/sales/order/new'" class="option-card bg-white p-10 rounded-[2.5rem] border border-slate-100 cursor-pointer group">
+                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center text-3xl mb-8 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                    <i class="fa-solid fa-file-signature"></i>
+                </div>
+                <h3 class="text-2xl font-extrabold text-slate-900 mb-2">Sales Order</h3>
+                <p class="text-slate-500 leading-relaxed mb-6">Create quotations and booking orders for clients. (Pre-Billing Stage)</p>
+                <span class="text-[10px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 px-4 py-2 rounded-full italic">Generate Quotation</span>
+            </div>
+
+            <div onclick="window.location.href='/sales/new'" class="option-card bg-white p-10 rounded-[2.5rem] border border-slate-100 cursor-pointer group">
+                <div class="w-20 h-20 bg-purple-100 text-[#875A7B] rounded-3xl flex items-center justify-center text-3xl mb-8 group-hover:bg-[#875A7B] group-hover:text-white transition-all">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <h3 class="text-2xl font-extrabold text-slate-900 mb-2">Tax Invoice</h3>
+                <p class="text-slate-500 leading-relaxed mb-6">Final GST billing for delivered services or goods. (Final Billing Stage)</p>
+                <span class="text-[10px] font-black uppercase tracking-widest text-[#875A7B] bg-purple-50 px-4 py-2 rounded-full italic">Generate GST Bill</span>
+            </div>
+        </div>
+
+        <div class="mt-12 p-8 bg-slate-900 rounded-[2rem] text-white flex justify-between items-center opacity-80">
+            <div class="flex items-center gap-6">
+                <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-emerald-400">
+                    <i class="fa-solid fa-rotate"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold">Automated Workflow</h4>
+                    <p class="text-xs text-slate-400">Convert approved Sales Orders to Invoices with one click.</p>
+                </div>
+            </div>
+            <span class="text-[9px] font-bold border border-white/20 px-3 py-1 rounded-lg uppercase tracking-widest">Coming Soon</span>
+        </div>
+    </div>
+
+</body>
+</html>
