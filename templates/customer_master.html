@@ -35,8 +35,7 @@
                     <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                         <th class="p-6">Company / Name</th>
                         <th class="p-6">GSTIN</th>
-                        <th class="p-6">Contact Details</th>
-                        <th class="p-6">Address</th>
+                        <th class="p-6">Contact & Email</th> <th class="p-6">Address</th>
                         <th class="p-6 text-right">Action</th>
                     </tr>
                 </thead>
@@ -51,7 +50,7 @@
                         </td>
                         <td class="p-6">
                             <p class="text-sm font-semibold text-slate-700">{{ c.phone }}</p>
-                            <p class="text-[10px] text-slate-400">{{ c.email }}</p>
+                            <p class="text-[11px] text-blue-500 font-medium lowercase">{{ c.email if c.email else 'no-email@atc.com' }}</p>
                         </td>
                         <td class="p-6 text-xs text-slate-500 font-medium max-w-xs">{{ c.address }}</td>
                         <td class="p-6 text-right">
@@ -59,45 +58,46 @@
                         </td>
                     </tr>
                     {% endfor %}
-                    {% if not customers %}
-                    <tr>
-                        <td colspan="5" class="p-20 text-center text-slate-400 italic">No customers onboarded yet. Click the button above to start.</td>
-                    </tr>
-                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" x-transition.opacity>
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate__animated animate__zoomIn" @click.away="showModal = false">
+    <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" x-transition.opacity style="display: none;">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden" @click.away="showModal = false">
             <div class="p-8 bg-blue-600 text-white flex justify-between items-center">
                 <h3 class="text-xl font-bold italic">New Customer Registration</h3>
                 <button @click="showModal = false" class="text-white/50 hover:text-white text-2xl">&times;</button>
             </div>
             
-            <div class="p-8 space-y-6">
+            <div class="p-8 space-y-5">
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Company Name *</label>
-                    <input type="text" x-model="custData.name" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none font-bold" placeholder="Legal Entity Name">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Company Name *</label>
+                    <input type="text" x-model="custData.name" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold focus:border-blue-500" placeholder="Legal Entity Name">
                 </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Official Email Address</label>
+                    <input type="email" x-model="custData.email" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none focus:border-blue-500 lowercase" placeholder="customer@company.com">
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Phone</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Phone</label>
                         <input type="text" x-model="custData.phone" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none" placeholder="+91">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">GSTIN</label>
-                        <input type="text" x-model="custData.gstin" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none uppercase font-bold" placeholder="07AAAAA...">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">GSTIN</label>
+                        <input type="text" x-model="custData.gstin" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none uppercase font-bold" placeholder="Optional">
                     </div>
                 </div>
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Address</label>
-                    <textarea x-model="custData.address" rows="3" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none" placeholder="Registered Office Address"></textarea>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Address</label>
+                    <textarea x-model="custData.address" rows="2" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none" placeholder="Full Address"></textarea>
                 </div>
 
-                <button @click="saveCustomer()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all">
-                    Register to Cloud
+                <button @click="saveCustomer()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all active:scale-95">
+                    Register & Sync to Cloud
                 </button>
             </div>
         </div>
@@ -107,22 +107,27 @@
         function customerSystem() {
             return {
                 showModal: false,
+                // Added email to data object
                 custData: { name: '', phone: '', gstin: '', email: '', address: '' },
                 
                 async saveCustomer() {
                     if(!this.custData.name) return alert('Company Name is required');
                     
-                    const response = await fetch('/api/save-customer', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(this.custData)
-                    });
+                    try {
+                        const response = await fetch('/api/save-customer', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.custData)
+                        });
 
-                    if(response.ok) {
-                        alert('Customer Onboarded Successfully!');
-                        location.reload();
-                    } else {
-                        alert('Cloud Sync Failed!');
+                        if(response.ok) {
+                            alert('Customer Onboarded Successfully!');
+                            location.reload();
+                        } else {
+                            alert('Sync Error. Please check backend logs.');
+                        }
+                    } catch (err) {
+                        alert('Network Error!');
                     }
                 }
             }
