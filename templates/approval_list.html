@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <div class="flex items-center gap-4">
+                <a href="/sales/hub" class="text-slate-400 hover:text-slate-900"><i class="fa-solid fa-arrow-left text-xl"></i></a>
+                <h1 class="text-3xl font-black text-slate-900">{{ title }}</h1>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[2rem] shadow-xl border border-slate-100 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b">
+                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <th class="p-6">Date</th>
+                        <th class="p-6">Ref Number</th>
+                        <th class="p-6">Client Name</th>
+                        <th class="p-6">Amount</th>
+                        <th class="p-6">Current Status</th>
+                        <th class="p-6 text-right">Decision</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50">
+                    {% for item in data %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="p-6 text-sm font-medium text-slate-500">{{ item.date.strftime('%d %b, %y') }}</td>
+                        <td class="p-6 text-sm font-bold text-slate-900">{{ item.so_no if type == 'orders' else item.inv_no }}</td>
+                        <td class="p-6 text-sm font-bold text-slate-900 uppercase">{{ item.client_name }}</td>
+                        <td class="p-6 text-sm font-black text-slate-900">₹{{ "{:,.2f}".format(item.total_amount) }}</td>
+                        <td class="p-6">
+                            <span class="px-3 py-1 rounded-full text-[9px] font-black uppercase 
+                                {{ 'bg-green-100 text-green-700' if item.status == 'Approved' else 'bg-amber-100 text-amber-700' if item.status == 'Pending' else 'bg-red-100 text-red-700' }}">
+                                {{ item.status }}
+                            </span>
+                        </td>
+                        <td class="p-6 text-right">
+                            <select onchange="updateStatus('{{ item.so_no if type == 'orders' else item.inv_no }}', this.value, '{{ type }}')" 
+                                    class="text-[10px] font-bold border rounded-lg p-2 bg-white focus:ring-2 focus:ring-[#875A7B] outline-none cursor-pointer">
+                                <option value="" selected disabled>Action</option>
+                                <option value="Approved" class="text-green-600">Approve ✅</option>
+                                <option value="Rejected" class="text-red-600">Reject ❌</option>
+                                <option value="Pending" class="text-amber-600">Hold ⏳</option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function updateStatus(id, newStatus, moduleType) {
+            const response = await fetch('/api/update-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, status: newStatus, type: moduleType })
+            });
+            if(response.ok) {
+                alert('Status Updated to ' + newStatus);
+                location.reload(); // Refresh the list
+            } else {
+                alert('Authorization Failed!');
+            }
+        }
+    </script>
+</body>
+</html>
