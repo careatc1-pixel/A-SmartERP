@@ -17,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V12_APPROVALS' # Key updated for status logic
+    SECRET_KEY='ATHARV_ERP_V13_AUDIT_LOG' # Key updated for new columns
 )
 
 db = SQLAlchemy(app)
@@ -32,14 +32,6 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
-
-class Invoice(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    invoice_no = db.Column(db.String(20), unique=True)
-    client_name = db.Column(db.String(100))
-    amount = db.Column(db.Float)
-    status = db.Column(db.String(20), default='Unpaid')
-    date_created = db.Column(db.Date, default=datetime.utcnow().date())
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -56,7 +48,8 @@ class SaleInvoice(db.Model):
     client_name = db.Column(db.String(100))
     total_amount = db.Column(db.Float)
     gst_amount = db.Column(db.Float)
-    status = db.Column(db.String(20), default='Pending') # Default set to Pending
+    status = db.Column(db.String(20), default='Pending')
+    cancel_reason = db.Column(db.String(255)) # Naya Column for Audit
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class SalesOrder(db.Model):
@@ -65,7 +58,8 @@ class SalesOrder(db.Model):
     so_no = db.Column(db.String(50), unique=True)
     client_name = db.Column(db.String(100))
     total_amount = db.Column(db.Float)
-    status = db.Column(db.String(20), default='Pending') # Default set to Pending
+    status = db.Column(db.String(20), default='Pending')
+    cancel_reason = db.Column(db.String(255)) # Naya Column for Audit
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class PurchaseInvoice(db.Model):
@@ -112,13 +106,7 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    company_info = {
-        "name": "Atharv Tech co.",
-        "location": "New Delhi, India",
-        "phone": "+91 93107 21874",
-        "email": "care.atc1@gmail.com",
-        "initial": "A"
-    }
+    company_info = {"name": "Atharv Tech co.", "location": "New Delhi", "phone": "+91 93107 21874"}
     invoices = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.id.desc()).all()
     return render_template('dashboard.html', invoices=invoices, company=company_info, name=current_user.username)
 
@@ -127,21 +115,15 @@ def dashboard():
 def accounting():
     user_sales = SaleInvoice.query.filter_by(user_id=current_user.id).all()
     total_val = sum(s.total_amount for s in user_sales)
-    stats = { 
-        "total_invoices": len(user_sales), 
-        "pending_bills": 0, 
-        "cash_flow": f"₹{total_val:,.2f}" 
-    }
+    stats = {"total_invoices": len(user_sales), "pending_bills": 0, "cash_flow": f"₹{total_val:,.2f}"}
     return render_template('accounting.html', stats=stats, name=current_user.username)
 
 @app.route('/sales/hub')
 @login_required
 def sales_hub():
-    # Show only pending/confirmed SO for the counter
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
 
-# --- NEW: APPROVALS ROUTE ---
 @app.route('/sales/approvals/<type>')
 @login_required
 def approval_page(type):
@@ -151,10 +133,9 @@ def approval_page(type):
     else:
         data = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.date.desc()).all()
         title = "Tax Invoice Approval Queue"
-    
     return render_template('approval_list.html', data=data, title=title, type=type, name=current_user.username)
 
-# --- NEW: STATUS UPDATE API ---
+# --- UPDATED STATUS API WITH REASON ---
 @app.route('/api/update-status', methods=['POST'])
 @login_required
 def update_status():
@@ -167,6 +148,8 @@ def update_status():
             
         if target:
             target.status = req['status']
+            if 'reason' in req and req['reason']:
+                target.cancel_reason = req['reason']
             db.session.commit()
             return jsonify({"status": "success"})
         return jsonify({"status": "error", "message": "Record not found"}), 404
@@ -181,38 +164,22 @@ def reports():
     orders = SalesOrder.query.filter_by(user_id=current_user.id).order_by(SalesOrder.date.desc()).all()
     return render_template('reports.html', sales=sales, orders=orders, name=current_user.username)
 
-@app.route('/sales/new')
-@login_required
-def new_sales():
-    products = Product.query.filter_by(user_id=current_user.id).all()
-    return render_template('sales_form.html', products=products)
-
-@app.route('/sales/order/new')
-@login_required
-def new_sales_order():
-    return render_template('sales_order_form.html', name=current_user.username)
-
 @app.route('/api/save-sale', methods=['POST'])
 @login_required
 def save_sale():
     data = request.json
     try:
-        existing = SaleInvoice.query.filter_by(inv_no=data['inv_no']).first()
-        final_inv_no = data['inv_no']
-        if existing:
-            final_inv_no = f"{data['inv_no']}-{datetime.now().strftime('%M%S')}"
-
         new_sale = SaleInvoice(
             user_id=current_user.id,
-            inv_no=final_inv_no,
+            inv_no=data['inv_no'],
             client_name=data['client'],
             total_amount=float(data['total']),
             gst_amount=float(data['gst']),
-            status='Pending' # New entries start as pending
+            status='Pending'
         )
         db.session.add(new_sale)
         db.session.commit()
-        return jsonify({"status": "success", "message": "Cloud Sync Complete"})
+        return jsonify({"status": "success"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -227,40 +194,14 @@ def save_so():
             so_no=data['so_no'],
             client_name=data['client'],
             total_amount=float(data['total']),
-            status='Pending' # New orders start as pending
+            status='Pending'
         )
         db.session.add(new_so)
         db.session.commit()
-        return jsonify({"status": "success", "message": "Sales Order Created"})
+        return jsonify({"status": "success"})
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
-
-@app.route('/export/<module>')
-@login_required
-def export_master(module):
-    data_list = []
-    filename = f"ATC_{module}_Report.xlsx"
-
-    if module == 'sales':
-        items = SaleInvoice.query.filter_by(user_id=current_user.id).all()
-        data_list = [{"Date": i.date.strftime('%d-%m-%Y'), "Invoice No": i.inv_no, "Client": i.client_name, "GST Amount": i.gst_amount, "Total Amount": i.total_amount, "Status": i.status} for i in items]
-    elif module == 'purchase':
-        items = PurchaseInvoice.query.filter_by(user_id=current_user.id).all()
-        data_list = [{"Date": i.date.strftime('%d-%m-%Y'), "Bill No": i.bill_no, "Vendor": i.vendor_name, "GST Amount": i.gst_amount, "Total Amount": i.total_amount} for i in items]
-    elif module == 'inventory':
-        items = Product.query.filter_by(user_id=current_user.id).all()
-        data_list = [{"Item Name": i.name, "SKU": i.sku, "Current Stock": i.stock, "Unit Price": i.price, "Valuation": i.stock * i.price} for i in items]
-
-    if not data_list:
-        return "No data found to export", 404
-
-    df = pd.DataFrame(data_list)
-    output = BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-        df.to_excel(writer, index=False, sheet_name=module.capitalize())
-    output.seek(0)
-    return send_file(output, download_name=filename, as_attachment=True)
 
 @app.route('/logout')
 def logout():
