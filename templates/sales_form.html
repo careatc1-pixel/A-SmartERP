@@ -12,11 +12,14 @@
         body { font-family: 'Inter', sans-serif; background: #f4f7f9; color: #1a1f36; }
         
         @media print {
+            @page { 
+                size: auto;
+                margin: 0mm; /* Browser headers/footers hatane ke liye */
+            }
             .no-print { display: none !important; }
             body { background: white !important; padding: 0 !important; margin: 0 !important; }
             .invoice-shell { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
-            @page { size: A4; margin: 1cm; }
-            .content-area { padding: 20px !important; }
+            .content-area { padding: 20mm !important; }
         }
         .input-clean { border-bottom: 1px solid #e3e8ee; transition: all 0.2s; }
         .input-clean:focus { border-bottom-color: #875A7B; }
@@ -35,7 +38,9 @@
                 <button @click="generatePDF()" x-show="isSaved" class="bg-slate-900 text-white px-5 py-2 rounded-lg font-bold text-xs shadow-lg hover:bg-black transition-all">
                     <i class="fa-solid fa-file-pdf mr-2"></i> DOWNLOAD PDF
                 </button>
-                <a href="/accounting" class="bg-white border px-5 py-2 rounded-lg font-bold text-xs text-slate-600 hover:bg-slate-50">EXIT</a>
+                <a href="/sales/hub" class="bg-white border px-5 py-2 rounded-lg font-bold text-xs text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> EXIT TO SALES HUB
+                </a>
             </div>
         </div>
 
@@ -138,7 +143,7 @@
                 </div>
                 <div class="text-right border-t border-slate-900 w-56 pt-3">
                     <p class="text-[10px] font-black uppercase tracking-widest text-slate-900">Authorized Signatory</p>
-                    <p class="text-[9px] font-medium text-slate-400 mt-1 uppercase">For Atharv Tech Co.</p>
+                    <p class="text-[9px] font-medium text-slate-400 mt-1 uppercase italic">For Atharv Tech Co.</p>
                 </div>
             </div>
 
@@ -153,7 +158,6 @@
         function invoiceSystem() {
             return {
                 clientName: '',
-                // UNIQUE COUNTER LOGIC ADDED HERE
                 invNo: 'ATC/26-27/' + String(Math.floor(Date.now() / 1000)).slice(-3),
                 invoiceDate: new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}),
                 items: [{ name: '', qty: 1, price: 0, gstSlab: 18 }],
@@ -171,13 +175,10 @@
                     this.total = this.subtotal + this.totalGst;
                 },
 
-                generatePDF() {
-                    window.print();
-                },
+                generatePDF() { window.print(); },
 
                 async saveAndLock() {
                     if(!this.clientName) return alert('Customer Name is required!');
-                    
                     try {
                         const response = await fetch('/api/save-sale', {
                             method: 'POST',
@@ -189,9 +190,7 @@
                                 gst: this.totalGst
                             })
                         });
-
                         const result = await response.json();
-
                         if(response.ok) {
                             this.isSaved = true;
                             alert('Cloud Sync Complete! You can now download the PDF.');
