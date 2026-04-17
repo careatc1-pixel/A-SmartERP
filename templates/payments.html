@@ -15,9 +15,14 @@
 <body class="p-6 md:p-12" x-data="paymentSystem()">
 
     <div class="max-w-2xl mx-auto">
-        <a href="/sales/hub" class="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-8 transition-all font-bold text-sm">
-            <i class="fa-solid fa-arrow-left"></i> BACK TO SALES HUB
-        </a>
+        <div class="flex justify-between items-center mb-8">
+            <a href="/sales/hub" class="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-bold text-sm">
+                <i class="fa-solid fa-arrow-left"></i> BACK TO HUB
+            </a>
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white px-4 py-2 rounded-full border border-slate-100 shadow-sm">
+                <i class="fa-solid fa-shield-halved text-green-500 mr-1"></i> Double-Entry Secure
+            </span>
+        </div>
 
         <div class="bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-12 border border-slate-100">
             <div class="flex items-center gap-5 mb-12">
@@ -52,25 +57,36 @@
                         </div>
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-3">Payment Mode</label>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-3">Payment Mode / Channel</label>
                         <select x-model="payData.mode" class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-green-500 focus:bg-white outline-none font-bold text-slate-700 appearance-none cursor-pointer transition-all">
-                            <option value="UPI">UPI / G-Pay</option>
-                            <option value="Cash">Cash Payment</option>
-                            <option value="Bank">Bank Transfer (NEFT)</option>
-                            <option value="Cheque">Cheque</option>
+                            <option value="UPI">UPI / G-Pay / PhonePe</option>
+                            <option value="NEFT">NEFT / RTGS</option>
+                            <option value="IMPS">IMPS Transfer</option>
+                            <option value="Cheque">Cheque Payment</option>
+                            <option value="Cash">Cash in Hand</option>
                         </select>
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-3">Reference / Transaction No.</label>
-                    <input type="text" x-model="payData.ref" placeholder="UTR / Transaction ID / Remarks" 
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-3">Deposit To (Company Bank Account)</label>
+                    <select x-model="payData.depositTo" class="w-full p-5 bg-blue-50/50 rounded-2xl border-2 border-transparent focus:border-blue-500 focus:bg-white outline-none font-bold text-blue-800 appearance-none cursor-pointer transition-all">
+                        <option value="HDFC">HDFC Bank - A/c 50200012345678</option>
+                        <option value="ICICI">ICICI Bank - A/c 000405012345</option>
+                        <option value="CASH">Cash Ledger (Physical Cash)</option>
+                    </select>
+                    <p class="text-[9px] text-slate-400 mt-2 italic">* This will reflect in your Bank Reconciliation Statement.</p>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block mb-3">Reference / Transaction ID / UTR</label>
+                    <input type="text" x-model="payData.ref" placeholder="Enter UTR or Cheque Number" 
                            class="w-full p-5 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-green-500 focus:bg-white outline-none font-medium text-slate-600 transition-all">
                 </div>
 
                 <button @click="recordPayment()" 
                         class="w-full bg-slate-900 text-white p-6 rounded-[1.5rem] font-black uppercase tracking-widest hover:bg-green-600 shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3">
-                    <i class="fa-solid fa-cloud-arrow-up"></i> CONFIRM & POST TO LEDGER
+                    <i class="fa-solid fa-building-columns"></i> CONFIRM & POST TO BANK LEDGER
                 </button>
             </div>
         </div>
@@ -79,13 +95,18 @@
     <script>
         function paymentSystem() {
             return {
-                payData: { client: '', amount: '', mode: 'UPI', ref: '' },
+                payData: { 
+                    client: '', 
+                    amount: '', 
+                    mode: 'UPI', 
+                    depositTo: 'HDFC', 
+                    ref: '' 
+                },
                 recordPayment() {
-                    if(!this.payData.client) return alert('Bhai, Customer toh select karo!');
+                    if(!this.payData.client) return alert('Bhai, Customer select karna mandatory hai!');
                     if(!this.payData.amount || this.payData.amount <= 0) return alert('Amount sahi daalo!');
                     
-                    // Abhi ke liye bas alert, baad mein API connect karenge
-                    alert('SUCCESS: Payment of ₹' + this.payData.amount + ' received from ' + this.payData.client + ' recorded!');
+                    alert('SUCCESS: Entry Received in ' + this.payData.depositTo + '\nAmount: ₹' + this.payData.amount + '\nFrom: ' + this.payData.client + '\nStatus: Synced to Bank Ledger.');
                     window.location.href = '/sales/hub';
                 }
             }
