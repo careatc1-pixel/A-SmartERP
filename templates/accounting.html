@@ -84,8 +84,8 @@
 
     <div class="secondary-nav flex justify-center py-3 bg-white border-b px-12 gap-2 overflow-x-auto">
         <a href="#" class="active">Overview</a>
-        <a href="#">Customers</a>
-        <a href="#">Vendors</a>
+        <a href="/sales/customers">Customers</a>
+        <a href="/purchase/vendors">Vendors</a>
         <a href="/reports" class="hover:text-[#875A7B] transition-colors">
             <i class="fa-solid fa-folder-tree mr-1"></i> Report Center
         </a>
@@ -120,7 +120,7 @@
                 </div>
             </div>
 
-            <div class="module-card">
+            <div onclick="window.location.href='/purchase/hub'" class="module-card group">
                 <div class="icon-wrapper bg-purchase">
                     <i class="fa-solid fa-cart-shopping"></i>
                 </div>
@@ -130,7 +130,7 @@
                 </div>
             </div>
 
-            <div class="module-card">
+            <div class="module-card group">
                 <div class="icon-wrapper bg-expenses">
                     <i class="fa-solid fa-receipt"></i>
                 </div>
@@ -140,7 +140,7 @@
                 </div>
             </div>
 
-            <div class="module-card">
+            <div class="module-card group">
                 <div class="icon-wrapper bg-inventory">
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
@@ -150,7 +150,7 @@
                 </div>
             </div>
 
-            <div class="module-card">
+            <div class="module-card group">
                 <div class="icon-wrapper bg-docs">
                     <i class="fa-solid fa-folder-open"></i>
                 </div>
