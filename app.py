@@ -85,7 +85,7 @@ class PaymentReceived(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     client_name = db.Column(db.String(100))
     amount = db.Column(db.Float)
-    mode = db.Column(db.String(50)) # Cash, UPI, Bank
+    mode = db.Column(db.String(50))
     ref_no = db.Column(db.String(100))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -113,7 +113,7 @@ class EWayBill(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- ROUTES ---
+# --- CORE ROUTES ---
 
 @app.route('/')
 def index():
@@ -181,7 +181,7 @@ def new_sales_order():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', customers=customers, name=current_user.username)
 
-# --- NAYE MODULES ROUTES ---
+# --- NAYE MODULES WORKING ROUTES ---
 
 @app.route('/sales/delivery-challan')
 @login_required
@@ -193,7 +193,7 @@ def delivery_challan():
 @login_required
 def payments_received():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('payments.html', customers=customers, name=current_user.username)
+    return render_template('payments_received.html', customers=customers, name=current_user.username)
 
 @app.route('/sales/credit-notes')
 @login_required
@@ -206,7 +206,7 @@ def credit_notes():
 def eway_bills():
     return render_template('eway_bills.html', name=current_user.username)
 
-# --- APIs ---
+# --- API ENDPOINTS ---
 
 @app.route('/api/save-customer', methods=['POST'])
 @login_required
