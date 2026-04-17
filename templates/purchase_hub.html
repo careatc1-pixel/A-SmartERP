@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase Hub | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fdfaf9; }
+        .p-card { transition: all 0.3s ease; border: 1px solid #f1f5f9; }
+        .p-card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); border-color: #f97316; }
+    </style>
+</head>
+<body class="p-6 md:p-12">
+
+    <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-12">
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 italic">Purchase <span class="text-orange-600">Operations</span></h1>
+                <p class="text-slate-500 font-medium mt-2">Manage vendors, procurement, and out-payments.</p>
+            </div>
+            <a href="/accounting" class="bg-white border p-4 rounded-2xl text-slate-400 hover:text-orange-600 transition-all shadow-sm">
+                <i class="fa-solid fa-house-chimney text-xl"></i>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div onclick="window.location.href='/purchase/vendors'" class="p-card bg-white p-8 rounded-[2.5rem] cursor-pointer group">
+                <div class="w-16 h-16 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-orange-600 group-hover:text-white transition-all">
+                    <i class="fa-solid fa-address-book"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Vendor Master</h3>
+                <p class="text-sm text-slate-500 mt-2">Maintain supplier records and GST details.</p>
+            </div>
+
+            <div onclick="window.location.href='/purchase/order/new'" class="p-card bg-white p-8 rounded-[2.5rem] cursor-pointer group">
+                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <i class="fa-solid fa-cart-plus"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Purchase Order</h3>
+                <p class="text-sm text-slate-500 mt-2">Create orders for inventory or services.</p>
+            </div>
+
+            <div onclick="window.location.href='/purchase/bill/new'" class="p-card bg-white p-8 rounded-[2.5rem] cursor-pointer group">
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Purchase Bill</h3>
+                <p class="text-sm text-slate-500 mt-2">Enter incoming vendor invoices for GST input.</p>
+            </div>
+
+            <div onclick="window.location.href='/purchase/payment'" class="p-card bg-white p-8 rounded-[2.5rem] cursor-pointer group">
+                <div class="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-red-600 group-hover:text-white transition-all">
+                    <i class="fa-solid fa-money-bill-transfer"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Out-Payments</h3>
+                <p class="text-sm text-slate-500 mt-2">Record payments made to your suppliers.</p>
+            </div>
+
+            <div onclick="window.location.href='/purchase/debit-note'" class="p-card bg-white p-8 rounded-[2.5rem] cursor-pointer group">
+                <div class="w-16 h-16 bg-slate-100 text-slate-600 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                    <i class="fa-solid fa-file-circle-exclamation"></i>
+                </div>
+                <h3 class="text-xl font-extrabold text-slate-900">Debit Note</h3>
+                <p class="text-sm text-slate-500 mt-2">Handle purchase returns or price reductions.</p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
