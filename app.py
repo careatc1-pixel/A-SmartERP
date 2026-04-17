@@ -24,7 +24,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 handler = app
 
-# --- MODELS (No changes here) ---
+# --- MODELS ---
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,6 +70,45 @@ class SalesOrder(db.Model):
     cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+# --- NAYE MODULES MODELS START ---
+
+class DeliveryChallan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    dc_no = db.Column(db.String(50), unique=True)
+    client_name = db.Column(db.String(100))
+    vehicle_no = db.Column(db.String(20))
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PaymentReceived(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    client_name = db.Column(db.String(100))
+    amount = db.Column(db.Float)
+    mode = db.Column(db.String(50)) # Cash, UPI, Bank
+    ref_no = db.Column(db.String(100))
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class CreditNote(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    cn_no = db.Column(db.String(50), unique=True)
+    inv_ref = db.Column(db.String(50)) 
+    client_name = db.Column(db.String(100))
+    amount = db.Column(db.Float)
+    reason = db.Column(db.String(200))
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class EWayBill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    ewb_no = db.Column(db.String(20), unique=True)
+    inv_no = db.Column(db.String(50))
+    transporter = db.Column(db.String(100))
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- NAYE MODULES MODELS END ---
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -112,7 +151,6 @@ def sales_hub():
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
 
-# --- MISSING APPROVAL ROUTES FIXED HERE ---
 @app.route('/sales/approvals/orders')
 @login_required
 def approval_orders_page():
@@ -142,6 +180,31 @@ def new_sales():
 def new_sales_order():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', customers=customers, name=current_user.username)
+
+# --- NAYE MODULES ROUTES ---
+
+@app.route('/sales/delivery-challan')
+@login_required
+def delivery_challan():
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('delivery_challan.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/payments')
+@login_required
+def payments_received():
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('payments.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/credit-notes')
+@login_required
+def credit_notes():
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('credit_notes.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/eway-bills')
+@login_required
+def eway_bills():
+    return render_template('eway_bills.html', name=current_user.username)
 
 # --- APIs ---
 
