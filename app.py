@@ -16,7 +16,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V24_STRICT_RESTORE' 
+    SECRET_KEY='ATHARV_ERP_V25_PURCHASE_INTEGRATION' 
 )
 
 db = SQLAlchemy(app)
@@ -70,7 +70,7 @@ class SalesOrder(db.Model):
     cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# --- NAYE MODULES MODELS START ---
+# --- SALES EXTRA MODELS ---
 
 class DeliveryChallan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -107,7 +107,41 @@ class EWayBill(db.Model):
     transporter = db.Column(db.String(100))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# --- NAYE MODULES MODELS END ---
+# --- PURCHASE MODULE MODELS ---
+
+class Vendor(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    name = db.Column(db.String(100), nullable=False)
+    gstin = db.Column(db.String(20))
+    phone = db.Column(db.String(20))
+    address = db.Column(db.Text)
+
+class PurchaseOrder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    po_no = db.Column(db.String(50), unique=True)
+    vendor_name = db.Column(db.String(100))
+    total_amount = db.Column(db.Float)
+    status = db.Column(db.String(20), default='Pending')
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class PurchaseBill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    bill_no = db.Column(db.String(50), unique=True)
+    vendor_name = db.Column(db.String(100))
+    total_amount = db.Column(db.Float)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class DebitNote(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    dn_no = db.Column(db.String(50), unique=True)
+    vendor_name = db.Column(db.String(100))
+    amount = db.Column(db.Float)
+    reason = db.Column(db.String(200))
+    date = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -181,7 +215,40 @@ def new_sales_order():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', customers=customers, name=current_user.username)
 
-# --- NAYE MODULES WORKING ROUTES ---
+# --- PURCHASE ROUTES ---
+
+@app.route('/purchase/hub')
+@login_required
+def purchase_hub():
+    return render_template('purchase_hub.html', name=current_user.username)
+
+@app.route('/purchase/vendors')
+@login_required
+def vendor_master():
+    vendors = Vendor.query.filter_by(user_id=current_user.id).all()
+    return render_template('vendor_master.html', vendors=vendors, name=current_user.username)
+
+@app.route('/purchase/order/new')
+@login_required
+def new_purchase_order():
+    return "<h3>New Purchase Order Form Working</h3><a href='/purchase/hub'>Back</a>"
+
+@app.route('/purchase/bill/new')
+@login_required
+def new_purchase_bill():
+    return "<h3>New Purchase Bill Form Working</h3><a href='/purchase/hub'>Back</a>"
+
+@app.route('/purchase/payment')
+@login_required
+def purchase_payment():
+    return "<h3>Purchase Payment Module Working</h3><a href='/purchase/hub'>Back</a>"
+
+@app.route('/purchase/debit-note')
+@login_required
+def debit_note():
+    return "<h3>Debit Note Module Working</h3><a href='/purchase/hub'>Back</a>"
+
+# --- EXISTING SALES MODULE ROUTES ---
 
 @app.route('/sales/delivery-challan')
 @login_required
@@ -193,7 +260,7 @@ def delivery_challan():
 @login_required
 def payments_received():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('payments.html', customers=customers, name=current_user.username)
+    return render_template('payments_received.html', customers=customers, name=current_user.username)
 
 @app.route('/sales/credit-notes')
 @login_required
@@ -213,14 +280,7 @@ def eway_bills():
 def save_customer():
     data = request.json
     try:
-        new_cust = Customer(
-            user_id=current_user.id,
-            name=data['name'],
-            email=data.get('email', ''),
-            phone=data.get('phone', ''),
-            gstin=data.get('gstin', ''),
-            address=data.get('address', '')
-        )
+        new_cust = Customer(user_id=current_user.id, name=data['name'], email=data.get('email', ''), phone=data.get('phone', ''), gstin=data.get('gstin', ''), address=data.get('address', ''))
         db.session.add(new_cust)
         db.session.commit()
         return jsonify({"status": "success"})
@@ -233,14 +293,7 @@ def save_customer():
 def save_sale():
     data = request.json
     try:
-        new_sale = SaleInvoice(
-            user_id=current_user.id,
-            inv_no=data['inv_no'],
-            client_name=data['client'],
-            total_amount=float(data['total']),
-            gst_amount=float(data['gst']),
-            status='Pending'
-        )
+        new_sale = SaleInvoice(user_id=current_user.id, inv_no=data['inv_no'], client_name=data['client'], total_amount=float(data['total']), gst_amount=float(data['gst']), status='Pending')
         db.session.add(new_sale)
         db.session.commit()
         return jsonify({"status": "success"})
@@ -253,13 +306,7 @@ def save_sale():
 def save_so():
     data = request.json
     try:
-        new_so = SalesOrder(
-            user_id=current_user.id,
-            so_no=data['so_no'],
-            client_name=data['client'],
-            total_amount=float(data['total']),
-            status='Pending'
-        )
+        new_so = SalesOrder(user_id=current_user.id, so_no=data['so_no'], client_name=data['client'], total_amount=float(data['total']), status='Pending')
         db.session.add(new_so)
         db.session.commit()
         return jsonify({"status": "success"})
@@ -272,10 +319,8 @@ def save_so():
 def update_status():
     req = request.json
     try:
-        if req['type'] == 'orders':
-            target = SalesOrder.query.filter_by(so_no=req['id']).first()
-        else:
-            target = SaleInvoice.query.filter_by(inv_no=req['id']).first()
+        if req['type'] == 'orders': target = SalesOrder.query.filter_by(so_no=req['id']).first()
+        else: target = SaleInvoice.query.filter_by(inv_no=req['id']).first()
         if target:
             target.status = req['status']
             if 'reason' in req: target.cancel_reason = req['reason']
