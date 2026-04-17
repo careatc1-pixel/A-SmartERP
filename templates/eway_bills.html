@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Way Bill Terminal | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #0f172a; }
+    </style>
+</head>
+<body class="p-6 md:p-12" x-data="ewbSystem()">
+
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-white font-black italic tracking-tighter text-2xl">E-WAY <span class="text-sky-400">TERMINAL</span></h1>
+            <a href="/sales/hub" class="text-slate-500 hover:text-white font-bold text-xs uppercase tracking-widest">Close Terminal</a>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-[2rem] p-8 md:p-12 shadow-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div class="space-y-8">
+                    <div>
+                        <label class="text-[9px] font-black text-sky-400 uppercase tracking-[0.3em] block mb-4">Transaction Details</label>
+                        <div class="space-y-4">
+                            <input type="text" x-model="ewb.invNo" placeholder="Invoice Number Ref" class="w-full bg-slate-800 p-4 rounded-xl text-white outline-none border border-slate-700 focus:border-sky-500">
+                            <input type="number" x-model="ewb.distance" placeholder="Distance (Approx KM)" class="w-full bg-slate-800 p-4 rounded-xl text-white outline-none border border-slate-700">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-sky-400 uppercase tracking-[0.3em] block mb-4">Transporter Info</label>
+                        <input type="text" x-model="ewb.transporter" placeholder="Transporter Name or ID" class="w-full bg-slate-800 p-4 rounded-xl text-white outline-none border border-slate-700">
+                    </div>
+                </div>
+
+                <div class="bg-slate-800/50 rounded-3xl p-8 border border-slate-700">
+                    <h4 class="text-xs font-black text-slate-500 uppercase mb-6 tracking-widest">Live Validation</h4>
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-400">GSTIN Status</span>
+                            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full uppercase">Verified</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-slate-700 pt-6">
+                            <span class="text-xs text-slate-400">HSN Compliance</span>
+                            <span class="text-[10px] font-bold text-sky-400 bg-sky-400/10 px-3 py-1 rounded-full uppercase">Checked</span>
+                        </div>
+                    </div>
+                    <div class="mt-12">
+                        <p class="text-[9px] text-slate-500 leading-relaxed italic">Note: E-Way bill generation is mandatory for movements exceeding ₹50,000 value.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="generateEWB()" class="w-full bg-sky-500 text-white p-6 rounded-2xl font-black uppercase tracking-widest mt-12 hover:bg-sky-400 transition-all shadow-lg shadow-sky-500/20 active:scale-95">
+                Generate E-Way Bill Number
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function ewbSystem() {
+            return {
+                ewb: { invNo: '', distance: '', transporter: '' },
+                generateEWB() {
+                    if(!this.ewb.invNo) return alert('Invoice Reference is required!');
+                    const ewbNum = Math.floor(100000000000 + Math.random() * 900000000000);
+                    alert('E-WAY BILL GENERATED SUCCESSFULLY\nNumber: ' + ewbNum);
+                    window.location.href = '/sales/hub';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

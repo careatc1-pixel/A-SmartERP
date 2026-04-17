@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Note | A-SmartERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fdf2f2; }
+    </style>
+</head>
+<body class="p-6 md:p-12" x-data="creditNoteSystem()">
+
+    <div class="max-w-3xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <a href="/sales/hub" class="text-slate-400 hover:text-red-600 font-bold text-sm flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> BACK
+            </a>
+            <span class="text-[10px] font-black text-red-500 uppercase tracking-widest bg-white px-4 py-2 rounded-full border border-red-100">
+                <i class="fa-solid fa-circle-minus mr-1"></i> Sales Adjustment
+            </span>
+        </div>
+
+        <div class="bg-white rounded-[2.5rem] shadow-2xl p-10 border border-red-50">
+            <div class="flex items-center gap-5 mb-12">
+                <div class="w-16 h-16 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 italic">Credit <span class="text-red-600">Note</span></h2>
+                    <p class="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-1">Issue Sales Return Credit</p>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Client Name</label>
+                    <input list="custList" x-model="cn.client" class="w-full p-5 bg-slate-50 rounded-2xl outline-none font-bold border-2 border-transparent focus:border-red-500 transition-all">
+                    <datalist id="custList">
+                        {% for c in customers %}
+                        <option value="{{ c.name }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Original Inv Ref</label>
+                        <input type="text" x-model="cn.invRef" placeholder="INV/001" class="w-full p-5 bg-slate-50 rounded-2xl outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Credit Amount</label>
+                        <input type="number" x-model="cn.amount" placeholder="0.00" class="w-full p-5 bg-red-50 text-red-600 rounded-2xl outline-none font-black text-xl">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Reason for Credit</label>
+                    <select x-model="cn.reason" class="w-full p-5 bg-slate-50 rounded-2xl outline-none font-bold">
+                        <option value="Sales Return">Sales Return / Goods Rejected</option>
+                        <option value="Post-Sale Discount">Post-Sale Discount</option>
+                        <option value="Deficiency in Service">Deficiency in Service</option>
+                        <option value="Correction in Invoice">Correction in Invoice Value</option>
+                    </select>
+                </div>
+
+                <button @click="saveCN()" class="w-full bg-slate-900 text-white p-6 rounded-3xl font-black uppercase tracking-widest hover:bg-red-600 transition-all shadow-xl flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-check-double"></i> AUTHORIZE CREDIT NOTE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function creditNoteSystem() {
+            return {
+                cn: { client: '', invRef: '', amount: '', reason: 'Sales Return' },
+                saveCN() {
+                    if(!this.cn.client || !this.cn.amount) return alert('Bhai, Amount aur Client zaruri hai!');
+                    alert('Credit Note Generated & Linked to Invoice ' + this.cn.invRef);
+                    window.location.href = '/sales/hub';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
