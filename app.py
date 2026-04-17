@@ -16,7 +16,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V17_CUSTOMER_MASTER' 
+    SECRET_KEY='ATHARV_ERP_V24_STRICT_RESTORE' 
 )
 
 db = SQLAlchemy(app)
@@ -193,7 +193,7 @@ def delivery_challan():
 @login_required
 def payments_received():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('payments_received.html', customers=customers, name=current_user.username)
+    return render_template('payments.html', customers=customers, name=current_user.username)
 
 @app.route('/sales/credit-notes')
 @login_required
