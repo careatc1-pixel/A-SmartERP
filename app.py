@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import pandas as pd
 from io import BytesIO
+from sqlalchemy import text 
 
 app = Flask(__name__)
 
@@ -16,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V30_CUSTOMER_ID_FIX' 
+    SECRET_KEY='ATHARV_ERP_V32_FULL_RESTORE' 
 )
 
 db = SQLAlchemy(app)
@@ -24,7 +25,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 handler = app
 
-# --- MODELS ---
+# --- MODELS START ---
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -34,7 +35,7 @@ class User(UserMixin, db.Model):
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    cust_code = db.Column(db.String(20), unique=True) # Unique Code Field Added
+    cust_code = db.Column(db.String(50), nullable=True) 
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100))
     phone = db.Column(db.String(20))
@@ -71,8 +72,6 @@ class SalesOrder(db.Model):
     cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# --- SALES EXTRA MODELS ---
-
 class DeliveryChallan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -108,8 +107,6 @@ class EWayBill(db.Model):
     transporter = db.Column(db.String(100))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# --- PURCHASE MODULE MODELS ---
-
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -144,25 +141,22 @@ class DebitNote(db.Model):
     reason = db.Column(db.String(200))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+# --- MODELS END ---
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- LEGACY FIX ROUTE ---
-@app.route('/assign-codes')
-@login_required
-def assign_missing_codes():
+# --- SPECIAL RE-SYNC ROUTE ---
+@app.route('/force-sync-db')
+def force_sync():
     try:
-        legacy_customers = Customer.query.filter((Customer.cust_code == None) | (Customer.cust_code == '')).all()
-        count = 0
-        for cust in legacy_customers:
-            count += 1
-            cust.cust_code = f"ATC/CUST/{cust.id:03d}"
+        db.session.execute(text("DROP TABLE IF EXISTS customer CASCADE;"))
         db.session.commit()
-        return f"<h3>Success!</h3><p>{count} Legacy customers updated.</p><a href='/sales/customers'>Back</a>"
+        db.create_all()
+        return "<h3>Success!</h3><p>Database Matched. Customer Master Active.</p><a href='/sales/customers'>Open Master</a>"
     except Exception as e:
-        db.session.rollback()
-        return f"Error: {str(e)}"
+        return f"SQL Error: {str(e)}"
 
 # --- CORE ROUTES ---
 
@@ -202,6 +196,8 @@ def sales_hub():
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
 
+# --- SALES MANAGEMENT ROUTES ---
+
 @app.route('/sales/approvals/orders')
 @login_required
 def approval_orders_page():
@@ -232,40 +228,7 @@ def new_sales_order():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', customers=customers, name=current_user.username)
 
-# --- PURCHASE ROUTES ---
-
-@app.route('/purchase/hub')
-@login_required
-def purchase_hub():
-    return render_template('purchase_hub.html', name=current_user.username)
-
-@app.route('/purchase/vendors')
-@login_required
-def vendor_master():
-    vendors = Vendor.query.filter_by(user_id=current_user.id).all()
-    return render_template('vendor_master.html', vendors=vendors, name=current_user.username)
-
-@app.route('/purchase/order/new')
-@login_required
-def new_purchase_order():
-    return "<h3>New Purchase Order Form Working</h3><a href='/purchase/hub'>Back</a>"
-
-@app.route('/purchase/bill/new')
-@login_required
-def new_purchase_bill():
-    return "<h3>New Purchase Bill Form Working</h3><a href='/purchase/hub'>Back</a>"
-
-@app.route('/purchase/payment')
-@login_required
-def purchase_payment():
-    return "<h3>Purchase Payment Module Working</h3><a href='/purchase/hub'>Back</a>"
-
-@app.route('/purchase/debit-note')
-@login_required
-def debit_note():
-    return "<h3>Debit Note Module Working</h3><a href='/purchase/hub'>Back</a>"
-
-# --- EXISTING SALES MODULE ROUTES ---
+# --- SALES EXTRA MODULES ROUTES ---
 
 @app.route('/sales/delivery-challan')
 @login_required
@@ -290,6 +253,19 @@ def credit_notes():
 def eway_bills():
     return render_template('eway_bills.html', name=current_user.username)
 
+# --- PURCHASE HUB ROUTES ---
+
+@app.route('/purchase/hub')
+@login_required
+def purchase_hub():
+    return render_template('purchase_hub.html', name=current_user.username)
+
+@app.route('/purchase/vendors')
+@login_required
+def vendor_master():
+    vendors = Vendor.query.filter_by(user_id=current_user.id).all()
+    return render_template('vendor_master.html', vendors=vendors, name=current_user.username)
+
 # --- VIEW & PRINT ROUTES ---
 
 @app.route('/sales/view/<inv_no>')
@@ -313,26 +289,16 @@ def view_sales_order(so_no):
 def save_customer():
     data = request.json
     try:
-        # Naya ID dhoondh ke auto code generator
         last_cust = Customer.query.order_by(Customer.id.desc()).first()
-        new_id = (last_cust.id + 1) if last_cust else 1
-        generated_code = f"ATC/CUST/{new_id:03d}"
-
-        new_cust = Customer(
-            user_id=current_user.id,
-            cust_code=generated_code,
-            name=data['name'],
-            email=data.get('email', ''),
-            phone=data.get('phone', ''),
-            gstin=data.get('gstin', ''),
-            address=data.get('address', '')
-        )
+        next_id = (last_cust.id + 1) if last_cust else 1
+        generated_code = f"ATC/CUST/{next_id:03d}"
+        new_cust = Customer(user_id=current_user.id, cust_code=generated_code, name=data['name'], email=data.get('email', ''), phone=data.get('phone', ''), gstin=data.get('gstin', ''), address=data.get('address', ''))
         db.session.add(new_cust)
         db.session.commit()
         return jsonify({"status": "success", "code": generated_code})
     except Exception as e:
         db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 400
+        return jsonify({"status": "error", "message": "SQL Error: Run /force-sync-db"}), 400
 
 @app.route('/api/save-sale', methods=['POST'])
 @login_required
