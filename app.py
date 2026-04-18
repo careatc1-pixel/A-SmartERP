@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 import pandas as pd
 from io import BytesIO
-from sqlalchemy import text # Import fixed
+from sqlalchemy import text 
 
 app = Flask(__name__)
 
@@ -17,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V28_FINAL_FIX' 
+    SECRET_KEY='ATHARV_ERP_V30_STRICT_FIX' 
 )
 
 db = SQLAlchemy(app)
@@ -35,7 +35,7 @@ class User(UserMixin, db.Model):
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    cust_code = db.Column(db.String(20), unique=True) 
+    cust_code = db.Column(db.String(20), unique=True) # Essential for identification
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100))
     phone = db.Column(db.String(20))
@@ -72,6 +72,8 @@ class SalesOrder(db.Model):
     cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+# --- EXTRA MODULES ---
+
 class DeliveryChallan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -106,6 +108,8 @@ class EWayBill(db.Model):
     inv_no = db.Column(db.String(50))
     transporter = db.Column(db.String(100))
     date = db.Column(db.DateTime, default=datetime.utcnow)
+
+# --- PURCHASE MODELS ---
 
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -145,19 +149,19 @@ class DebitNote(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- CRITICAL FIX ROUTE ---
-@app.route('/fix-db')
-def fix_database():
+# --- FORCE DATABASE RECONCILIATION ---
+@app.route('/reset-db-tables')
+def reset_database():
     try:
-        # Step 1: Forcefully add column
-        db.session.execute(text("ALTER TABLE customer ADD COLUMN IF NOT EXISTS cust_code VARCHAR(20) UNIQUE;"))
+        db.session.execute(text("DROP TABLE IF EXISTS customer CASCADE;"))
         db.session.commit()
-        return "<h3>Success!</h3><p>Database structure synced. Now open Customer Master.</p>"
+        db.create_all()
+        return "<h3>Hard Reset Success!</h3><p>Customer Master Active.</p><a href='/sales/customers'>Open Master</a>"
     except Exception as e:
         db.session.rollback()
         return f"Error: {str(e)}"
 
-# --- ROUTES ---
+# --- CORE ROUTES ---
 
 @app.route('/')
 def index():
@@ -210,7 +214,6 @@ def approval_invoices_page():
 @app.route('/sales/customers') 
 @login_required
 def customer_master():
-    # Fetching all customers to show in master table
     customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
 
@@ -251,7 +254,7 @@ def view_sales_order(so_no):
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', order=order, customers=customers, mode='print', name=current_user.username)
 
-# --- APIs ---
+# --- API ENDPOINTS ---
 
 @app.route('/api/save-customer', methods=['POST'])
 @login_required
