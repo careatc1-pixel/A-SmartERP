@@ -8,53 +8,78 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; color: #1e293b; }
         .modal-bg { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+        .table-shadow { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); }
     </style>
 </head>
 <body class="p-6 md:p-12" x-data="customerSystem()">
 
-    <div class="max-w-6xl mx-auto">
+    <div class="max-w-7xl mx-auto">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
             <div>
                 <div class="flex items-center gap-3 mb-2">
-                    <a href="/sales/hub" class="text-slate-400 hover:text-slate-900"><i class="fa-solid fa-arrow-left"></i></a>
-                    <h1 class="text-3xl font-black text-slate-900 italic">Customer <span class="text-blue-600">Master</span></h1>
+                    <a href="/sales/hub" class="text-slate-400 hover:text-slate-900 transition-all"><i class="fa-solid fa-arrow-left text-xl"></i></a>
+                    <h1 class="text-3xl font-black text-slate-900 italic tracking-tighter">Customer <span class="text-blue-600">Master</span></h1>
                 </div>
                 <p class="text-slate-500 font-medium">Manage your verified business associates</p>
             </div>
-            <button @click="showModal = true" class="bg-blue-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:bg-blue-700 transition-all flex items-center gap-2">
+            <button @click="showModal = true" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all flex items-center gap-2 uppercase text-xs tracking-widest">
                 <i class="fa-solid fa-plus"></i> ONBOARD NEW CUSTOMER
             </button>
         </div>
 
-        <div class="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden">
-            <table class="w-full text-left">
+        <div class="bg-white rounded-[2.5rem] table-shadow border border-slate-100 overflow-hidden">
+            <table class="w-full text-left border-collapse">
                 <thead class="bg-slate-50 border-b border-slate-100">
-                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        <th class="p-6">Company / Name</th>
-                        <th class="p-6">GSTIN</th>
-                        <th class="p-6">Contact & Email</th> <th class="p-6">Address</th>
-                        <th class="p-6 text-right">Action</th>
+                    <tr class="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">
+                        <th class="px-8 py-6">Code</th>
+                        <th class="px-8 py-6">Company / Name</th>
+                        <th class="px-8 py-6">GSTIN</th>
+                        <th class="px-8 py-6">Contact & Email</th>
+                        <th class="px-8 py-6">Address</th>
+                        <th class="px-8 py-6 text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50">
                     {% for c in customers %}
-                    <tr class="hover:bg-blue-50/30 transition-colors">
-                        <td class="p-6 text-sm font-bold text-slate-900 uppercase">{{ c.name }}</td>
-                        <td class="p-6">
-                            <span class="bg-blue-50 text-blue-700 text-[10px] px-3 py-1 rounded-full font-black uppercase">
-                                {{ c.gstin if c.gstin else 'N/A' }}
+                    <tr class="hover:bg-blue-50/30 transition-all group">
+                        <td class="px-8 py-6">
+                            <span class="bg-slate-100 text-slate-600 font-black text-[10px] px-3 py-1.5 rounded-lg border border-slate-200 uppercase tracking-tighter group-hover:bg-blue-100 group-hover:text-blue-700 group-hover:border-blue-200 transition-all">
+                                {{ c.cust_code if c.cust_code else 'LEGACY' }}
                             </span>
                         </td>
-                        <td class="p-6">
-                            <p class="text-sm font-semibold text-slate-700">{{ c.phone }}</p>
+                        
+                        <td class="px-8 py-6">
+                            <p class="font-black text-slate-900 uppercase group-hover:text-blue-600 transition-colors">{{ c.name }}</p>
+                        </td>
+
+                        <td class="px-8 py-6">
+                            {% if c.gstin %}
+                            <span class="bg-blue-50 text-blue-600 text-[10px] px-3 py-1 rounded-full font-black border border-blue-100">
+                                {{ c.gstin }}
+                            </span>
+                            {% else %}
+                            <span class="text-[10px] font-bold text-slate-300 uppercase italic">Unregistered</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="px-8 py-6">
+                            <p class="text-sm font-bold text-slate-700 tracking-tight">{{ c.phone }}</p>
                             <p class="text-[11px] text-blue-500 font-medium lowercase">{{ c.email if c.email else 'no-email@atc.com' }}</p>
                         </td>
-                        <td class="p-6 text-xs text-slate-500 font-medium max-w-xs">{{ c.address }}</td>
-                        <td class="p-6 text-right">
-                            <button class="text-slate-300 hover:text-blue-600"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+
+                        <td class="px-8 py-6">
+                            <p class="text-[11px] text-slate-400 font-medium max-w-[200px] truncate leading-relaxed">
+                                {{ c.address if c.address else '--' }}
+                            </p>
+                        </td>
+
+                        <td class="px-8 py-6 text-right">
+                            <button class="text-slate-300 hover:text-slate-900 transition-all transform active:scale-90">
+                                <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -64,40 +89,43 @@
     </div>
 
     <div x-show="showModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg" x-transition.opacity style="display: none;">
-        <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden" @click.away="showModal = false">
+        <div class="bg-white w-full max-w-lg rounded-[3rem] shadow-2xl overflow-hidden border border-white/20" @click.away="showModal = false">
             <div class="p-8 bg-blue-600 text-white flex justify-between items-center">
-                <h3 class="text-xl font-bold italic">New Customer Registration</h3>
-                <button @click="showModal = false" class="text-white/50 hover:text-white text-2xl">&times;</button>
+                <div>
+                    <h3 class="text-xl font-black italic uppercase tracking-tighter">New Registration</h3>
+                    <p class="text-[10px] font-bold text-blue-100 uppercase tracking-widest mt-1">Onboard Verified Associate</p>
+                </div>
+                <button @click="showModal = false" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 transition-all">&times;</button>
             </div>
             
-            <div class="p-8 space-y-5">
+            <div class="p-10 space-y-6">
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Company Name *</label>
-                    <input type="text" x-model="custData.name" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none font-bold focus:border-blue-500" placeholder="Legal Entity Name">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Company Name *</label>
+                    <input type="text" x-model="custData.name" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl outline-none font-bold focus:border-blue-500 focus:bg-white transition-all uppercase" placeholder="Enter Legal Entity Name">
                 </div>
 
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Official Email Address</label>
-                    <input type="email" x-model="custData.email" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none focus:border-blue-500 lowercase" placeholder="customer@company.com">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Official Email Address</label>
+                    <input type="email" x-model="custData.email" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-all lowercase" placeholder="customer@company.com">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Phone</label>
-                        <input type="text" x-model="custData.phone" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none" placeholder="+91">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Phone</label>
+                        <input type="text" x-model="custData.phone" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-all" placeholder="+91">
                     </div>
                     <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">GSTIN</label>
-                        <input type="text" x-model="custData.gstin" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none uppercase font-bold" placeholder="Optional">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">GSTIN</label>
+                        <input type="text" x-model="custData.gstin" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl outline-none uppercase font-bold focus:border-blue-500 focus:bg-white transition-all" placeholder="Optional">
                     </div>
                 </div>
                 <div>
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Address</label>
-                    <textarea x-model="custData.address" rows="2" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-xl outline-none" placeholder="Full Address"></textarea>
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Registered Address</label>
+                    <textarea x-model="custData.address" rows="2" class="w-full bg-slate-50 border border-slate-100 p-4 rounded-2xl outline-none focus:border-blue-500 focus:bg-white transition-all" placeholder="Full Address Details"></textarea>
                 </div>
 
-                <button @click="saveCustomer()" class="w-full bg-slate-900 text-white p-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black shadow-xl transition-all active:scale-95">
-                    Register & Sync to Cloud
+                <button @click="saveCustomer()" class="w-full bg-slate-900 text-white p-6 rounded-[1.5rem] font-black uppercase tracking-widest hover:bg-blue-600 shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Register & Sync to Cloud
                 </button>
             </div>
         </div>
@@ -107,11 +135,10 @@
         function customerSystem() {
             return {
                 showModal: false,
-                // Added email to data object
                 custData: { name: '', phone: '', gstin: '', email: '', address: '' },
                 
                 async saveCustomer() {
-                    if(!this.custData.name) return alert('Company Name is required');
+                    if(!this.custData.name) return alert('Bhai, Company Name toh daalo!');
                     
                     try {
                         const response = await fetch('/api/save-customer', {
@@ -120,14 +147,16 @@
                             body: JSON.stringify(this.custData)
                         });
 
+                        const result = await response.json();
+
                         if(response.ok) {
-                            alert('Customer Onboarded Successfully!');
+                            alert('SUCCESS: Customer ' + result.code + ' Onboarded!');
                             location.reload();
                         } else {
-                            alert('Sync Error. Please check backend logs.');
+                            alert('Sync Error: ' + (result.message || 'Check logs'));
                         }
                     } catch (err) {
-                        alert('Network Error!');
+                        alert('Network Error! Cloud Sync failed.');
                     }
                 }
             }

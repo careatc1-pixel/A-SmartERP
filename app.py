@@ -16,7 +16,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V26_PRINT_MASTER' 
+    SECRET_KEY='ATHARV_ERP_V27_CUSTOMER_CODE_MASTER' 
 )
 
 db = SQLAlchemy(app)
@@ -34,6 +34,7 @@ class User(UserMixin, db.Model):
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    cust_code = db.Column(db.String(20), unique=True) # Naya Unique Code Column
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100))
     phone = db.Column(db.String(20))
@@ -70,7 +71,7 @@ class SalesOrder(db.Model):
     cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-# --- SALES EXTRA MODELS ---
+# --- EXTRA MODELS (Sales & Purchase) ---
 
 class DeliveryChallan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -106,8 +107,6 @@ class EWayBill(db.Model):
     inv_no = db.Column(db.String(50))
     transporter = db.Column(db.String(100))
     date = db.Column(db.DateTime, default=datetime.utcnow)
-
-# --- PURCHASE MODULE MODELS ---
 
 class Vendor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -200,7 +199,7 @@ def approval_invoices_page():
 @app.route('/sales/customers') 
 @login_required
 def customer_master():
-    customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.name.asc()).all()
+    customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
 
 @app.route('/sales/new') 
@@ -228,51 +227,6 @@ def vendor_master():
     vendors = Vendor.query.filter_by(user_id=current_user.id).all()
     return render_template('vendor_master.html', vendors=vendors, name=current_user.username)
 
-@app.route('/purchase/order/new')
-@login_required
-def new_purchase_order():
-    return "<h3>New Purchase Order Form Working</h3><a href='/purchase/hub'>Back</a>"
-
-@app.route('/purchase/bill/new')
-@login_required
-def new_purchase_bill():
-    return "<h3>New Purchase Bill Form Working</h3><a href='/purchase/hub'>Back</a>"
-
-@app.route('/purchase/payment')
-@login_required
-def purchase_payment():
-    return "<h3>Purchase Payment Module Working</h3><a href='/purchase/hub'>Back</a>"
-
-@app.route('/purchase/debit-note')
-@login_required
-def debit_note():
-    return "<h3>Debit Note Module Working</h3><a href='/purchase/hub'>Back</a>"
-
-# --- EXISTING SALES MODULE ROUTES ---
-
-@app.route('/sales/delivery-challan')
-@login_required
-def delivery_challan():
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('delivery_challan.html', customers=customers, name=current_user.username)
-
-@app.route('/sales/payments')
-@login_required
-def payments_received():
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('payments.html', customers=customers, name=current_user.username)
-
-@app.route('/sales/credit-notes')
-@login_required
-def credit_notes():
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('credit_notes.html', customers=customers, name=current_user.username)
-
-@app.route('/sales/eway-bills')
-@login_required
-def eway_bills():
-    return render_template('eway_bills.html', name=current_user.username)
-
 # --- VIEW & PRINT ROUTES ---
 
 @app.route('/sales/view/<inv_no>')
@@ -296,10 +250,23 @@ def view_sales_order(so_no):
 def save_customer():
     data = request.json
     try:
-        new_cust = Customer(user_id=current_user.id, name=data['name'], email=data.get('email', ''), phone=data.get('phone', ''), gstin=data.get('gstin', ''), address=data.get('address', ''))
+        # Code Generation Logic: ATC/CUST/001
+        last_cust = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).first()
+        next_id = (last_cust.id + 1) if last_cust else 1
+        generated_code = f"ATC/CUST/{next_id:03d}"
+
+        new_cust = Customer(
+            user_id=current_user.id,
+            cust_code=generated_code,
+            name=data['name'],
+            email=data.get('email', ''),
+            phone=data.get('phone', ''),
+            gstin=data.get('gstin', ''),
+            address=data.get('address', '')
+        )
         db.session.add(new_cust)
         db.session.commit()
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "code": generated_code})
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
@@ -346,13 +313,6 @@ def update_status():
     except Exception as e:
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
-
-@app.route('/reports')
-@login_required
-def reports():
-    sales = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.date.desc()).all()
-    orders = SalesOrder.query.filter_by(user_id=current_user.id).order_by(SalesOrder.date.desc()).all()
-    return render_template('reports.html', sales=sales, orders=orders, name=current_user.username)
 
 @app.route('/logout')
 def logout():
