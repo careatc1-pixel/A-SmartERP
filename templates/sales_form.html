@@ -9,7 +9,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #f4f7f9; color: #1a1f36; }
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: #f4f7f9; 
+            color: #1a1f36; 
+        }
         
         @media print {
             @page { 
@@ -20,9 +25,12 @@
             body { background: white !important; padding: 0 !important; margin: 0 !important; }
             .invoice-shell { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
             .content-area { padding: 20mm !important; }
+            input, select, textarea { border: none !important; outline: none !important; background: transparent !important; appearance: none !important; }
         }
+
         .input-clean { border-bottom: 1px solid #e3e8ee; transition: all 0.2s; }
         .input-clean:focus { border-bottom-color: #875A7B; }
+
     </style>
 </head>
 <body class="p-0 md:p-12">
@@ -32,22 +40,23 @@
         <div class="p-4 bg-slate-50 border-b flex justify-between items-center no-print">
             <div class="flex items-center gap-2">
                 <span class="w-2 h-2 bg-[#875A7B] rounded-full animate-pulse"></span>
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Atharv Tech Core | Secure Billing</span>
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Atharv Tech Core | Secure Billing Terminal</span>
             </div>
             <div class="flex gap-3">
-                <button @click="generatePDF()" x-show="isSaved" class="bg-slate-900 text-white px-5 py-2 rounded-lg font-bold text-xs shadow-lg hover:bg-black transition-all">
-                    <i class="fa-solid fa-file-pdf mr-2"></i> DOWNLOAD PDF
+                <button @click="generatePDF()" class="bg-slate-900 text-white px-5 py-2 rounded-lg font-bold text-xs shadow-lg hover:bg-black transition-all">
+                    <i class="fa-solid fa-print mr-2"></i> PRINT / SAVE PDF
                 </button>
                 <a href="/sales/hub" class="bg-white border px-5 py-2 rounded-lg font-bold text-xs text-slate-600 hover:bg-slate-50 transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-left"></i> EXIT TO SALES HUB
+                    <i class="fa-solid fa-arrow-left"></i> EXIT TO HUB
                 </a>
             </div>
         </div>
 
-        <div class="content-area p-10 md:p-16 bg-white">
+        <div class="content-area p-10 md:p-16 bg-white" id="printableArea">
+            
             <div class="flex justify-between items-start mb-16">
                 <div class="space-y-4">
-                    <h1 class="text-3xl font-extrabold tracking-tighter text-slate-900">ATHARV TECH CO.</h1>
+                    <h1 class="text-3xl font-extrabold tracking-tighter text-slate-900 uppercase">ATHARV TECH CO.</h1>
                     <div class="text-[12px] text-slate-500 font-medium leading-relaxed">
                         <p>Plot No. 12, Sector 5, Dwarka</p>
                         <p>New Delhi, India - 110075</p>
@@ -97,23 +106,29 @@
                     <template x-for="(item, index) in items" :key="index">
                         <tr class="group">
                             <td class="py-6">
-                                <input type="text" x-model="item.name" placeholder="Describe service or product" class="w-full font-semibold text-slate-800 focus:outline-none">
+                                <input type="text" x-model="item.name" placeholder="Describe service or product" class="w-full font-semibold text-slate-800 focus:outline-none bg-transparent">
                             </td>
                             <td class="py-6 text-center">
-                                <input type="number" x-model.number="item.qty" @input="calculate()" class="w-full text-center font-medium outline-none">
+                                <input type="number" x-model.number="item.qty" @input="calculate()" class="w-full text-center font-medium outline-none bg-transparent">
                             </td>
                             <td class="py-6 text-right font-medium">
-                                <input type="number" x-model.number="item.price" @input="calculate()" class="w-full text-right outline-none">
+                                <input type="number" x-model.number="item.price" @input="calculate()" class="w-full text-right outline-none bg-transparent">
                             </td>
                             <td class="py-6 text-center">
                                 <select x-model.number="item.gstSlab" @change="calculate()" class="no-print font-bold text-[11px] bg-slate-50 p-1 rounded outline-none cursor-pointer">
-                                    <option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option><option value="28">28%</option>
+                                    <option value="0">0%</option>
+                                    <option value="5">5%</option>
+                                    <option value="12">12%</option>
+                                    <option value="18">18%</option>
+                                    <option value="28">28%</option>
                                 </select>
                                 <span class="hidden print:block text-[11px] font-bold" x-text="item.gstSlab + '%'"></span>
                             </td>
                             <td class="py-6 text-right font-bold text-slate-900" x-text="'₹' + (item.qty * item.price).toLocaleString('en-IN', {minimumFractionDigits: 2})"></td>
                             <td class="py-6 text-right no-print">
-                                <button @click="removeItem(index)" class="text-slate-200 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark"></i></button>
+                                <button @click="removeItem(index)" class="text-slate-200 hover:text-red-500 transition-colors">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
                             </td>
                         </tr>
                     </template>
@@ -123,15 +138,17 @@
             <button @click="addItem()" class="no-print text-[10px] font-black uppercase text-slate-400 hover:text-[#875A7B] tracking-widest mb-16">+ Add Line Item</button>
 
             <div class="flex justify-between items-start border-t pt-10 border-slate-100">
+                
                 <div class="max-w-[280px]">
                     <h4 class="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Bank Credentials</h4>
-                    <div class="text-[11px] text-slate-600 space-y-1 font-medium italic">
+                    <div class="text-[11px] text-slate-600 space-y-1 font-medium italic leading-relaxed">
                         <p>Bank: <span class="text-slate-900 font-bold">HDFC BANK LTD</span></p>
                         <p>Account: <span class="text-slate-900 font-bold">ATHARV TECH CO.</span></p>
                         <p>A/c No: <span class="text-slate-900 font-bold">50200012345678</span></p>
                         <p>IFSC Code: <span class="text-slate-900 font-bold">HDFC0001234</span></p>
                     </div>
                 </div>
+
                 <div class="w-64 space-y-3">
                     <div class="flex justify-between text-xs font-semibold text-slate-500">
                         <span>Items Subtotal</span>
@@ -163,6 +180,7 @@
                         <span x-text="'₹' + total.toLocaleString('en-IN', {minimumFractionDigits: 2})"></span>
                     </div>
                 </div>
+
             </div>
 
             <div class="mt-20 flex justify-between items-end">
@@ -179,57 +197,84 @@
                     class="no-print w-full bg-slate-900 text-white p-6 rounded-xl font-black uppercase tracking-widest mt-16 shadow-xl hover:bg-black transition-all active:scale-[0.98]">
                 Validate & Finalize Invoice
             </button>
+            
         </div>
     </div>
 
     <script>
         function invoiceSystem() {
             return {
-                clientName: '',
-                invNo: 'ATC/26-27/' + String(Math.floor(Date.now() / 1000)).slice(-3),
-                invoiceDate: new Date().toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'}),
+                clientName: "{{ invoice.client_name if invoice else '' }}",
+                invNo: "{{ invoice.inv_no if invoice else 'ATC/26-27/' + String(Math.floor(Date.now() / 1000)).slice(-3) }}",
+                invoiceDate: "{{ invoice.date.strftime('%d %b %Y') if invoice else 'PENDING' }}",
+                
                 items: [{ name: '', qty: 1, price: 0, gstSlab: 18 }],
-                subtotal: 0,
-                totalGst: 0,
+                
+                subtotal: {{ invoice.total_amount - invoice.gst_amount if invoice else 0 }},
+                totalGst: {{ invoice.gst_amount if invoice else 0 }},
                 freight: 0,
                 roundOff: 0,
-                total: 0,
-                isSaved: false,
+                total: {{ invoice.total_amount if invoice else 0 }},
+                
+                isSaved: {{ 'true' if invoice else 'false' }},
 
-                addItem() { this.items.push({ name: '', qty: 1, price: 0, gstSlab: 18 }); },
-                removeItem(i) { if(this.items.length > 1) this.items.splice(i, 1); this.calculate(); },
+                init() {
+                    // Logic to handle auto-print for approved invoices
+                    if("{{ mode }}" === "print") {
+                        console.log("Print mode active. Triggering browser print.");
+                        setTimeout(() => { 
+                            window.print(); 
+                        }, 1200);
+                    }
+                    
+                    // Logic for Dynamic Date
+                    if(this.invoiceDate === 'PENDING') {
+                        let d = new Date();
+                        this.invoiceDate = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
+                    }
+                },
+
+                addItem() { 
+                    this.items.push({ name: '', qty: 1, price: 0, gstSlab: 18 }); 
+                },
+
+                removeItem(i) { 
+                    if(this.items.length > 1) {
+                        this.items.splice(i, 1); 
+                    }
+                    this.calculate(); 
+                },
 
                 calculate() {
-                    // 1. Items ka basic subtotal
+                    // 1. Calculate Items Base Value
                     this.subtotal = this.items.reduce((acc, item) => acc + (item.qty * item.price), 0);
                     
-                    // 2. GST Calculation (Items + Freight proportionately)
-                    // Logic: Hum freight ko total taxable value ka hissa maan rahe hain.
+                    // 2. Freight Logic
                     let freightVal = parseFloat(this.freight) || 0;
                     
-                    // Sabhi items ka individual GST sum
+                    // 3. GST Calculation Logic
                     let itemsGst = this.items.reduce((acc, item) => acc + (item.qty * item.price * (item.gstSlab / 100)), 0);
-                    
-                    // Freight par GST (Default 18% ya aap ise dynamic bhi kar sakte hain)
                     let freightGst = freightVal * 0.18; 
-
+                    
                     this.totalGst = itemsGst + freightGst;
                     
-                    // 3. Raw Total Calculation
+                    // 4. Grand Total & Rounding
                     let rawTotal = this.subtotal + freightVal + this.totalGst;
-                    
-                    // 4. Rounding Logic
                     let roundedTotal = Math.round(rawTotal);
-                    this.roundOff = roundedTotal - rawTotal;
                     
-                    // 5. Final Total
+                    this.roundOff = roundedTotal - rawTotal;
                     this.total = roundedTotal;
                 },
 
-                generatePDF() { window.print(); },
+                generatePDF() { 
+                    window.print(); 
+                },
 
                 async saveAndLock() {
-                    if(!this.clientName) return alert('Customer Name is required!');
+                    if(!this.clientName) {
+                        return alert('Customer Name is required to save!');
+                    }
+                    
                     try {
                         const response = await fetch('/api/save-sale', {
                             method: 'POST',
@@ -241,16 +286,15 @@
                                 gst: this.totalGst
                             })
                         });
-                        const result = await response.json();
+                        
                         if(response.ok) {
                             this.isSaved = true;
-                            alert('Cloud Sync Complete! Downloading PDF.');
-                            setTimeout(() => { this.generatePDF(); }, 800);
+                            alert('Cloud Sync Successful! You can now print.');
                         } else {
-                            alert('Cloud Sync Failed: ' + (result.message || 'Unknown Error'));
+                            alert('Cloud Sync Failed. Please check network.');
                         }
-                    } catch (e) {
-                        alert('Network Error!');
+                    } catch (e) { 
+                        alert('Fatal Error: Network connection lost.'); 
                     }
                 }
             }

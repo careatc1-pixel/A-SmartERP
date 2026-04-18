@@ -16,7 +16,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V25_PURCHASE_INTEGRATION' 
+    SECRET_KEY='ATHARV_ERP_V26_PRINT_MASTER' 
 )
 
 db = SQLAlchemy(app)
@@ -260,7 +260,7 @@ def delivery_challan():
 @login_required
 def payments_received():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('payments_received.html', customers=customers, name=current_user.username)
+    return render_template('payments.html', customers=customers, name=current_user.username)
 
 @app.route('/sales/credit-notes')
 @login_required
@@ -272,6 +272,22 @@ def credit_notes():
 @login_required
 def eway_bills():
     return render_template('eway_bills.html', name=current_user.username)
+
+# --- VIEW & PRINT ROUTES ---
+
+@app.route('/sales/view/<inv_no>')
+@login_required
+def view_invoice(inv_no):
+    invoice = SaleInvoice.query.filter_by(inv_no=inv_no, user_id=current_user.id).first()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_form.html', invoice=invoice, customers=customers, mode='print', name=current_user.username)
+
+@app.route('/sales/order/view/<so_no>')
+@login_required
+def view_sales_order(so_no):
+    order = SalesOrder.query.filter_by(so_no=so_no, user_id=current_user.id).first()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_order_form.html', order=order, customers=customers, mode='print', name=current_user.username)
 
 # --- API ENDPOINTS ---
 
