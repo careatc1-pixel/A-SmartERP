@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 import pandas as pd
 from io import BytesIO
-from sqlalchemy import text
+from sqlalchemy import text # Import fixed
 
 app = Flask(__name__)
 
@@ -17,7 +17,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_ERP_V27_CUSTOMER_CODE_MASTER' 
+    SECRET_KEY='ATHARV_ERP_V28_FINAL_FIX' 
 )
 
 db = SQLAlchemy(app)
@@ -35,7 +35,7 @@ class User(UserMixin, db.Model):
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    cust_code = db.Column(db.String(20), unique=True) # Naya Unique Code Column
+    cust_code = db.Column(db.String(20), unique=True) 
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100))
     phone = db.Column(db.String(20))
@@ -71,8 +71,6 @@ class SalesOrder(db.Model):
     status = db.Column(db.String(20), default='Pending')
     cancel_reason = db.Column(db.String(255))
     date = db.Column(db.DateTime, default=datetime.utcnow)
-
-# --- EXTRA MODELS (Sales & Purchase) ---
 
 class DeliveryChallan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -147,19 +145,19 @@ class DebitNote(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- DATABASE FIX ROUTE ---
+# --- CRITICAL FIX ROUTE ---
 @app.route('/fix-db')
 def fix_database():
     try:
-        # Manual migration command for existing table
-        db.session.execute(text('ALTER TABLE customer ADD COLUMN IF NOT EXISTS cust_code VARCHAR(20) UNIQUE;'))
+        # Step 1: Forcefully add column
+        db.session.execute(text("ALTER TABLE customer ADD COLUMN IF NOT EXISTS cust_code VARCHAR(20) UNIQUE;"))
         db.session.commit()
-        return "<h3>Database Updated!</h3><p>Column 'cust_code' added successfully. You can now use Customer Master.</p><a href='/sales/customers'>Go to Customer Master</a>"
+        return "<h3>Success!</h3><p>Database structure synced. Now open Customer Master.</p>"
     except Exception as e:
         db.session.rollback()
         return f"Error: {str(e)}"
 
-# --- CORE ROUTES ---
+# --- ROUTES ---
 
 @app.route('/')
 def index():
@@ -212,6 +210,7 @@ def approval_invoices_page():
 @app.route('/sales/customers') 
 @login_required
 def customer_master():
+    # Fetching all customers to show in master table
     customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
 
@@ -227,8 +226,6 @@ def new_sales_order():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', customers=customers, name=current_user.username)
 
-# --- PURCHASE ROUTES ---
-
 @app.route('/purchase/hub')
 @login_required
 def purchase_hub():
@@ -239,8 +236,6 @@ def purchase_hub():
 def vendor_master():
     vendors = Vendor.query.filter_by(user_id=current_user.id).all()
     return render_template('vendor_master.html', vendors=vendors, name=current_user.username)
-
-# --- VIEW & PRINT ROUTES ---
 
 @app.route('/sales/view/<inv_no>')
 @login_required
@@ -256,14 +251,13 @@ def view_sales_order(so_no):
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', order=order, customers=customers, mode='print', name=current_user.username)
 
-# --- API ENDPOINTS ---
+# --- APIs ---
 
 @app.route('/api/save-customer', methods=['POST'])
 @login_required
 def save_customer():
     data = request.json
     try:
-        # Code Generation Logic: ATC/CUST/001
         last_cust = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).first()
         next_id = (last_cust.id + 1) if last_cust else 1
         generated_code = f"ATC/CUST/{next_id:03d}"
