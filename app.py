@@ -18,14 +18,14 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_A_SUIT_SAAS_V1_MASTER' 
+    SECRET_KEY='ATHARV_SAAS_V2_COMPLETE' 
 )
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- SAAS & SALES MODELS ---
+# --- MODELS (Purana Structure + SaaS Isolation) ---
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,7 +36,7 @@ class User(UserMixin, db.Model):
 
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # SaaS Isolation
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     cust_code = db.Column(db.String(50))
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100))
@@ -47,7 +47,7 @@ class Customer(db.Model):
 
 class SaleInvoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # SaaS Isolation
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     inv_no = db.Column(db.String(50), unique=True)
     client_name = db.Column(db.String(100))
     total_amount = db.Column(db.Float)
@@ -58,42 +58,11 @@ class SaleInvoice(db.Model):
 
 class SalesOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # SaaS Isolation
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     so_no = db.Column(db.String(50), unique=True)
     client_name = db.Column(db.String(100))
     total_amount = db.Column(db.Float)
     status = db.Column(db.String(20), default='Pending')
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-
-class DeliveryChallan(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    dc_no = db.Column(db.String(50), unique=True)
-    client_name = db.Column(db.String(100))
-    vehicle_no = db.Column(db.String(20))
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-
-class EWayBill(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    ewb_no = db.Column(db.String(20), unique=True)
-    inv_no = db.Column(db.String(50))
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-
-class PaymentReceived(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    client_name = db.Column(db.String(100))
-    amount = db.Column(db.Float)
-    mode = db.Column(db.String(50))
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-
-class CreditNote(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    cn_no = db.Column(db.String(50), unique=True)
-    client_name = db.Column(db.String(100))
-    amount = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 # --- SAAS CORE LOGIC ---
@@ -102,16 +71,25 @@ class CreditNote(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/')
+def index():
+    # Home page seedha login par bhejega agar logged in nahi hai
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
 @app.route('/saas-init')
 def init_saas():
     db.create_all()
-    return "SaaS Tables Initialized!"
+    return "SaaS Environment Initialized! Tables Ready."
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         hashed_pw = generate_password_hash(request.form.get('password'))
-        new_user = User(username=request.form.get('username'), password=hashed_pw, company_name=request.form.get('company'))
+        new_user = User(username=request.form.get('username'), 
+                        password=hashed_pw, 
+                        company_name=request.form.get('company'))
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
@@ -126,7 +104,7 @@ def login():
             return redirect(url_for('dashboard'))
     return render_template('login.html')
 
-# --- MODULES WITH TENANT ISOLATION ---
+# --- DASHBOARD & HUB ---
 
 @app.route('/dashboard')
 @login_required
@@ -134,39 +112,64 @@ def dashboard():
     invoices = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.id.desc()).all()
     return render_template('dashboard.html', invoices=invoices, company=current_user.company_name, name=current_user.username)
 
+@app.route('/sales/hub')
+@login_required
+def sales_hub():
+    return render_template('sales_hub.html', name=current_user.username)
+
+# --- PURANE MODULES (Fixing 404) ---
+
 @app.route('/sales/customers') 
 @login_required
 def customer_master():
-    customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.name.asc()).all()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/new') 
+@login_required
+def new_sales():
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_form.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/order/new') 
+@login_required
+def new_sales_order():
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_order_form.html', customers=customers, name=current_user.username)
 
 @app.route('/sales/approvals/orders')
 @login_required
 def approval_orders_page():
-    data = SalesOrder.query.filter_by(user_id=current_user.id).order_by(SalesOrder.date.desc()).all()
-    return render_template('approval_list.html', data=data, title="Sales Order Approval Queue", type='orders', name=current_user.username)
+    data = SalesOrder.query.filter_by(user_id=current_user.id).all()
+    return render_template('approval_list.html', data=data, title="Sales Order Queue", type='orders', name=current_user.username)
+
+@app.route('/sales/approvals/invoices')
+@login_required
+def approval_invoices_page():
+    data = SaleInvoice.query.filter_by(user_id=current_user.id).all()
+    return render_template('approval_list.html', data=data, title="Invoice Queue", type='invoices', name=current_user.username)
 
 @app.route('/sales/delivery-challan')
 @login_required
 def delivery_challan():
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('delivery_challan.html', customers=customers, name=current_user.username)
+    return render_template('delivery_challan.html', name=current_user.username)
 
 @app.route('/sales/eway-bills')
 @login_required
 def eway_bills():
     return render_template('eway_bills.html', name=current_user.username)
 
-# --- VIEW & PRINT (SaaS Safe) ---
-
-@app.route('/sales/view/<inv_no>')
+@app.route('/sales/payments')
 @login_required
-def view_invoice(inv_no):
-    invoice = SaleInvoice.query.filter_by(inv_no=inv_no, user_id=current_user.id).first()
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('sales_form.html', invoice=invoice, customers=customers, mode='print', name=current_user.username)
+def payments_received():
+    return render_template('payments_received.html', name=current_user.username)
 
-# --- API ENDPOINTS (SaaS Protected) ---
+@app.route('/sales/credit-notes')
+@login_required
+def credit_notes():
+    return render_template('credit_notes.html', name=current_user.username)
+
+# --- API ENDPOINTS ---
 
 @app.route('/api/save-customer', methods=['POST'])
 @login_required
@@ -176,12 +179,11 @@ def save_customer():
         last_cust = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).first()
         next_id = (last_cust.id + 1) if last_cust else 1
         gen_code = f"ATC/CUST/{next_id:03d}"
-        new_cust = Customer(user_id=current_user.id, cust_code=gen_code, name=data['name'], phone=data.get('phone'), gstin=data.get('gstin'), address=data.get('address'))
+        new_cust = Customer(user_id=current_user.id, cust_code=gen_code, name=data['name'], phone=data.get('phone'))
         db.session.add(new_cust)
         db.session.commit()
         return jsonify({"status": "success", "code": gen_code})
     except Exception as e:
-        db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
 
 @app.route('/logout')
