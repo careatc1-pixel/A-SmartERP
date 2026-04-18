@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 import pandas as pd
 from io import BytesIO
+from sqlalchemy import text
 
 app = Flask(__name__)
 
@@ -145,6 +146,18 @@ class DebitNote(db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# --- DATABASE FIX ROUTE ---
+@app.route('/fix-db')
+def fix_database():
+    try:
+        # Manual migration command for existing table
+        db.session.execute(text('ALTER TABLE customer ADD COLUMN IF NOT EXISTS cust_code VARCHAR(20) UNIQUE;'))
+        db.session.commit()
+        return "<h3>Database Updated!</h3><p>Column 'cust_code' added successfully. You can now use Customer Master.</p><a href='/sales/customers'>Go to Customer Master</a>"
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}"
 
 # --- CORE ROUTES ---
 
