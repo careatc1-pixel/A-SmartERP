@@ -29,7 +29,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(500), nullable=False) 
     company_name = db.Column(db.String(100))
-    # Naye Fields for Registration
+    # Profile Fields
     contact_no = db.Column(db.String(20))
     email = db.Column(db.String(100))
     address = db.Column(db.Text)
@@ -50,25 +50,23 @@ class Customer(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- DATABASE AUTO-REPAIR (MANDATORY FOR NEW FIELDS) ---
+# --- DATABASE AUTO-REPAIR FUNCTION ---
 def repair_database():
     try:
         with app.app_context():
-            # 1. Type Fixes
+            # Force Update Columns
             db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
-            
-            # 2. Add New Columns if they don't exist
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS contact_no VARCHAR(20)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS address TEXT'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
-            
             db.session.commit()
-            print("Database Schema Updated with New Registration Fields!")
+            return True
     except Exception as e:
         db.session.rollback()
         print(f"DB Repair Info: {e}")
+        return False
 
 # --- ROUTES ---
 
@@ -78,9 +76,16 @@ def index():
         return redirect(url_for('dashboard'))
     return render_template('index.html')
 
+@app.route('/force-sync-db')
+def force_sync():
+    # Secret URL to manually trigger database repair
+    if repair_database():
+        return "<h3>Database Sync Successful! Naye columns add ho gaye hain.</h3><a href='/register'>Go to Register</a>"
+    return "<h3>Database Sync Failed! Check logs.</h3>"
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    repair_database() # Automatically updates DB when someone visits register page
+    repair_database() 
     if request.method == 'POST':
         try:
             hashed_pw = generate_password_hash(request.form.get('password'))
@@ -122,7 +127,6 @@ def dashboard():
     try:
         user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
         comp_name = current_user.company_name if current_user.company_name else "ATC Workspace"
-        
         return render_template('dashboard.html', 
                                user_modules=user_modules, 
                                company=comp_name, 
@@ -137,7 +141,6 @@ def dashboard():
 def sales_hub():
     if 'sales' not in current_user.subscribed_modules:
         return "<h3>Access Denied: Module not in your plan.</h3><a href='/dashboard'>Back</a>"
-    
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
 
