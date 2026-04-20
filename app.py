@@ -22,13 +22,17 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- MODELS ---
+# --- MODELS (SaaS Ready with Full Profiles) ---
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    # Password length increased to 500 to handle long scrypt hashes
     password = db.Column(db.String(500), nullable=False) 
     company_name = db.Column(db.String(100))
+    # Naye Fields for Registration
+    contact_no = db.Column(db.String(20))
+    email = db.Column(db.String(100))
+    address = db.Column(db.Text)
     subscribed_modules = db.Column(db.String(255), default='sales') 
 
 class SalesOrder(db.Model):
@@ -46,19 +50,22 @@ class Customer(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- DATABASE AUTO-REPAIR (ZABARDASTI FIX) ---
+# --- DATABASE AUTO-REPAIR (MANDATORY FOR NEW FIELDS) ---
 def repair_database():
     try:
         with app.app_context():
-            # 1. Password column ki length badhao (Amrik wala error fix)
+            # 1. Type Fixes
             db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
             
-            # 2. Missing columns add karo agar nahi hain toh
+            # 2. Add New Columns if they don't exist
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS contact_no VARCHAR(20)'))
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS address TEXT'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
             
             db.session.commit()
-            print("Database Schema Repaired Successfully!")
+            print("Database Schema Updated with New Registration Fields!")
     except Exception as e:
         db.session.rollback()
         print(f"DB Repair Info: {e}")
@@ -73,13 +80,10 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # Har registration se pehle DB check karega taaki error na aaye
-    repair_database()
+    repair_database() # Automatically updates DB when someone visits register page
     if request.method == 'POST':
         try:
-            # Secure password hashing
             hashed_pw = generate_password_hash(request.form.get('password'))
-            # Capture selected modules
             modules_list = request.form.getlist('modules')
             modules_str = ",".join(modules_list) if modules_list else 'sales'
             
@@ -87,6 +91,9 @@ def register():
                 username=request.form.get('username'),
                 password=hashed_pw,
                 company_name=request.form.get('company'),
+                contact_no=request.form.get('contact'),
+                email=request.form.get('email'),
+                address=request.form.get('address'),
                 subscribed_modules=modules_str
             )
             db.session.add(new_user)
@@ -94,7 +101,7 @@ def register():
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            return f"Registration Error (Bhai DB fix check karo): {str(e)}"
+            return f"Registration Error: {str(e)}"
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -103,7 +110,6 @@ def login():
         u = User.query.filter_by(username=request.form.get('username')).first()
         pass_input = request.form.get('password')
         if u:
-            # Compatibility check: Plain text (purana) aur Hashed (naya) dono chalenge
             if u.password == pass_input or check_password_hash(u.password, pass_input):
                 login_user(u)
                 return redirect(url_for('dashboard'))
@@ -114,7 +120,6 @@ def login():
 @login_required
 def dashboard():
     try:
-        # Crash-proof handling for modules and company name
         user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
         comp_name = current_user.company_name if current_user.company_name else "ATC Workspace"
         
@@ -130,7 +135,6 @@ def dashboard():
 @app.route('/sales/hub')
 @login_required
 def sales_hub():
-    # Module restriction
     if 'sales' not in current_user.subscribed_modules:
         return "<h3>Access Denied: Module not in your plan.</h3><a href='/dashboard'>Back</a>"
     
