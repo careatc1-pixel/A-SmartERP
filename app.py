@@ -15,7 +15,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_SAAS_FINAL_STABLE' 
+    SECRET_KEY='ATHARV_SAAS_V5_STABLE_FINAL' 
 )
 
 db = SQLAlchemy(app)
@@ -30,15 +30,25 @@ class User(UserMixin, db.Model):
     company_name = db.Column(db.String(100))
     subscribed_modules = db.Column(db.String(255), default='sales') 
 
+class SalesOrder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    so_no = db.Column(db.String(50), unique=True)
+    status = db.Column(db.String(20), default='Pending')
+
+class Customer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    name = db.Column(db.String(100), nullable=False)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- DATABASE AUTO-REPAIR FUNCTION ---
+# --- DATABASE AUTO-REPAIR ---
 def repair_database():
     try:
         with app.app_context():
-            # Zabardasti missing columns add karna
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
             db.session.commit()
@@ -55,12 +65,11 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    repair_database() # Pehle DB theek karega phir register
+    repair_database()
     if request.method == 'POST':
         try:
             hashed_pw = generate_password_hash(request.form.get('password'))
             modules = ",".join(request.form.getlist('modules')) or 'sales'
-            
             new_user = User(
                 username=request.form.get('username'),
                 password=hashed_pw,
@@ -79,9 +88,9 @@ def register():
 def login():
     if request.method == 'POST':
         u = User.query.filter_by(username=request.form.get('username')).first()
-        # Dono check: Plain Text (purana) aur Hashed (naya)
         pass_input = request.form.get('password')
         if u:
+            # Check for both plain text and hashed for backward compatibility
             if u.password == pass_input or check_password_hash(u.password, pass_input):
                 login_user(u)
                 return redirect(url_for('dashboard'))
@@ -100,6 +109,24 @@ def dashboard():
                                username=current_user.username)
     except Exception as e:
         return f"Dashboard Error: {str(e)}"
+
+# --- ACCOUNTING / SALES MODULES (FIXED LINKS) ---
+
+@app.route('/sales/hub')
+@login_required
+def sales_hub():
+    # Security check: User must have sales module
+    if 'sales' not in current_user.subscribed_modules:
+        return "<h3>Access Denied: Sales Module not purchased.</h3><a href='/dashboard'>Back</a>"
+    
+    so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
+    return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
+
+@app.route('/sales/customers') 
+@login_required
+def customer_master():
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('customer_master.html', customers=customers, name=current_user.username)
 
 @app.route('/logout')
 def logout():
