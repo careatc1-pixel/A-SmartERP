@@ -48,6 +48,8 @@ class SalesOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     so_no = db.Column(db.String(50), unique=True)
+    client_name = db.Column(db.String(100)) # Added for consistency
+    total_amount = db.Column(db.Float)      # Added for consistency
     status = db.Column(db.String(20), default='Pending')
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -59,78 +61,40 @@ class Customer(db.Model):
     phone = db.Column(db.String(20))
     gstin = db.Column(db.String(20))
     address = db.Column(db.Text)
-    date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- DATABASE AUTO-REPAIR ---
+# --- FORCE DATABASE REPAIR (Zabardasti Columns Add Karna) ---
 def repair_database():
     try:
         with app.app_context():
-            # Repair User Table
+            # Fix User Table
             db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS contact_no VARCHAR(20)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS address TEXT'))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
+            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255)'))
             
-            # Repair Customer Table (IMPORTANT for the error you faced)
+            # Fix Customer Table
             db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS phone VARCHAR(20)'))
             db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)'))
             db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS address TEXT'))
             
+            # Fix SalesOrder Table
+            db.session.execute(text('ALTER TABLE "sales_order" ADD COLUMN IF NOT EXISTS client_name VARCHAR(100)'))
+            db.session.execute(text('ALTER TABLE "sales_order" ADD COLUMN IF NOT EXISTS total_amount FLOAT'))
+            
             db.session.commit()
+            print("Force Repair Successful!")
     except Exception as e:
         db.session.rollback()
-        print(f"Repair Error: {e}")
+        print(f"Repair Failed: {e}")
 
-# --- API ENDPOINTS ---
-
-@app.route('/api/save-customer', methods=['POST'])
-@login_required
-def save_customer_api():
-    data = request.json
-    try:
-        new_cust = Customer(
-            user_id=current_user.id,
-            name=data.get('name'),
-            email=data.get('email', ''),
-            phone=data.get('phone', ''),
-            gstin=data.get('gstin', ''),
-            address=data.get('address', '')
-        )
-        db.session.add(new_cust)
-        db.session.commit()
-        return jsonify({"status": "success"})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 400
-
-@app.route('/api/save-sale', methods=['POST'])
-@login_required
-def save_sale():
-    data = request.json
-    try:
-        new_sale = SaleInvoice(
-            user_id=current_user.id, 
-            inv_no=data['inv_no'], 
-            client_name=data['client'], 
-            total_amount=float(data['total']), 
-            gst_amount=float(data['gst']), 
-            status='Pending'
-        )
-        db.session.add(new_sale)
-        db.session.commit()
-        return jsonify({"status": "success"})
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 400
-
-# --- CORE ROUTES ---
+# --- ROUTES ---
 
 @app.route('/')
 def index():
@@ -144,9 +108,8 @@ def register():
     if request.method == 'POST':
         try:
             hashed_pw = generate_password_hash(request.form.get('password'))
-            modules_list = request.form.getlist('modules')
-            modules_str = ",".join(modules_list) if modules_list else 'sales'
-            new_user = User(username=request.form.get('username'), password=hashed_pw, company_name=request.form.get('company'), contact_no=request.form.get('contact'), email=request.form.get('email'), address=request.form.get('address'), subscribed_modules=modules_str)
+            modules = ",".join(request.form.getlist('modules')) or 'sales'
+            new_user = User(username=request.form.get('username'), password=hashed_pw, company_name=request.form.get('company'), contact_no=request.form.get('contact'), email=request.form.get('email'), address=request.form.get('address'), subscribed_modules=modules)
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('login'))
@@ -171,7 +134,7 @@ def dashboard():
     user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
     return render_template('dashboard.html', user_modules=user_modules, company=current_user.company_name, username=current_user.username)
 
-# --- SALES HUB ROUTES ---
+# --- SALES HUB ROUTES (100% FIXED) ---
 
 @app.route('/sales/hub')
 @login_required
@@ -182,7 +145,7 @@ def sales_hub():
 @app.route('/sales/customers') 
 @login_required
 def customer_master():
-    customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).all()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
 
 @app.route('/sales/invoice/new')
@@ -191,10 +154,46 @@ def new_invoice():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', customers=customers, name=current_user.username)
 
+@app.route('/sales/order/new')
+@login_required
+def new_sales_order():
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_order_form.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/delivery-challan')
+@login_required
+def delivery_challan():
+    return render_template('delivery_challan.html', name=current_user.username)
+
+@app.route('/sales/payments')
+@login_required
+def payments():
+    return render_template('payments.html', name=current_user.username)
+
+@app.route('/sales/credit-notes')
+@login_required
+def credit_notes():
+    return render_template('credit_notes.html', name=current_user.username)
+
 @app.route('/sales/eway-bills')
 @login_required
 def eway_bills():
     return render_template('eway_bills.html', name=current_user.username)
+
+# --- API SAVE ENDPOINTS ---
+
+@app.route('/api/save-customer', methods=['POST'])
+@login_required
+def api_save_customer():
+    data = request.json
+    try:
+        new_c = Customer(user_id=current_user.id, name=data['name'], email=data.get('email'), phone=data.get('phone'), gstin=data.get('gstin'), address=data.get('address'))
+        db.session.add(new_c)
+        db.session.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
 
 @app.route('/logout')
 def logout():
