@@ -193,3 +193,17 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    # --- TEMPORARY DATABASE REPAIR ROUTE ---
+@app.route('/repair-db')
+def repair_db():
+    try:
+        # Ye command database mein missing columns zabardasti add karegi
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
+        db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT \'Admin\''))
+        db.session.commit()
+        return "Database Repair Successful! Ab registration try kijiye."
+    except Exception as e:
+        db.session.rollback()
+        return f"Repair Failed: {str(e)}"
