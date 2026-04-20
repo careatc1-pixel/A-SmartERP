@@ -40,6 +40,7 @@ class SalesOrder(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     so_no = db.Column(db.String(50), unique=True)
     status = db.Column(db.String(20), default='Pending')
+    date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -54,7 +55,6 @@ def load_user(user_id):
 def repair_database():
     try:
         with app.app_context():
-            # Force Update Columns
             db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS contact_no VARCHAR(20)'))
@@ -65,7 +65,6 @@ def repair_database():
             return True
     except Exception as e:
         db.session.rollback()
-        print(f"DB Repair Info: {e}")
         return False
 
 # --- ROUTES ---
@@ -78,10 +77,9 @@ def index():
 
 @app.route('/force-sync-db')
 def force_sync():
-    # Secret URL to manually trigger database repair
     if repair_database():
-        return "<h3>Database Sync Successful! Naye columns add ho gaye hain.</h3><a href='/register'>Go to Register</a>"
-    return "<h3>Database Sync Failed! Check logs.</h3>"
+        return "<h3>Database Sync Successful!</h3><a href='/register'>Go to Register</a>"
+    return "<h3>Database Sync Failed!</h3>"
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -134,7 +132,7 @@ def dashboard():
     except Exception as e:
         return f"Dashboard Access Error: {str(e)}"
 
-# --- MODULE ROUTES ---
+# --- MAIN SALES HUB ROUTE ---
 
 @app.route('/sales/hub')
 @login_required
@@ -144,11 +142,42 @@ def sales_hub():
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
 
+# --- SALES HUB SUB-MODULE ROUTES (RESTORED) ---
+
 @app.route('/sales/customers') 
 @login_required
 def customer_master():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/invoice/new')
+@login_required
+def new_invoice():
+    # Tax Invoice logic
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_form.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/order/new')
+@login_required
+def new_sales_order():
+    # Sales Order / Quotation logic
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_order_form.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/delivery-challan')
+@login_required
+def delivery_challan_page():
+    return render_template('delivery_challan.html', name=current_user.username)
+
+@app.route('/sales/payments')
+@login_required
+def payments_page():
+    return render_template('payments.html', name=current_user.username)
+
+@app.route('/sales/credit-notes')
+@login_required
+def credit_notes_page():
+    return render_template('credit_notes.html', name=current_user.username)
 
 @app.route('/logout')
 def logout():
