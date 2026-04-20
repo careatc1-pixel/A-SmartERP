@@ -38,21 +38,19 @@
             transform: scale(1.05);
             box-shadow: 0 10px 20px rgba(135, 90, 123, 0.3);
         }
-
-        /* Logo Glow Effect */
-        .logo-glow {
-            filter: drop-shadow(0 0 8px rgba(135, 90, 123, 0.2));
-        }
     </style>
 </head>
 <body class="hero-gradient min-h-screen">
 
-    <nav class="flex items-center justify-between px-8 md:px-20 py-4 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <nav class="flex items-center justify-between px-8 md:px-20 py-6 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-10">
             <div class="flex items-center gap-3">
-                <img src="{{ url_for('static', filename='logo.png') }}" class="w-12 h-12 object-contain logo-glow" alt="A-Smart Logo">
-                <span class="text-xl font-black tracking-tighter uppercase">A-Smart<span class="odoo-purple">ERP</span></span>
+                <div class="w-10 h-10 bg-[#875A7B] rounded-xl flex items-center justify-center text-white shadow-sm">
+                    <i class="fa-solid fa-layer-group text-xl"></i>
+                </div>
+                <span class="text-xl font-black tracking-tighter uppercase text-slate-900">A-Smart<span class="odoo-purple">ERP</span></span>
             </div>
+            
             <div class="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-widest text-slate-400">
                 <a href="#" class="nav-link py-2 transition-all">Products</a>
                 <a href="#" class="nav-link py-2 transition-all">Enterprise</a>
@@ -61,8 +59,8 @@
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <a href="/login" class="text-sm font-bold text-slate-600 hover:text-purple-700">Sign In</a>
-            <a href="/register" class="bg-odoo-purple text-white px-6 py-2.5 rounded-lg text-sm font-bold btn-animate">GET STARTED FOR FREE</a>
+            <a href="/login" class="text-sm font-bold text-slate-600 hover:text-purple-700 transition-colors">Sign In</a>
+            <a href="/register" class="bg-odoo-purple text-white px-6 py-2.5 rounded-lg text-sm font-bold btn-animate shadow-lg">GET STARTED FOR FREE</a>
         </div>
     </nav>
 
@@ -75,7 +73,7 @@
             A unique and powerful software suite to transform the way you work. Designed for businesses of all sizes, built by Atharv Tech Co.
         </p>
         <div class="pt-4">
-            <a href="/register" class="inline-block bg-red-600 text-white px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm btn-animate">
+            <a href="/register" class="inline-block bg-red-600 text-white px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm btn-animate shadow-xl">
                 GET STARTED FOR FREE <i class="fa-solid fa-chevron-right ml-2"></i>
             </a>
         </div>
