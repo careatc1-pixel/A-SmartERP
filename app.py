@@ -26,7 +26,8 @@ login_manager.login_view = 'login'
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
+    # Password length increased to 500 to handle long scrypt hashes
+    password = db.Column(db.String(500), nullable=False) 
     company_name = db.Column(db.String(100))
     subscribed_modules = db.Column(db.String(255), default='sales') 
 
@@ -45,15 +46,22 @@ class Customer(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- DATABASE AUTO-REPAIR ---
+# --- DATABASE AUTO-REPAIR (ZABARDASTI FIX) ---
 def repair_database():
     try:
         with app.app_context():
+            # 1. Password column ki length badhao (Amrik wala error fix)
+            db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
+            
+            # 2. Missing columns add karo agar nahi hain toh
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
+            
             db.session.commit()
+            print("Database Schema Repaired Successfully!")
     except Exception as e:
-        print(f"DB Repair Skip: {e}")
+        db.session.rollback()
+        print(f"DB Repair Info: {e}")
 
 # --- ROUTES ---
 
@@ -65,23 +73,28 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    # Har registration se pehle DB check karega taaki error na aaye
     repair_database()
     if request.method == 'POST':
         try:
+            # Secure password hashing
             hashed_pw = generate_password_hash(request.form.get('password'))
-            modules = ",".join(request.form.getlist('modules')) or 'sales'
+            # Capture selected modules
+            modules_list = request.form.getlist('modules')
+            modules_str = ",".join(modules_list) if modules_list else 'sales'
+            
             new_user = User(
                 username=request.form.get('username'),
                 password=hashed_pw,
                 company_name=request.form.get('company'),
-                subscribed_modules=modules
+                subscribed_modules=modules_str
             )
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            return f"Registration Error: {str(e)}"
+            return f"Registration Error (Bhai DB fix check karo): {str(e)}"
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -90,7 +103,7 @@ def login():
         u = User.query.filter_by(username=request.form.get('username')).first()
         pass_input = request.form.get('password')
         if u:
-            # Check for both plain text and hashed for backward compatibility
+            # Compatibility check: Plain text (purana) aur Hashed (naya) dono chalenge
             if u.password == pass_input or check_password_hash(u.password, pass_input):
                 login_user(u)
                 return redirect(url_for('dashboard'))
@@ -101,23 +114,25 @@ def login():
 @login_required
 def dashboard():
     try:
-        # Crash-proof module handling
-        modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
+        # Crash-proof handling for modules and company name
+        user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
+        comp_name = current_user.company_name if current_user.company_name else "ATC Workspace"
+        
         return render_template('dashboard.html', 
-                               user_modules=modules, 
-                               company=current_user.company_name or "ATC Workspace", 
+                               user_modules=user_modules, 
+                               company=comp_name, 
                                username=current_user.username)
     except Exception as e:
-        return f"Dashboard Error: {str(e)}"
+        return f"Dashboard Access Error: {str(e)}"
 
-# --- ACCOUNTING / SALES MODULES (FIXED LINKS) ---
+# --- MODULE ROUTES ---
 
 @app.route('/sales/hub')
 @login_required
 def sales_hub():
-    # Security check: User must have sales module
+    # Module restriction
     if 'sales' not in current_user.subscribed_modules:
-        return "<h3>Access Denied: Sales Module not purchased.</h3><a href='/dashboard'>Back</a>"
+        return "<h3>Access Denied: Module not in your plan.</h3><a href='/dashboard'>Back</a>"
     
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
