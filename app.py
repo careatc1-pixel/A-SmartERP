@@ -34,7 +34,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(100), unique=True)
     company_name = db.Column(db.String(100))
-    subscribed_modules = db.Column(db.String(255), default='sales') # sales,purchase,inventory,hr
+    subscribed_modules = db.Column(db.String(255), default='sales') 
     role = db.Column(db.String(20), default='Admin')
 
 class Customer(db.Model):
@@ -85,8 +85,11 @@ def load_user(user_id):
 
 @app.route('/force-init-saas')
 def init_saas():
-    db.create_all()
-    return "SaaS Tables Initialized!"
+    try:
+        db.create_all()
+        return "SaaS Tables Initialized!"
+    except Exception as e:
+        return f"Init Error: {str(e)}"
 
 # --- CORE SAAS ROUTES ---
 
@@ -123,23 +126,28 @@ def login():
         return "Invalid Username or Password!"
     return render_template('login_form.html')
 
-# --- ODOO STYLE DASHBOARD ---
+# --- CRASH-PROOF DASHBOARD ---
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     try:
-        # Check subscribed modules to show icons in drawer
-        user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else []
+        # Check subscribed modules with fallback
+        if hasattr(current_user, 'subscribed_modules') and current_user.subscribed_modules:
+            user_modules = current_user.subscribed_modules.split(',')
+        else:
+            user_modules = ['sales'] 
         
-        # We also fetch invoices count for stats if needed, but primary is the app grid
+        # Safe fetch company name
+        comp_name = getattr(current_user, 'company_name', 'My Workspace')
+        
         return render_template('dashboard.html', 
                                user_modules=user_modules, 
-                               company=current_user.company_name, 
+                               company=comp_name, 
                                username=current_user.username)
     except Exception as e:
         db.session.rollback()
-        return f"Internal Server Error: {str(e)}"
+        return f"Dashboard Error: {str(e)}. Please run /force-init-saas"
 
 # --- PROTECTED ERP MODULES ---
 
