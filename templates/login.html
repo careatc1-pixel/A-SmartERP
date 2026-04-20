@@ -3,142 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A-SmartERP | Business Intelligence Suite</title>
+    <title>A-SmartERP | Business Powered by ATC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #ffffff; color: #1e293b; }
+
+        .odoo-purple { color: #875A7B; }
+        .bg-odoo-purple { background-color: #875A7B; }
+        .bg-odoo-teal { background-color: #008784; }
         
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #ffffff; }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #875A7B 0%, #008784 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .hero-gradient {
+            background: radial-gradient(circle at top right, rgba(135, 90, 123, 0.05), transparent),
+                        radial-gradient(circle at bottom left, rgba(0, 135, 132, 0.05), transparent);
         }
 
-        .feature-card:hover {
-            transform: translateX(10px);
-            background: #f8fafc;
-        }
+        .nav-link:hover { color: #875A7B; border-bottom: 2px solid #875A7B; }
         
-        .login-section {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        .app-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid #f1f5f9;
+        }
+        .app-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -15px rgba(135, 90, 123, 0.15);
+            border-color: #875A7B;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 40px 60px -15px rgba(135, 90, 123, 0.2);
+        .btn-animate {
+            transition: all 0.3s ease;
         }
-
-        /* Smooth scroll for anchor links */
-        html { scroll-behavior: smooth; }
+        .btn-animate:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(135, 90, 123, 0.3);
+        }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="hero-gradient min-h-screen">
 
-    <div class="flex flex-col md:flex-row min-h-screen">
-        
-        <div class="w-full md:w-[60%] p-8 md:p-20 space-y-12 bg-white overflow-y-auto">
-            
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-[#875A7B] rounded-2xl flex items-center justify-center text-white shadow-lg">
-                    <i class="fa-solid fa-layer-group text-2xl"></i>
+    <nav class="flex items-center justify-between px-8 md:px-20 py-6 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-10">
+            <div class="flex items-center gap-2">
+                <img src="https://cdn-icons-png.flaticon.com/512/1055/1055687.png" class="w-8 h-8" alt="logo">
+                <span class="text-xl font-black tracking-tighter uppercase">A-Smart<span class="odoo-purple">ERP</span></span>
+            </div>
+            <div class="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-widest text-slate-400">
+                <a href="#" class="nav-link py-2 transition-all">Products</a>
+                <a href="#" class="nav-link py-2 transition-all">Enterprise</a>
+                <a href="#" class="nav-link py-2 transition-all">Customers</a>
+                <a href="#" class="nav-link py-2 transition-all">Resources</a>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/login" class="text-sm font-bold text-slate-600 hover:text-purple-700">Sign In</a>
+            <a href="/register" class="bg-odoo-purple text-white px-6 py-2.5 rounded-lg text-sm font-bold btn-animate">GET STARTED FOR FREE</a>
+        </div>
+    </nav>
+
+    <section class="px-8 md:px-20 py-20 text-center max-w-5xl mx-auto space-y-8">
+        <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
+            Your life's work, <br>
+            <span class="odoo-purple">powered by</span> our life's work
+        </h1>
+        <p class="text-xl text-slate-500 font-medium max-w-2xl mx-auto">
+            A unique and powerful software suite to transform the way you work. Designed for businesses of all sizes, built by Atharv Tech Co.
+        </p>
+        <div class="pt-4">
+            <a href="/register" class="inline-block bg-red-600 text-white px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm btn-animate">
+                GET STARTED FOR FREE <i class="fa-solid fa-chevron-right ml-2"></i>
+            </a>
+        </div>
+    </section>
+
+    <section class="px-8 md:px-20 py-16 bg-slate-50/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Portfolio</h2>
+                    <h3 class="text-3xl font-black text-slate-800 tracking-tighter italic">Featured <span class="odoo-purple">Apps</span></h3>
                 </div>
-                <h1 class="text-3xl font-black tracking-tighter text-slate-900 uppercase">A-Smart<span class="text-[#875A7B]">ERP</span></h1>
+                <a href="#" class="text-blue-600 font-bold text-sm hover:underline uppercase tracking-widest text-[10px]">Explore All Products <i class="fa-solid fa-arrow-right ml-1"></i></a>
             </div>
 
-            <div class="space-y-6">
-                <h2 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[0.9]">
-                    The most <span class="gradient-text">advanced</span> ERP for your business.
-                </h2>
-                <p class="text-xl text-slate-500 font-medium max-w-xl leading-relaxed">
-                    Automate your Sales, Purchase, Inventory, and Accounts in one unified dashboard. Designed by Atharv Tech Co. for next-gen growth.
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
-                <div class="feature-card p-6 rounded-[2rem] border border-slate-100 transition-all cursor-default">
-                    <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4"><i class="fa-solid fa-file-invoice-dollar"></i></div>
-                    <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest mb-2">Smart Invoicing</h3>
-                    <p class="text-sm text-slate-400 font-medium">Generate GST compliant invoices & sales orders in seconds with auto-approval workflow.</p>
+                <div class="app-card bg-white p-8 rounded-[2rem] flex items-start gap-6">
+                    <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800 mb-1">CRM</h4>
+                        <p class="text-sm text-slate-400 font-medium leading-relaxed">Comprehensive CRM platform for customer-centric companies.</p>
+                    </div>
                 </div>
 
-                <div class="feature-card p-6 rounded-[2rem] border border-slate-100 transition-all cursor-default">
-                    <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4"><i class="fa-solid fa-boxes-stacked"></i></div>
-                    <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest mb-2">Inventory Control</h3>
-                    <p class="text-sm text-slate-400 font-medium">Real-time stock tracking with automated low-stock alerts and multi-warehouse support.</p>
+                <div class="app-card bg-white p-8 rounded-[2rem] flex items-start gap-6">
+                    <div class="w-14 h-14 bg-odoo-teal/10 text-odoo-teal rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0">
+                        <i class="fa-solid fa-envelope-open-text"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800 mb-1">Mail</h4>
+                        <p class="text-sm text-slate-400 font-medium leading-relaxed">Secure email service for teams of all sizes. Encrypted & Ad-free.</p>
+                    </div>
                 </div>
 
-                <div class="feature-card p-6 rounded-[2rem] border border-slate-100 transition-all cursor-default">
-                    <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4"><i class="fa-solid fa-users-gear"></i></div>
-                    <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest mb-2">SaaS Multi-Tenancy</h3>
-                    <p class="text-sm text-slate-400 font-medium">Secure login with unique user workspace. Your data stays yours with 100% isolation.</p>
+                <div class="app-card bg-white p-8 rounded-[2rem] flex items-start gap-6">
+                    <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0">
+                        <i class="fa-solid fa-book-bookmark"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800 mb-1">Books</h4>
+                        <p class="text-sm text-slate-400 font-medium leading-relaxed">Powerful accounting platform for growing businesses.</p>
+                    </div>
                 </div>
 
-                <div class="feature-card p-6 rounded-[2rem] border border-slate-100 transition-all cursor-default">
-                    <div class="w-10 h-10 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-4"><i class="fa-solid fa-chart-line"></i></div>
-                    <h3 class="font-black text-slate-800 uppercase text-xs tracking-widest mb-2">Live Reporting</h3>
-                    <p class="text-sm text-slate-400 font-medium">Analyze your business performance with dynamic charts and exportable PDF reports.</p>
+                <div class="app-card bg-white p-8 rounded-[2rem] flex items-start gap-6">
+                    <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800 mb-1">Inventory</h4>
+                        <p class="text-sm text-slate-400 font-medium leading-relaxed">Smart stock management with real-time tracking.</p>
+                    </div>
                 </div>
 
-            </div>
+                <div class="app-card bg-white p-8 rounded-[2rem] flex items-start gap-6">
+                    <div class="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800 mb-1">Projects</h4>
+                        <p class="text-sm text-slate-400 font-medium leading-relaxed">Plan, track, and collaborate on your next big thing.</p>
+                    </div>
+                </div>
 
-            <div class="pt-10 flex items-center gap-6 border-t border-slate-100">
-                <div class="text-xs font-black text-slate-300 uppercase tracking-widest">Powered by ATC Delhi</div>
-                <div class="h-1 w-1 bg-slate-300 rounded-full"></div>
-                <div class="text-xs font-black text-slate-300 uppercase tracking-widest">Established 2023</div>
+                <div class="app-card bg-white p-8 rounded-[2rem] flex items-start gap-6 border-dashed border-2 border-slate-200">
+                    <div class="w-14 h-14 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center text-2xl shrink-0">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-300 mb-1 italic">More Coming</h4>
+                        <p class="text-sm text-slate-300 font-medium leading-relaxed">We are constantly building more tools for you.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
+    </section>
 
-        <div class="w-full md:w-[40%] login-section p-8 md:p-12 flex items-center justify-center relative overflow-hidden">
-            
-            <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-[#875A7B] opacity-10 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-[#008784] opacity-10 rounded-full blur-3xl"></div>
-
-            <div class="glass-card w-full max-w-md p-10 md:p-12 rounded-[3.5rem] z-10 transition-all" id="loginCard">
-                <div class="text-center mb-10">
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tighter uppercase italic">Access <span class="text-[#875A7B]">Terminal</span></h2>
-                    <p class="text-xs font-bold text-slate-400 mt-2 tracking-widest uppercase">Secure SaaS Authorization</p>
-                </div>
-
-                <form action="/login" method="POST" class="space-y-6">
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 mb-2 block">User Identifier</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-user-tag absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                            <input type="text" name="username" required
-                                class="w-full pl-14 pr-4 py-5 bg-white border border-slate-200 rounded-2xl outline-none focus:border-[#875A7B] transition-all font-bold text-slate-700"
-                                placeholder="Username">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1 mb-2 block">Secret Key</label>
-                        <div class="relative">
-                            <i class="fa-solid fa-key absolute left-5 top-1/2 -translate-y-1/2 text-slate-300"></i>
-                            <input type="password" name="password" required
-                                class="w-full pl-14 pr-4 py-5 bg-white border border-slate-200 rounded-2xl outline-none focus:border-[#875A7B] transition-all font-bold text-slate-700"
-                                placeholder="••••••••">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-[#875A7B] text-white py-6 rounded-2xl font-black uppercase tracking-[0.25em] shadow-2xl hover:bg-[#704a66] transition-all active:scale-95 text-xs">
-                        Initialize Session <i class="fa-solid fa-chevron-right ml-2"></i>
-                    </button>
-                </form>
-
-                <div class="mt-10 pt-8 border-t border-slate-100 flex justify-between items-center">
-                    <a href="/register" class="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-[#875A7B] transition-colors">Create Workspace</a>
-                    <a href="#" class="text-[10px] font-black text-[#875A7B] uppercase tracking-widest">Help Center</a>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <footer class="text-center py-10 text-slate-300 text-[10px] font-black uppercase tracking-[0.4em]">
+        © 2026 Atharv Tech Co. Delhi | Built with <i class="fa-solid fa-heart text-red-500 mx-1"></i> for Entrepreneurs
+    </footer>
 
 </body>
 </html>
