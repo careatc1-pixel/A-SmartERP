@@ -38,14 +38,19 @@
             transform: scale(1.05);
             box-shadow: 0 10px 20px rgba(135, 90, 123, 0.3);
         }
+
+        /* Logo Glow Effect */
+        .logo-glow {
+            filter: drop-shadow(0 0 8px rgba(135, 90, 123, 0.2));
+        }
     </style>
 </head>
 <body class="hero-gradient min-h-screen">
 
-    <nav class="flex items-center justify-between px-8 md:px-20 py-6 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <nav class="flex items-center justify-between px-8 md:px-20 py-4 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
         <div class="flex items-center gap-10">
-            <div class="flex items-center gap-2">
-                <img src="https://cdn-icons-png.flaticon.com/512/1055/1055687.png" class="w-8 h-8" alt="logo">
+            <div class="flex items-center gap-3">
+                <img src="{{ url_for('static', filename='logo.png') }}" class="w-12 h-12 object-contain logo-glow" alt="A-Smart Logo">
                 <span class="text-xl font-black tracking-tighter uppercase">A-Smart<span class="odoo-purple">ERP</span></span>
             </div>
             <div class="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-widest text-slate-400">
@@ -64,9 +69,9 @@
     <section class="px-8 md:px-20 py-20 text-center max-w-5xl mx-auto space-y-8">
         <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">
             Your life's work, <br>
-            <span class="odoo-purple">powered by</span> our life's work
+            <span class="odoo-purple font-black italic">powered by</span> our life's work
         </h1>
-        <p class="text-xl text-slate-500 font-medium max-w-2xl mx-auto">
+        <p class="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
             A unique and powerful software suite to transform the way you work. Designed for businesses of all sizes, built by Atharv Tech Co.
         </p>
         <div class="pt-4">
@@ -80,10 +85,10 @@
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-end mb-12">
                 <div>
-                    <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Portfolio</h2>
-                    <h3 class="text-3xl font-black text-slate-800 tracking-tighter italic">Featured <span class="odoo-purple">Apps</span></h3>
+                    <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Platform Hub</h2>
+                    <h3 class="text-3xl font-black text-slate-800 tracking-tighter italic">Explore <span class="odoo-purple">Modules</span></h3>
                 </div>
-                <a href="#" class="text-blue-600 font-bold text-sm hover:underline uppercase tracking-widest text-[10px]">Explore All Products <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                <a href="#" class="text-blue-600 font-bold text-sm hover:underline uppercase tracking-widest text-[10px]">View Pricing Plans <i class="fa-solid fa-arrow-right ml-1"></i></a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -143,8 +148,8 @@
                         <i class="fa-solid fa-plus"></i>
                     </div>
                     <div>
-                        <h4 class="text-lg font-black text-slate-300 mb-1 italic">More Coming</h4>
-                        <p class="text-sm text-slate-300 font-medium leading-relaxed">We are constantly building more tools for you.</p>
+                        <h4 class="text-lg font-black text-slate-300 mb-1 italic">Tailored Suite</h4>
+                        <p class="text-sm text-slate-300 font-medium leading-relaxed">We customize modules based on your unique needs.</p>
                     </div>
                 </div>
 
@@ -152,8 +157,8 @@
         </div>
     </section>
 
-    <footer class="text-center py-10 text-slate-300 text-[10px] font-black uppercase tracking-[0.4em]">
-        © 2026 Atharv Tech Co. Delhi | Built with <i class="fa-solid fa-heart text-red-500 mx-1"></i> for Entrepreneurs
+    <footer class="text-center py-10 bg-white border-t border-slate-100 text-slate-300 text-[10px] font-black uppercase tracking-[0.4em]">
+        © 2026 Atharv Tech Co. Delhi | Global SaaS Enterprise
     </footer>
 
 </body>
