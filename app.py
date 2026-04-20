@@ -18,7 +18,7 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_SAAS_V5_STABLE_FINAL' 
+    SECRET_KEY='ATHARV_SAAS_V5_STRICT_SESSION_RESET' 
 )
 
 db = SQLAlchemy(app)
@@ -85,7 +85,6 @@ def load_user(user_id):
 
 @app.route('/force-init-saas')
 def init_saas():
-    # Syncs database schema with new SaaS structure
     db.create_all()
     return "SaaS Tables Initialized!"
 
@@ -93,7 +92,6 @@ def init_saas():
 
 @app.route('/')
 def index():
-    # Shows the Zoho-style landing page
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     return render_template('index.html') 
@@ -102,7 +100,6 @@ def index():
 def register():
     if request.method == 'POST':
         hashed_pw = generate_password_hash(request.form.get('password'))
-        # Capture selected modules from checkboxes
         selected_modules = ",".join(request.form.getlist('modules')) or 'sales'
         
         new_user = User(
@@ -120,28 +117,35 @@ def register():
 def login():
     if request.method == 'POST':
         u = User.query.filter_by(username=request.form.get('username')).first()
-        # Secure Hashed Password Check
         if u and check_password_hash(u.password, request.form.get('password')):
             login_user(u)
             return redirect(url_for('dashboard'))
         return "Invalid Username or Password!"
-    
-    # Shows the dedicated login form page
     return render_template('login_form.html')
 
-# --- PROTECTED ERP MODULES ---
+# --- ODOO STYLE DASHBOARD ---
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    company_info = {"name": current_user.company_name, "location": "New Delhi"}
-    invoices = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.id.desc()).all()
-    return render_template('dashboard.html', invoices=invoices, company=company_info, name=current_user.username)
+    try:
+        # Check subscribed modules to show icons in drawer
+        user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else []
+        
+        # We also fetch invoices count for stats if needed, but primary is the app grid
+        return render_template('dashboard.html', 
+                               user_modules=user_modules, 
+                               company=current_user.company_name, 
+                               username=current_user.username)
+    except Exception as e:
+        db.session.rollback()
+        return f"Internal Server Error: {str(e)}"
+
+# --- PROTECTED ERP MODULES ---
 
 @app.route('/sales/hub')
 @login_required
 def sales_hub():
-    # Module Access Security
     if 'sales' not in current_user.subscribed_modules:
         return "<h3>Access Denied: Sales Module not purchased.</h3><a href='/dashboard'>Back</a>"
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
