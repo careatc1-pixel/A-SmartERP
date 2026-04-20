@@ -22,18 +22,27 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- MODELS (SaaS Ready with Full Profiles) ---
+# --- MODELS ---
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(500), nullable=False) 
     company_name = db.Column(db.String(100))
-    # Profile Fields
     contact_no = db.Column(db.String(20))
     email = db.Column(db.String(100))
     address = db.Column(db.Text)
     subscribed_modules = db.Column(db.String(255), default='sales') 
+
+class SaleInvoice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    inv_no = db.Column(db.String(50), unique=True)
+    client_name = db.Column(db.String(100))
+    total_amount = db.Column(db.Float)
+    gst_amount = db.Column(db.Float)
+    status = db.Column(db.String(20), default='Pending')
+    date = db.Column(db.DateTime, default=datetime.utcnow)
 
 class SalesOrder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -51,7 +60,7 @@ class Customer(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- DATABASE AUTO-REPAIR FUNCTION ---
+# --- DATABASE AUTO-REPAIR ---
 def repair_database():
     try:
         with app.app_context():
@@ -62,24 +71,16 @@ def repair_database():
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS address TEXT'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
             db.session.commit()
-            return True
     except Exception as e:
         db.session.rollback()
-        return False
 
-# --- ROUTES ---
+# --- CORE ROUTES ---
 
 @app.route('/')
 def index():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard'))
     return render_template('index.html')
-
-@app.route('/force-sync-db')
-def force_sync():
-    if repair_database():
-        return "<h3>Database Sync Successful!</h3><a href='/register'>Go to Register</a>"
-    return "<h3>Database Sync Failed!</h3>"
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -89,22 +90,13 @@ def register():
             hashed_pw = generate_password_hash(request.form.get('password'))
             modules_list = request.form.getlist('modules')
             modules_str = ",".join(modules_list) if modules_list else 'sales'
-            
-            new_user = User(
-                username=request.form.get('username'),
-                password=hashed_pw,
-                company_name=request.form.get('company'),
-                contact_no=request.form.get('contact'),
-                email=request.form.get('email'),
-                address=request.form.get('address'),
-                subscribed_modules=modules_str
-            )
+            new_user = User(username=request.form.get('username'), password=hashed_pw, company_name=request.form.get('company'), contact_no=request.form.get('contact'), email=request.form.get('email'), address=request.form.get('address'), subscribed_modules=modules_str)
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            return f"Registration Error: {str(e)}"
+            return f"Error: {str(e)}"
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -112,37 +104,24 @@ def login():
     if request.method == 'POST':
         u = User.query.filter_by(username=request.form.get('username')).first()
         pass_input = request.form.get('password')
-        if u:
-            if u.password == pass_input or check_password_hash(u.password, pass_input):
-                login_user(u)
-                return redirect(url_for('dashboard'))
-        return "Invalid Login! Please check credentials."
+        if u and (u.password == pass_input or check_password_hash(u.password, pass_input)):
+            login_user(u)
+            return redirect(url_for('dashboard'))
     return render_template('login_form.html')
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    try:
-        user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
-        comp_name = current_user.company_name if current_user.company_name else "ATC Workspace"
-        return render_template('dashboard.html', 
-                               user_modules=user_modules, 
-                               company=comp_name, 
-                               username=current_user.username)
-    except Exception as e:
-        return f"Dashboard Access Error: {str(e)}"
+    user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
+    return render_template('dashboard.html', user_modules=user_modules, company=current_user.company_name, username=current_user.username)
 
-# --- MAIN SALES HUB ROUTE ---
+# --- SALES HUB & SUB-MODULES (RESTORED) ---
 
 @app.route('/sales/hub')
 @login_required
 def sales_hub():
-    if 'sales' not in current_user.subscribed_modules:
-        return "<h3>Access Denied: Module not in your plan.</h3><a href='/dashboard'>Back</a>"
     so_count = SalesOrder.query.filter_by(user_id=current_user.id, status='Pending').count()
     return render_template('sales_hub.html', so_count=so_count, name=current_user.username)
-
-# --- SALES HUB SUB-MODULE ROUTES (RESTORED) ---
 
 @app.route('/sales/customers') 
 @login_required
@@ -150,17 +129,20 @@ def customer_master():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
 
-@app.route('/sales/invoice/new')
+@app.route('/sales/invoice/new') # TAX INVOICE FIX
 @login_required
 def new_invoice():
-    # Tax Invoice logic
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', customers=customers, name=current_user.username)
+
+@app.route('/sales/eway-bills') # E-WAY BILL FIX
+@login_required
+def eway_bills():
+    return render_template('eway_bills.html', name=current_user.username)
 
 @app.route('/sales/order/new')
 @login_required
 def new_sales_order():
-    # Sales Order / Quotation logic
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_order_form.html', customers=customers, name=current_user.username)
 
@@ -178,6 +160,14 @@ def payments_page():
 @login_required
 def credit_notes_page():
     return render_template('credit_notes.html', name=current_user.username)
+
+# --- VIEW & PRINT ROUTES ---
+@app.route('/sales/view/<inv_no>')
+@login_required
+def view_invoice(inv_no):
+    invoice = SaleInvoice.query.filter_by(inv_no=inv_no, user_id=current_user.id).first()
+    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    return render_template('sales_form.html', invoice=invoice, customers=customers, mode='print', name=current_user.username)
 
 @app.route('/logout')
 def logout():
