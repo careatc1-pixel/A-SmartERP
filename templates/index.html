@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-Smart Suite | Global Business ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #ffffff; }
+        .odoo-purple { color: #875A7B; }
+        .bg-odoo-purple { background-color: #875A7B; }
+        .hero-gradient { background: radial-gradient(circle at top right, rgba(135, 90, 123, 0.05), transparent); }
+    </style>
+</head>
+<body class="hero-gradient min-h-screen">
+    <nav class="flex items-center justify-between px-8 md:px-20 py-6 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-[#875A7B] rounded-xl flex items-center justify-center text-white shadow-sm"><i class="fa-solid fa-layer-group text-xl"></i></div>
+            <span class="text-xl font-black tracking-tighter uppercase">A-Smart<span class="odoo-purple">ERP</span></span>
+        </div>
+        <div class="flex items-center gap-6">
+            <a href="/login" class="text-sm font-bold text-slate-600 hover:text-[#875A7B]">Sign In</a>
+            <a href="/register" class="bg-odoo-purple text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg">GET STARTED FOR FREE</a>
+        </div>
+    </nav>
+
+    <section class="px-8 md:px-20 py-20 text-center max-w-5xl mx-auto space-y-8">
+        <h1 class="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight leading-[1.1]">Your life's work, <br><span class="odoo-purple italic">powered by</span> A-Smart ERP</h1>
+        <p class="text-xl text-slate-500 font-medium max-w-2xl mx-auto">A unique and powerful software suite to transform the way you work. Built for Indian Enterprises by Atharv Tech Co.</p>
+        <div class="pt-4"><a href="/register" class="bg-red-600 text-white px-10 py-5 rounded-full font-black uppercase tracking-widest text-sm shadow-xl transition-all hover:scale-105 inline-block">Explore Modules <i class="fa-solid fa-chevron-right ml-2"></i></a></div>
+    </section>
+
+    <section class="px-8 md:px-20 py-16 bg-slate-50/50">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:border-[#875A7B] transition-all">
+                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4"><i class="fa-solid fa-handshake"></i></div>
+                <h4 class="text-lg font-black text-slate-800">Sales CRM</h4>
+                <p class="text-sm text-slate-400 mt-2 font-medium leading-relaxed">End-to-end sales pipeline, from quotation to final tax invoice.</p>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:border-[#875A7B] transition-all">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mb-4"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <h4 class="text-lg font-black text-slate-800">Inventory Pro</h4>
+                <p class="text-sm text-slate-400 mt-2 font-medium leading-relaxed">Real-time stock management with multi-location tracking.</p>
+            </div>
+            <div class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:border-[#875A7B] transition-all border-dashed">
+                <div class="w-12 h-12 bg-slate-50 text-slate-400 rounded-xl flex items-center justify-center mb-4"><i class="fa-solid fa-plus"></i></div>
+                <h4 class="text-lg font-black text-slate-300">Custom Built</h4>
+                <p class="text-sm text-slate-300 mt-2 font-medium leading-relaxed">Need a specific module? Our ATC team builds it for you.</p>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

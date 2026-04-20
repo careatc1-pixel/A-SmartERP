@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Access | A-Smart ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');body{font-family:'Plus Jakarta Sans',sans-serif;background:#f8fafc;}</style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+    <div class="bg-white w-full max-w-md p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+        <div class="text-center mb-10">
+            <div class="w-12 h-12 bg-[#875A7B] rounded-2xl flex items-center justify-center text-white mx-auto mb-4 shadow-lg"><i class="fa-solid fa-key"></i></div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight uppercase">Access <span class="text-[#875A7B]">Terminal</span></h2>
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Secure SaaS Node</p>
+        </div>
+        <form action="/login" method="POST" class="space-y-6">
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Username</label>
+                <div class="relative"><i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                    <input type="text" name="username" required class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-[#875A7B] focus:bg-white transition-all font-bold" placeholder="ATC ID">
+                </div>
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Password</label>
+                <div class="relative"><i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"></i>
+                    <input type="password" name="password" required class="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-[#875A7B] focus:bg-white transition-all font-bold" placeholder="••••••••">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-[#875A7B] text-white py-5 rounded-2xl font-black uppercase tracking-[0.2em] shadow-xl hover:bg-[#704a66] transition-all text-[11px]">Initialize Session <i class="fa-solid fa-chevron-right ml-2"></i></button>
+        </form>
+        <p class="text-center mt-8 text-xs font-bold text-slate-400">New around here? <a href="/register" class="text-[#875A7B] hover:underline">Register Workspace</a></p>
+    </div>
+</body>
+</html>

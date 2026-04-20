@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create ERP Workspace | A-Smart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen p-6">
+    <form action="/register" method="POST" class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-lg">
+        <h2 class="text-3xl font-black italic mb-6 tracking-tighter uppercase text-slate-800">A-Smart <span class="text-blue-600">Workspace</span></h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <input type="text" name="company" placeholder="Company Name" class="p-4 bg-slate-50 rounded-xl border outline-none font-bold focus:border-blue-600" required>
+            <input type="text" name="username" placeholder="Admin Username" class="p-4 bg-slate-50 rounded-xl border outline-none font-bold focus:border-blue-600" required>
+            <input type="password" name="password" placeholder="Password" class="p-4 bg-slate-50 rounded-xl border outline-none font-bold focus:border-blue-600 col-span-2" required>
+        </div>
+        
+        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 mb-6">
+            <p class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Select Modules to Activate</p>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="sales" checked> Sales Hub</label>
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="purchase"> Purchase Module</label>
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="inventory"> Inventory Pro</label>
+                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="hr"> HR & Payroll</label>
+            </div>
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-xl font-black uppercase tracking-widest hover:bg-blue-700 shadow-xl">Deploy My ERP <i class="fa-solid fa-rocket ml-2"></i></button>
+        <p class="text-center mt-6 text-xs text-slate-400 font-bold">Member? <a href="/login" class="text-blue-600 underline">Sign In</a></p>
+    </form>
+</body>
+</html>
