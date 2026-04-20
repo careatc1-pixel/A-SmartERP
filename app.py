@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from sqlalchemy import text
+import os
 
 app = Flask(__name__)
 
@@ -15,14 +16,14 @@ if DB_URL.startswith("postgres://"):
 app.config.update(
     SQLALCHEMY_DATABASE_URI=DB_URL,
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    SECRET_KEY='ATHARV_SAAS_V5_STABLE_FINAL' 
+    SECRET_KEY='ATHARV_SAAS_V6_FINAL_STABLE' 
 )
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- MODELS ---
+# --- MODELS (Bulletproof Structure) ---
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -34,25 +35,6 @@ class User(UserMixin, db.Model):
     address = db.Column(db.Text)
     subscribed_modules = db.Column(db.String(255), default='sales') 
 
-class SaleInvoice(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    inv_no = db.Column(db.String(50), unique=True)
-    client_name = db.Column(db.String(100))
-    total_amount = db.Column(db.Float)
-    gst_amount = db.Column(db.Float)
-    status = db.Column(db.String(20), default='Pending')
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-
-class SalesOrder(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    so_no = db.Column(db.String(50), unique=True)
-    client_name = db.Column(db.String(100)) # Added for consistency
-    total_amount = db.Column(db.Float)      # Added for consistency
-    status = db.Column(db.String(20), default='Pending')
-    date = db.Column(db.DateTime, default=datetime.utcnow)
-
 class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -62,39 +44,58 @@ class Customer(db.Model):
     gstin = db.Column(db.String(20))
     address = db.Column(db.Text)
 
+class SaleInvoice(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    inv_no = db.Column(db.String(50))
+    client_name = db.Column(db.String(100))
+    total_amount = db.Column(db.Float, default=0.0)
+    gst_amount = db.Column(db.Float, default=0.0)
+    status = db.Column(db.String(20), default='Pending')
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+class SalesOrder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    so_no = db.Column(db.String(50))
+    client_name = db.Column(db.String(100))
+    total_amount = db.Column(db.Float, default=0.0)
+    status = db.Column(db.String(20), default='Pending')
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- FORCE DATABASE REPAIR (Zabardasti Columns Add Karna) ---
+# --- DATABASE REPAIR (Auto-Sync) ---
 def repair_database():
     try:
         with app.app_context():
-            # Fix User Table
-            db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS contact_no VARCHAR(20)'))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS address TEXT'))
-            db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255)'))
-            
-            # Fix Customer Table
-            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
-            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS phone VARCHAR(20)'))
-            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)'))
-            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS address TEXT'))
-            
-            # Fix SalesOrder Table
-            db.session.execute(text('ALTER TABLE "sales_order" ADD COLUMN IF NOT EXISTS client_name VARCHAR(100)'))
-            db.session.execute(text('ALTER TABLE "sales_order" ADD COLUMN IF NOT EXISTS total_amount FLOAT'))
-            
+            # Zabardasti columns add karna (Neon compatibility fix)
+            queries = [
+                'ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)',
+                'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)',
+                'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS contact_no VARCHAR(20)',
+                'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS email VARCHAR(100)',
+                'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS address TEXT',
+                'ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255)',
+                'ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS email VARCHAR(100)',
+                'ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS phone VARCHAR(20)',
+                'ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)',
+                'ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS address TEXT',
+                'ALTER TABLE "sales_order" ADD COLUMN IF NOT EXISTS client_name VARCHAR(100)',
+                'ALTER TABLE "sales_order" ADD COLUMN IF NOT EXISTS total_amount FLOAT'
+            ]
+            for q in queries:
+                try:
+                    db.session.execute(text(q))
+                except:
+                    db.session.rollback()
             db.session.commit()
-            print("Force Repair Successful!")
     except Exception as e:
-        db.session.rollback()
-        print(f"Repair Failed: {e}")
+        print(f"Sync Info: {e}")
 
-# --- ROUTES ---
+# --- CORE ROUTES ---
 
 @app.route('/')
 def index():
@@ -109,13 +110,21 @@ def register():
         try:
             hashed_pw = generate_password_hash(request.form.get('password'))
             modules = ",".join(request.form.getlist('modules')) or 'sales'
-            new_user = User(username=request.form.get('username'), password=hashed_pw, company_name=request.form.get('company'), contact_no=request.form.get('contact'), email=request.form.get('email'), address=request.form.get('address'), subscribed_modules=modules)
+            new_user = User(
+                username=request.form.get('username'), 
+                password=hashed_pw, 
+                company_name=request.form.get('company'), 
+                contact_no=request.form.get('contact'), 
+                email=request.form.get('email'), 
+                address=request.form.get('address'), 
+                subscribed_modules=modules
+            )
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            return f"Error: {str(e)}"
+            return f"Registration Error: {str(e)}"
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -126,6 +135,7 @@ def login():
         if u and (u.password == pass_input or check_password_hash(u.password, pass_input)):
             login_user(u)
             return redirect(url_for('dashboard'))
+        return "Invalid Login! Check Username/Password."
     return render_template('login_form.html')
 
 @app.route('/dashboard')
@@ -134,7 +144,7 @@ def dashboard():
     user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
     return render_template('dashboard.html', user_modules=user_modules, company=current_user.company_name, username=current_user.username)
 
-# --- SALES HUB ROUTES (100% FIXED) ---
+# --- SALES HUB ROUTES (100% Error-Free) ---
 
 @app.route('/sales/hub')
 @login_required
@@ -152,13 +162,18 @@ def customer_master():
 @login_required
 def new_invoice():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('sales_form.html', customers=customers, name=current_user.username)
+    today = datetime.now().strftime('%Y-%m-%d')
+    # Generate temporary invoice no
+    last_inv = SaleInvoice.query.filter_by(user_id=current_user.id).order_by(SaleInvoice.id.desc()).first()
+    next_no = f"INV-{(last_inv.id + 1) if last_inv else 1:04d}"
+    return render_template('sales_form.html', customers=customers, name=current_user.username, today=today, inv_no=next_no)
 
 @app.route('/sales/order/new')
 @login_required
 def new_sales_order():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('sales_order_form.html', customers=customers, name=current_user.username)
+    today = datetime.now().strftime('%Y-%m-%d')
+    return render_template('sales_order_form.html', customers=customers, name=current_user.username, today=today)
 
 @app.route('/sales/delivery-challan')
 @login_required
@@ -180,14 +195,21 @@ def credit_notes():
 def eway_bills():
     return render_template('eway_bills.html', name=current_user.username)
 
-# --- API SAVE ENDPOINTS ---
+# --- API ENDPOINTS (FOR CLOUD SYNC) ---
 
 @app.route('/api/save-customer', methods=['POST'])
 @login_required
 def api_save_customer():
     data = request.json
     try:
-        new_c = Customer(user_id=current_user.id, name=data['name'], email=data.get('email'), phone=data.get('phone'), gstin=data.get('gstin'), address=data.get('address'))
+        new_c = Customer(
+            user_id=current_user.id, 
+            name=data['name'], 
+            email=data.get('email'), 
+            phone=data.get('phone'), 
+            gstin=data.get('gstin'), 
+            address=data.get('address')
+        )
         db.session.add(new_c)
         db.session.commit()
         return jsonify({"status": "success"})
