@@ -1,32 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create ERP Workspace | A-Smart</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Your Workspace | A-Smart ERP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-</head>
-<body class="bg-slate-900 flex items-center justify-center min-h-screen p-6">
-    <form action="/register" method="POST" class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-lg">
-        <h2 class="text-3xl font-black italic mb-6 tracking-tighter uppercase text-slate-800">A-Smart <span class="text-blue-600">Workspace</span></h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <input type="text" name="company" placeholder="Company Name" class="p-4 bg-slate-50 rounded-xl border outline-none font-bold focus:border-blue-600" required>
-            <input type="text" name="username" placeholder="Admin Username" class="p-4 bg-slate-50 rounded-xl border outline-none font-bold focus:border-blue-600" required>
-            <input type="password" name="password" placeholder="Password" class="p-4 bg-slate-50 rounded-xl border outline-none font-bold focus:border-blue-600 col-span-2" required>
-        </div>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
-        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 mb-6">
-            <p class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Select Modules to Activate</p>
-            <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="sales" checked> Sales Hub</label>
-                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="purchase"> Purchase Module</label>
-                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="inventory"> Inventory Pro</label>
-                <label class="flex items-center gap-2 text-xs font-bold text-slate-600"><input type="checkbox" name="modules" value="hr"> HR & Payroll</label>
-            </div>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #F8F9FA; /* Odoo Light Gray Bg */
+        }
+
+        .odoo-purple { color: #875A7B; }
+        .bg-odoo-purple { background-color: #875A7B; }
+        
+        /* Modal Style Box */
+        .odoo-card {
+            background: #ffffff;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            border-top: 5px solid #875A7B;
+        }
+
+        .input-field {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #875A7B;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(135, 90, 123, 0.1);
+        }
+
+        .module-check {
+            accent-color: #875A7B;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 md:p-10">
+
+    <div class="fixed inset-0 z-0 opacity-20 pointer-events-none">
+        <div class="absolute top-10 left-10 w-64 h-64 bg-purple-300 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-teal-200 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative z-10 w-full max-w-lg odoo-card p-8 md:p-12">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-2xl font-bold text-slate-800 tracking-tight">
+                A-Smart <span class="odoo-purple uppercase">Workspace</span>
+            </h1>
+            <div class="h-1 w-12 bg-slate-200 mx-auto mt-2 rounded-full"></div>
         </div>
 
-        <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-xl font-black uppercase tracking-widest hover:bg-blue-700 shadow-xl">Deploy My ERP <i class="fa-solid fa-rocket ml-2"></i></button>
-        <p class="text-center mt-6 text-xs text-slate-400 font-bold">Member? <a href="/login" class="text-blue-600 underline">Sign In</a></p>
-    </form>
+        <form action="/register" method="POST" class="space-y-5">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase ml-1">Company Name</label>
+                    <input type="text" name="company" placeholder="e.g. Atharv Tech" 
+                           class="w-full p-3 input-field font-medium text-slate-700" required>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-500 uppercase ml-1">Admin User</label>
+                    <input type="text" name="username" placeholder="admin" 
+                           class="w-full p-3 input-field font-medium text-slate-700" required>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[11px] font-bold text-slate-500 uppercase ml-1">Password</label>
+                <input type="password" name="password" placeholder="••••••••" 
+                       class="w-full p-3 input-field font-medium text-slate-700" required>
+            </div>
+
+            <div class="bg-slate-50 p-6 rounded-lg border border-slate-100">
+                <p class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Select Modules to Activate</p>
+                
+                <div class="grid grid-cols-2 gap-y-4">
+                    <label class="flex items-center gap-3 text-sm font-medium text-slate-600 cursor-pointer">
+                        <input type="checkbox" name="modules" value="sales" checked class="w-4 h-4 module-check"> Sales Hub
+                    </label>
+                    <label class="flex items-center gap-3 text-sm font-medium text-slate-600 cursor-pointer">
+                        <input type="checkbox" name="modules" value="purchase" class="w-4 h-4 module-check"> Purchase Module
+                    </label>
+                    <label class="flex items-center gap-3 text-sm font-medium text-slate-600 cursor-pointer">
+                        <input type="checkbox" name="modules" value="inventory" class="w-4 h-4 module-check"> Inventory Pro
+                    </label>
+                    <label class="flex items-center gap-3 text-sm font-medium text-slate-600 cursor-pointer">
+                        <input type="checkbox" name="modules" value="hr" class="w-4 h-4 module-check"> HR & Payroll
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-odoo-purple text-white py-4 rounded font-bold uppercase tracking-widest text-sm hover:bg-[#704a66] shadow-lg transition-all active:scale-[0.98]">
+                Deploy my ERP <i class="fa-solid fa-rocket ml-2"></i>
+            </button>
+
+            <div class="text-center pt-4 border-t border-slate-50">
+                <p class="text-xs text-slate-400 font-medium">
+                    Already a member? <a href="/login" class="odoo-purple font-bold hover:underline">Sign In</a>
+                </p>
+            </div>
+        </form>
+    </div>
+
 </body>
 </html>
