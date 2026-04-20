@@ -55,6 +55,11 @@ class Customer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100))
+    phone = db.Column(db.String(20))
+    gstin = db.Column(db.String(20))
+    address = db.Column(db.Text)
+    date_added = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -64,15 +69,66 @@ def load_user(user_id):
 def repair_database():
     try:
         with app.app_context():
+            # Repair User Table
             db.session.execute(text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS company_name VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS contact_no VARCHAR(20)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS address TEXT'))
             db.session.execute(text('ALTER TABLE "user" ADD COLUMN IF NOT EXISTS subscribed_modules VARCHAR(255) DEFAULT \'sales\''))
+            
+            # Repair Customer Table (IMPORTANT for the error you faced)
+            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS email VARCHAR(100)'))
+            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS phone VARCHAR(20)'))
+            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS gstin VARCHAR(20)'))
+            db.session.execute(text('ALTER TABLE "customer" ADD COLUMN IF NOT EXISTS address TEXT'))
+            
             db.session.commit()
     except Exception as e:
         db.session.rollback()
+        print(f"Repair Error: {e}")
+
+# --- API ENDPOINTS ---
+
+@app.route('/api/save-customer', methods=['POST'])
+@login_required
+def save_customer_api():
+    data = request.json
+    try:
+        new_cust = Customer(
+            user_id=current_user.id,
+            name=data.get('name'),
+            email=data.get('email', ''),
+            phone=data.get('phone', ''),
+            gstin=data.get('gstin', ''),
+            address=data.get('address', '')
+        )
+        db.session.add(new_cust)
+        db.session.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
+
+@app.route('/api/save-sale', methods=['POST'])
+@login_required
+def save_sale():
+    data = request.json
+    try:
+        new_sale = SaleInvoice(
+            user_id=current_user.id, 
+            inv_no=data['inv_no'], 
+            client_name=data['client'], 
+            total_amount=float(data['total']), 
+            gst_amount=float(data['gst']), 
+            status='Pending'
+        )
+        db.session.add(new_sale)
+        db.session.commit()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
 
 # --- CORE ROUTES ---
 
@@ -115,7 +171,7 @@ def dashboard():
     user_modules = current_user.subscribed_modules.split(',') if current_user.subscribed_modules else ['sales']
     return render_template('dashboard.html', user_modules=user_modules, company=current_user.company_name, username=current_user.username)
 
-# --- SALES HUB & SUB-MODULES (RESTORED) ---
+# --- SALES HUB ROUTES ---
 
 @app.route('/sales/hub')
 @login_required
@@ -126,48 +182,19 @@ def sales_hub():
 @app.route('/sales/customers') 
 @login_required
 def customer_master():
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
+    customers = Customer.query.filter_by(user_id=current_user.id).order_by(Customer.id.desc()).all()
     return render_template('customer_master.html', customers=customers, name=current_user.username)
 
-@app.route('/sales/invoice/new') # TAX INVOICE FIX
+@app.route('/sales/invoice/new')
 @login_required
 def new_invoice():
     customers = Customer.query.filter_by(user_id=current_user.id).all()
     return render_template('sales_form.html', customers=customers, name=current_user.username)
 
-@app.route('/sales/eway-bills') # E-WAY BILL FIX
+@app.route('/sales/eway-bills')
 @login_required
 def eway_bills():
     return render_template('eway_bills.html', name=current_user.username)
-
-@app.route('/sales/order/new')
-@login_required
-def new_sales_order():
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('sales_order_form.html', customers=customers, name=current_user.username)
-
-@app.route('/sales/delivery-challan')
-@login_required
-def delivery_challan_page():
-    return render_template('delivery_challan.html', name=current_user.username)
-
-@app.route('/sales/payments')
-@login_required
-def payments_page():
-    return render_template('payments.html', name=current_user.username)
-
-@app.route('/sales/credit-notes')
-@login_required
-def credit_notes_page():
-    return render_template('credit_notes.html', name=current_user.username)
-
-# --- VIEW & PRINT ROUTES ---
-@app.route('/sales/view/<inv_no>')
-@login_required
-def view_invoice(inv_no):
-    invoice = SaleInvoice.query.filter_by(inv_no=inv_no, user_id=current_user.id).first()
-    customers = Customer.query.filter_by(user_id=current_user.id).all()
-    return render_template('sales_form.html', invoice=invoice, customers=customers, mode='print', name=current_user.username)
 
 @app.route('/logout')
 def logout():
